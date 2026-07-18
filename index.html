@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Knowledge Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:              #03060f;
+      --surface:         #0d1525;
+      --card:            rgba(13, 21, 40, 0.75);
+      --border:          rgba(99, 102, 241, 0.13);
+      --border-hover:    rgba(99, 102, 241, 0.45);
+      --primary:         #6366f1;
+      --primary-glow:    rgba(99, 102, 241, 0.28);
+      --cyan:            #06b6d4;
+      --cyan-glow:       rgba(6, 182, 212, 0.28);
+      --violet:          #8b5cf6;
+      --emerald:         #10b981;
+      --amber:           #f59e0b;
+      --rose:            #f43f5e;
+      --text:            #e2e8f0;
+      --text-dim:        #94a3b8;
+      --text-muted:      #475569;
+      --heading:         'Space Grotesk', system-ui, sans-serif;
+      --mono:            'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Neural Canvas ─────────────────────────── */
+    #neural-bg {
+      position: fixed;
+      inset: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
+    /* ── Layout ────────────────────────────────── */
+    .z1 { position: relative; z-index: 1; }
+
+    .wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Header ────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: rgba(3, 6, 15, 0.82);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-row {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .logo {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--cyan) 100%);
+      box-shadow: 0 0 22px var(--primary-glow);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      animation: logo-pulse 3s ease infinite;
+    }
+
+    @keyframes logo-pulse {
+      0%, 100% { box-shadow: 0 0 20px var(--primary-glow); }
+      50%       { box-shadow: 0 0 38px rgba(99,102,241,0.5); }
+    }
+
+    .brand { flex: 1; }
+
+    .brand h1 {
+      font-family: var(--heading);
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #a5b4fc 0%, #67e8f9 40%, #a7f3d0 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 5s linear infinite;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position:   0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position:   0% 50%; }
+    }
+
+    .search-box {
+      position: relative;
+      flex: 0 0 260px;
+    }
+
+    .search-icon {
+      position: absolute; left: 11px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted); pointer-events: none;
+    }
+
+    #search {
+      width: 100%;
+      padding: 0.5rem 2.4rem 0.5rem 2.2rem;
+      background: rgba(99,102,241,0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    #search::placeholder { color: var(--text-muted); }
+
+    #search:focus {
+      border-color: var(--primary);
+      background: rgba(99,102,241,0.08);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .kbd {
+      position: absolute; right: 9px; top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      padding: 1px 5px; border-radius: 4px;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    #search:focus ~ .kbd { opacity: 0; }
+
+    .clock {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      min-width: 72px;
+      text-align: right;
+    }
+
+    /* ── Hero ──────────────────────────────────── */
+    .hero {
+      padding: 4.5rem 0 3rem;
+      text-align: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.28rem 0.9rem;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.22);
+      color: #a5b4fc;
+      margin-bottom: 1.5rem;
+      animation: fade-up 0.5s ease both;
+    }
+
+    .live-dot {
+      width: 6px; height: 6px;
+      background: var(--emerald);
+      border-radius: 50%;
+      animation: blink 2s ease infinite;
+    }
+
+    @keyframes blink {
+      0%,100% { opacity:1; transform: scale(1); }
+      50%      { opacity:0.4; transform: scale(1.6); }
+    }
+
+    .hero-heading {
+      font-family: var(--heading);
+      font-size: clamp(2.2rem, 5.5vw, 4rem);
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+      animation: fade-up 0.5s 0.1s ease both;
+    }
+
+    .hero-heading .grad {
+      background: linear-gradient(135deg, #818cf8 0%, #38bdf8 50%, #34d399 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      color: var(--text-dim);
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.75;
+      animation: fade-up 0.5s 0.2s ease both;
+    }
+
+    @keyframes fade-up {
+      from { opacity:0; transform: translateY(18px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    /* ── Stats ─────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.875rem;
+      margin-bottom: 3rem;
+      animation: fade-up 0.5s 0.3s ease both;
+    }
+
+    .s-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .s-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(99,102,241,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .s-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 36px rgba(99,102,241,0.12);
+      border-color: var(--border-hover);
+    }
+
+    .s-emoji { font-size: 1.5rem; margin-bottom: 0.5rem; }
+
+    .s-num {
+      display: block;
+      font-family: var(--heading);
+      font-size: 2.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a5b4fc, #67e8f9);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .s-label {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    /* ── Project card ──────────────────────────── */
+    .project {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+      margin-bottom: 2rem;
+      animation: fade-up 0.5s 0.4s ease both;
+      transition: border-color 0.3s;
+    }
+
+    .project:hover { border-color: rgba(99,102,241,0.28); }
+
+    .project-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      padding: 1.75rem 2rem;
+      background: linear-gradient(135deg, rgba(99,102,241,0.07) 0%, rgba(6,182,212,0.03) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .p-icon {
+      width: 58px; height: 58px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--violet));
+      box-shadow: 0 0 30px rgba(99,102,241,0.35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; flex-shrink: 0;
+    }
+
+    .p-meta { flex: 1; }
+
+    .p-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .p-name {
+      font-family: var(--heading);
+      font-size: 1.3rem;
+      font-weight: 600;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.8rem;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+
+    .tag {
+      padding: 0.22rem 0.65rem;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      font-weight: 500;
+      border: 1px solid;
+    }
+
+    .t-i { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.28); color: #a5b4fc; }
+    .t-c { background: rgba(6,182,212,0.1);  border-color: rgba(6,182,212,0.28);  color: #67e8f9; }
+    .t-v { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.28); color: #c4b5fd; }
+    .t-e { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.28); color: #6ee7b7; }
+
+    .p-badges {
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 0.4rem;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      padding: 0.28rem 0.7rem;
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.18);
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: #a5b4fc;
+      white-space: nowrap;
+    }
+
+    /* ── Section ───────────────────────────────── */
+    .section { padding: 1.5rem 2rem; }
+
+    .sec-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.875rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sec-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--cyan), rgba(6,182,212,0.3));
+      box-shadow: 0 0 8px var(--cyan-glow);
+      flex-shrink: 0;
+    }
+
+    .sec-title {
+      font-family: var(--heading);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--cyan);
+      flex: 1;
+    }
+
+    .sec-badge {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 0.18rem 0.55rem;
+      border-radius: 6px;
+    }
+
+    /* ── Notes grid ────────────────────────────── */
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1rem;
+    }
+
+    /* ── Note card ─────────────────────────────── */
+    .note-card {
+      background: rgba(255,255,255,0.018);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .note-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--card-glow, transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      border-radius: 18px;
+    }
+
+    .note-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--border-hover);
+    }
+
+    .note-card:hover::before { opacity: 1; }
+
+    .note-card.n1 { --card-glow: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(139,92,246,0.03)); }
+    .note-card.n2 { --card-glow: linear-gradient(135deg, rgba(6,182,212,0.06),  rgba(14,165,233,0.03)); }
+    .note-card.n3 { --card-glow: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(5,150,105,0.03));  }
+
+    .note-card.n1:hover { box-shadow: 0 18px 50px rgba(99,102,241,0.16); }
+    .note-card.n2:hover { box-shadow: 0 18px 50px rgba(6,182,212,0.16);  }
+    .note-card.n3:hover { box-shadow: 0 18px 50px rgba(16,185,129,0.16); }
+
+    .note-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.875rem;
+      margin-bottom: 0.875rem;
+    }
+
+    .n-icon {
+      width: 44px; height: 44px;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .n-icon.n1 { background: linear-gradient(135deg,#6366f1,#8b5cf6); box-shadow: 0 5px 18px rgba(99,102,241,0.35);  }
+    .n-icon.n2 { background: linear-gradient(135deg,#06b6d4,#0ea5e9); box-shadow: 0 5px 18px rgba(6,182,212,0.35);   }
+    .n-icon.n3 { background: linear-gradient(135deg,#10b981,#059669); box-shadow: 0 5px 18px rgba(16,185,129,0.35);  }
+
+    .n-meta { flex: 1; min-width: 0; }
+
+    .n-num {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .n-title {
+      font-family: var(--heading);
+      font-size: 0.92rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .n-desc {
+      font-size: 0.765rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 0.875rem;
+    }
+
+    .topics {
+      display: flex; flex-wrap: wrap; gap: 0.35rem;
+      margin-bottom: 1rem;
+    }
+
+    .tp {
+      padding: 0.14rem 0.5rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .note-foot {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .depth-wrap { flex: 1; }
+
+    .depth-bar {
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 0.3rem;
+    }
+
+    .depth-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--da), var(--db));
+    }
+
+    .depth-text {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      color: var(--text-muted);
+    }
+
+    .open-btn {
+      display: flex; align-items: center; gap: 0.3rem;
+      padding: 0.38rem 0.8rem;
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.18);
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: #a5b4fc;
+      transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .note-card:hover .open-btn {
+      background: rgba(99,102,241,0.18);
+      border-color: rgba(99,102,241,0.45);
+      box-shadow: 0 0 14px rgba(99,102,241,0.2);
+    }
+
+    /* ── Empty state ────────────────────────────── */
+    .empty {
+      display: none;
+      text-align: center;
+      padding: 5rem 0;
+      font-family: var(--mono);
+      color: var(--text-muted);
+    }
+
+    .empty.show { display: block; }
+    .empty p:first-child { font-size: 2.5rem; margin-bottom: 0.6rem; }
+
+    /* ── Footer ─────────────────────────────────── */
+    footer {
+      margin-top: 4rem;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    footer .hl { color: var(--primary); }
+
+    /* ── Scrollbar ──────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.28); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.5); }
+
+    /* ── Responsive ─────────────────────────────── */
+    @media (max-width: 768px) {
+      .stats { grid-template-columns: repeat(2,1fr); }
+      .project-head { flex-wrap: wrap; }
+      .p-badges { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; }
+      .notes-grid { grid-template-columns: 1fr; }
+      .search-box { flex: 0 0 180px; }
+      .clock { display: none; }
+      .hero-heading { font-size: 2.2rem; }
+    }
+
+    @media (max-width: 540px) {
+      .header-row { flex-wrap: wrap; }
+      .search-box { order: 4; flex: 1 1 100%; }
+      .section { padding: 1.25rem 1.25rem; }
+      .project-head { padding: 1.25rem; }
+    }
+
+    /* ── Utility ────────────────────────────────── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Animated neural network ─────────────── -->
+  <canvas id="neural-bg"></canvas>
+
+  <!-- ── Header ───────────────────────────────── -->
+  <header class="z1">
+    <div class="header-row">
+      <div class="logo">
+        <!-- AI node icon -->
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="2.5" fill="white"/>
+          <circle cx="12" cy="4"  r="1.5" fill="white" opacity="0.7"/>
+          <circle cx="12" cy="20" r="1.5" fill="white" opacity="0.7"/>
+          <circle cx="4"  cy="12" r="1.5" fill="white" opacity="0.7"/>
+          <circle cx="20" cy="12" r="1.5" fill="white" opacity="0.7"/>
+          <circle cx="6.4"  cy="6.4"  r="1.2" fill="white" opacity="0.5"/>
+          <circle cx="17.6" cy="6.4"  r="1.2" fill="white" opacity="0.5"/>
+          <circle cx="6.4"  cy="17.6" r="1.2" fill="white" opacity="0.5"/>
+          <circle cx="17.6" cy="17.6" r="1.2" fill="white" opacity="0.5"/>
+          <line x1="12" y1="9.5"  x2="12" y2="5.5"  stroke="white" stroke-width="0.8" opacity="0.4"/>
+          <line x1="12" y1="14.5" x2="12" y2="18.5" stroke="white" stroke-width="0.8" opacity="0.4"/>
+          <line x1="9.5" y1="12"  x2="5.5"  y2="12" stroke="white" stroke-width="0.8" opacity="0.4"/>
+          <line x1="14.5" y1="12" x2="18.5" y2="12" stroke="white" stroke-width="0.8" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="brand">
+        <h1>AI Knowledge Vault</h1>
+        <p>// personal learning compendium</p>
+      </div>
+      <div class="search-box">
+        <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="7.5"/><path d="M21 21l-4.5-4.5"/>
+        </svg>
+        <input type="text" id="search" placeholder="Search notes…" autocomplete="off" spellcheck="false">
+        <span class="kbd">/</span>
+      </div>
+      <div class="clock z1" id="clock">—</div>
+    </div>
+  </header>
+
+  <!-- ── Page content ──────────────────────────── -->
+  <div class="wrap z1">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="pill">
+        <span class="live-dot"></span>
+        Active Knowledge Base
+      </div>
+      <h2 class="hero-heading">
+        Your <span class="grad">AI Learning</span><br>Universe
+      </h2>
+      <p class="hero-sub">Structured notes from AI engineering bootcamps, projects, and research — all in one place. Press <code style="font-family:var(--mono);background:rgba(99,102,241,0.12);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.85em">/</code> to search.</p>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="s-card">
+        <div class="s-emoji">🗂️</div>
+        <span class="s-num" data-target="1">0</span>
+        <div class="s-label">Project</div>
+      </div>
+      <div class="s-card">
+        <div class="s-emoji">📁</div>
+        <span class="s-num" data-target="1">0</span>
+        <div class="s-label">Section</div>
+      </div>
+      <div class="s-card">
+        <div class="s-emoji">📄</div>
+        <span class="s-num" data-target="3">0</span>
+        <div class="s-label">Notes</div>
+      </div>
+      <div class="s-card">
+        <div class="s-emoji">✏️</div>
+        <span class="s-num" data-target="1591">0</span>
+        <div class="s-label">Lines Written</div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty" id="empty">
+      <p>🔭</p>
+      <p>No notes match your search.</p>
+    </div>
+
+    <!-- ── Project: LLM Engineering ─────────────── -->
+    <article class="project" id="proj-llm">
+
+      <div class="project-head">
+        <div class="p-icon">🧠</div>
+        <div class="p-meta">
+          <div class="p-eyebrow">Project · 01</div>
+          <div class="p-name">LLM Engineering, RAG, &amp; AI Agents</div>
+          <div class="tags">
+            <span class="tag t-i">LLM</span>
+            <span class="tag t-c">RAG</span>
+            <span class="tag t-v">AI Agents</span>
+            <span class="tag t-e">Bootcamp</span>
+            <span class="tag t-i">Fine-tuning</span>
+          </div>
+        </div>
+        <div class="p-badges">
+          <span class="badge">1 section</span>
+          <span class="badge">3 notes</span>
+          <span class="badge">1,591 lines</span>
+        </div>
+      </div>
+
+      <!-- Section: Sec-1 -->
+      <div class="section">
+        <div class="sec-header">
+          <span class="sec-dot"></span>
+          <span class="sec-title">Sec-1 · Welcome to BootCamp</span>
+          <span class="sec-badge">3 notes</span>
+        </div>
+
+        <div class="notes-grid">
+
+          <!-- Note 1: Bootcamp Overview -->
+          <div class="note-card n1"
+               data-title="LLM & Agentic AI Engineer Bootcamp Notes"
+               data-topics="LM Studio Local LLM 14-Day Structure Active Recall Bootcamp"
+               data-file="LLM Engineering, RAG, & AI Agents/Sec-1: Welcome to BootCamp/section-1-welcome-to-bootcamp.html">
+            <div class="note-top">
+              <div class="n-icon n1">🚀</div>
+              <div class="n-meta">
+                <div class="n-num">Note 01 · Sec 1</div>
+                <div class="n-title">LLM &amp; Agentic AI Engineer — Bootcamp Notes</div>
+              </div>
+            </div>
+            <p class="n-desc">14-day roadmap across closed-source LLM APIs, open-source models &amp; fine-tuning, and agentic AI frameworks. Your launchpad into AI engineering.</p>
+            <div class="topics">
+              <span class="tp">Running Local LLM</span>
+              <span class="tp">LM Studio</span>
+              <span class="tp">14-Day Roadmap</span>
+              <span class="tp">Active Recall</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:100%; --da:#6366f1; --db:#8b5cf6;"></div>
+                </div>
+                <div class="depth-text">641 lines · most detailed</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note 2: Character Chatbot -->
+          <div class="note-card n2"
+               data-title="Project 1 Character AI Chatbot Full Notes"
+               data-topics="Setup API First Call Response Anatomy Persona Engineering Chatbot"
+               data-file="LLM Engineering, RAG, & AI Agents/Sec-1: Welcome to BootCamp/section2-full-notes-character-chatbot.html">
+            <div class="note-top">
+              <div class="n-icon n2">🤖</div>
+              <div class="n-meta">
+                <div class="n-num">Note 02 · Sec 1</div>
+                <div class="n-title">Project 1 — Character AI Chatbot | Full Notes</div>
+              </div>
+            </div>
+            <p class="n-desc">Build a character AI chatbot: first API call, response anatomy deep-dive, and persona engineering techniques to give your bot a unique personality.</p>
+            <div class="topics">
+              <span class="tp">Setup &amp; First Call</span>
+              <span class="tp">Response Anatomy</span>
+              <span class="tp">Persona Engineering</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:67%; --da:#06b6d4; --db:#0ea5e9;"></div>
+                </div>
+                <div class="depth-text">425 lines · concise</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note 3: Calorie Tracker -->
+          <div class="note-card n3"
+               data-title="Project 2 AI Calorie Tracker Vision API Prompt Engineering"
+               data-topics="Vision API Prompt Engineering Calorie Tracker Task Walkthrough Active Recall"
+               data-file="LLM Engineering, RAG, & AI Agents/Sec-1: Welcome to BootCamp/section3-calorie-tracker-notes.html">
+            <div class="note-top">
+              <div class="n-icon n3">👁️</div>
+              <div class="n-meta">
+                <div class="n-num">Note 03 · Sec 1</div>
+                <div class="n-title">Project 2 — AI Calorie Tracker | Vision API &amp; Prompt Engineering</div>
+              </div>
+            </div>
+            <p class="n-desc">Build an AI calorie tracker using the Vision API. Master prompt engineering patterns and image-to-nutrition analysis with active recall exercises.</p>
+            <div class="topics">
+              <span class="tp">Vision API</span>
+              <span class="tp">Prompt Engineering</span>
+              <span class="tp">Task Walkthrough</span>
+              <span class="tp">Active Recall</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:83%; --da:#10b981; --db:#059669;"></div>
+                </div>
+                <div class="depth-text">525 lines · thorough</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+        </div><!-- /notes-grid -->
+      </div><!-- /section -->
+    </article>
+
+  </div><!-- /wrap -->
+
+  <!-- ── Footer ───────────────────────────────── -->
+  <footer class="z1">
+    <p>AI Knowledge Vault &mdash; <span class="hl">3 notes</span> across <span class="hl">1 project</span> &mdash; Updated <span class="hl">July 2026</span></p>
+    <p style="margin-top:0.35rem;font-size:0.6rem;opacity:0.5">Press <span style="color:var(--primary)">/</span> to search · Click any card to open note · Neural network reacts to your cursor</p>
+  </footer>
+
+  <script>
+  /* ─── 1. Neural network canvas ─────────────────── */
+  (function () {
+    const cvs = document.getElementById('neural-bg');
+    const ctx = cvs.getContext('2d');
+    let W, H, pts = [];
+    const N = 65, LINK_D = 148;
+    const mouse = { x: -9999, y: -9999 };
+    const COLORS = ['#6366f1','#8b5cf6','#06b6d4','#38bdf8'];
+
+    function resize() {
+      W = cvs.width  = window.innerWidth;
+      H = cvs.height = window.innerHeight;
+    }
+
+    function mkPt() {
+      return {
+        x: Math.random() * W, y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        r: Math.random() * 1.8 + 0.8,
+        c: COLORS[Math.floor(Math.random() * COLORS.length)]
+      };
+    }
+
+    function init() { pts = Array.from({ length: N }, mkPt); }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      for (let i = 0; i < N; i++) {
+        const p = pts[i];
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > W) p.vx *= -1;
+        if (p.y < 0 || p.y > H) p.vy *= -1;
+
+        /* particle */
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.c;
+        ctx.fill();
+
+        /* inter-particle links */
+        for (let j = i + 1; j < N; j++) {
+          const q = pts[j];
+          const dx = p.x - q.x, dy = p.y - q.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < LINK_D) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
+            ctx.strokeStyle = `rgba(99,102,241,${0.18 * (1 - d / LINK_D)})`;
+            ctx.lineWidth = 0.7;
+            ctx.stroke();
+          }
+        }
+
+        /* mouse proximity links */
+        const mdx = p.x - mouse.x, mdy = p.y - mouse.y;
+        const md = Math.sqrt(mdx * mdx + mdy * mdy);
+        if (md < 130) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y);
+          ctx.strokeStyle = `rgba(6,182,212,${0.3 * (1 - md / 130)})`;
+          ctx.lineWidth = 0.9;
+          ctx.stroke();
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => { resize(); init(); });
+    window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    resize(); init(); draw();
+  })();
+
+  /* ─── 2. Animated stat counters ────────────────── */
+  (function () {
+    function ease(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function run(el, target, dur) {
+      const start = performance.now();
+      (function step(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(ease(p) * target).toLocaleString();
+        if (p < 1) requestAnimationFrame(step);
+      })(performance.now());
+    }
+
+    const io = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        document.querySelectorAll('.s-num[data-target]').forEach(el => {
+          run(el, +el.dataset.target, 1400);
+        });
+        io.disconnect();
+      }
+    }, { threshold: 0.4 });
+
+    const statsEl = document.querySelector('.stats');
+    if (statsEl) io.observe(statsEl);
+  })();
+
+  /* ─── 3. Live clock ─────────────────────────────── */
+  (function () {
+    const el = document.getElementById('clock');
+    function tick() {
+      el.textContent = new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+    }
+    tick(); setInterval(tick, 1000);
+  })();
+
+  /* ─── 4. Search / filter ────────────────────────── */
+  (function () {
+    const input  = document.getElementById('search');
+    const cards  = document.querySelectorAll('.note-card');
+    const empty  = document.getElementById('empty');
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      let visible = 0;
+      cards.forEach(c => {
+        const haystack = (c.dataset.title + ' ' + c.dataset.topics).toLowerCase();
+        const show = !q || haystack.includes(q);
+        c.classList.toggle('hidden', !show);
+        if (show) visible++;
+      });
+      empty.classList.toggle('show', visible === 0 && q.length > 0);
+    });
+  })();
+
+  /* ─── 5. Keyboard shortcuts ─────────────────────── */
+  (function () {
+    const input = document.getElementById('search');
+    document.addEventListener('keydown', e => {
+      if (e.key === '/' && document.activeElement !== input) {
+        e.preventDefault();
+        input.focus(); input.select();
+      }
+      if (e.key === 'Escape') {
+        input.value = '';
+        input.dispatchEvent(new Event('input'));
+        input.blur();
+      }
+    });
+  })();
+
+  /* ─── 6. Card click → open note ────────────────── */
+  (function () {
+    document.querySelectorAll('.note-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const raw = card.dataset.file;
+        if (!raw) return;
+        /* encode each path segment individually */
+        const encoded = raw.split('/').map(s => encodeURIComponent(s)).join('/');
+        window.open(encoded, '_blank');
+      });
+    });
+  })();
+
+  /* ─── 7. 3-D tilt on note cards ────────────────── */
+  (function () {
+    document.querySelectorAll('.note-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r  = card.getBoundingClientRect();
+        const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        const dx = (e.clientX - cx) / (r.width  / 2);
+        const dy = (e.clientY - cy) / (r.height / 2);
+        card.style.transform =
+          `translateY(-5px) perspective(700px) rotateY(${dx * 5}deg) rotateX(${-dy * 5}deg)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
+    });
+  })();
+  </script>
+
+</body>
+</html>
