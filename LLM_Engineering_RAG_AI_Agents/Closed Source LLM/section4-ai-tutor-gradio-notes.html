@@ -121,15 +121,6 @@
 </head>
 <body>
 
-  <div class="course-box">
-    <div>
-      <div class="label">Source Course</div>
-      <div class="title">Become an LLM &amp; Agentic AI Engineer — 14-Day Bootcamp</div>
-    </div>
-    <a class="link-btn" href="https://www.udemy.com/course/become-an-llm-agentic-ai-engineer-14-day-bootcamp-2025/" target="_blank" rel="noopener">Open on Udemy ↗</a>
-    <div class="note">⚠ no lecture-specific link provided for this section — pointing to the course root; swap in the exact lecture URL if you have it.</div>
-  </div>
-
   <header class="masthead">
     <div class="kicker">Section 04 — Project 3</div>
     <h1>AI Tutor with Gradio</h1>
@@ -182,11 +173,11 @@
           <span class="chevron">›</span>
         </div>
         <div class="task-body"><div class="task-body-inner">
-          <p><b style="color:var(--ink-bright)">Gradio</b> — an open-source library (backed by Hugging Face; used at Amazon, Facebook, Cisco, etc.) that turns a Python function into a web interface in ~5 lines. Three key properties:</p>
+          <p><a href="https://www.gradio.app" target="_blank" rel="noopener"><b style="color:var(--ink-bright)">Gradio ↗</b></a> — an open-source library (backed by Hugging Face; used at Amazon, Facebook, Cisco, etc.) that turns a Python function into a web interface in ~5 lines. Three key properties:</p>
           <ul>
             <li><b>Easy setup</b> — <code>pip install gradio</code>, then <code>import gradio as gr</code>.</li>
             <li><b>Instant sharing</b> — runs embedded in a notebook or as a separate tab with a shareable link.</li>
-            <li><b>Permanent hosting</b> — deployable to Hugging Face Spaces for a persistent public URL.</li>
+            <li><b>Permanent hosting</b> — deployable to <a href="https://huggingface.co/spaces" target="_blank" rel="noopener">Hugging Face Spaces ↗</a> for a persistent public URL.</li>
           </ul>
           <div class="code-block">import gradio as gr
 
@@ -196,7 +187,8 @@
 demo = gr.Interface(fn=greet, inputs=<span class="c2">"text"</span>, outputs=<span class="c2">"text"</span>)
 demo.launch()</div>
           <p>OpenAI client setup is unchanged from prior projects — <code>.env</code> key, <code>load_dotenv()</code>, configure the client, sanity-check the key prefix.</p>
-          <div class="callout"><b>Note —</b> Gradio's example gallery includes maps, streaming chatbots, and image-generation demos — same <code>Interface(fn, inputs, outputs)</code> pattern scales from "hello world" to fairly complex apps.</div>
+          <div class="callout"><b>Note —</b> Gradio's <a href="https://www.gradio.app/demos" target="_blank" rel="noopener">example gallery ↗</a> includes maps, streaming chatbots, and image-generation demos — same <code>Interface(fn, inputs, outputs)</code> pattern scales from "hello world" to fairly complex apps.</div>
+          <div class="callout violet"><b>AI Philosophy —</b> Gradio is an early instance of a shift that's accelerating across the whole stack: <b>function signatures becoming the API surface for UI generation.</b> The same pattern recurs at every layer — prompts becoming the API surface for reasoning, JSON schemas becoming the API surface for agent tool-use. The unit of composition keeps moving up the abstraction ladder, trading raw expressiveness for speed of iteration. The skill to develop is knowing which layer is the right one for each job, and resisting the pull to drop a level when the current one is sufficient.</div>
         </div></div>
       </div>
 
@@ -230,7 +222,8 @@ demo.launch()</div>
     <span class="c1">except</span> Exception:
         <span class="c1">return</span> <span class="c2">"Sorry, I encountered an error trying to get an answer."</span></div>
           <p><b style="color:var(--ink-bright)">temperature</b> — a knob between 0–2 controlling output randomness/creativity. Higher = more varied/creative; lower = more deterministic/focused. <code>0.7</code> is a moderate default here.</p>
-          <div class="callout violet"><b>Architect's note —</b> <code>try/except</code> around the API call is basic fault tolerance for an external dependency — same instinct as wrapping any third-party network call, since the API can fail, time out, or rate-limit independently of your code.</div>
+          <div class="callout violet"><b>Architect angle —</b> <code>try/except</code> around the API call is basic fault tolerance for an external dependency — same instinct as wrapping any third-party network call, since the API can fail, time out, or rate-limit independently of your code.</div>
+          <div class="callout violet"><b>AI Philosophy —</b> Building the core logic function <i>before</i> adding any UI is more than a code-organisation preference — it's a <b>testability discipline</b>. A function decoupled from its interface can be unit-tested, swapped between providers, benchmarked on a prompt eval set, and handed to a teammate without requiring them to run a notebook. In AI engineering, where iteration on the logic layer is constant, that seam between "what the model does" and "how the user reaches it" pays for itself faster than almost any other structural choice.</div>
         </div></div>
       </div>
 
@@ -247,8 +240,8 @@ demo.launch()</div>
           <span class="chevron">›</span>
         </div>
         <div class="task-body"><div class="task-body-inner">
-          <p>Exercise: swap the test question (e.g. gravity, photosynthesis), then edit only the <code>system_prompt</code> string to change personality (e.g. "impatient and unhelpful," "angry and sad"). Function signature and call logic stay identical — proof again that persona is purely a config-string swap.</p>
-          <p>Solution result: same modular function called with a new question, produced a curt, low-detail "just Google it" style answer matching the impatient persona.</p>
+          <p>Exercise: swap the test question (e.g. gravity, photosynthesis), then edit only the <code>system_prompt</code> string to change personality (e.g. "impatient and unhelpful," "angry and sad"). Function signature and call logic stay identical — persona is purely a config-string swap.</p>
+          <p>Same modular function called with a new question produces a curt, low-detail "just Google it" style answer matching the impatient persona — the only change was one string.</p>
           <div class="callout amber"><b>Guardrail note —</b> OpenAI will refuse/block prompts that push toward genuinely harmful personas (political extremism, hate speech, etc.) regardless of the "just roleplay" framing — a reminder that the <code>system</code> message can shape tone but doesn't override the provider's safety policies underneath it.</div>
         </div></div>
       </div>
@@ -282,7 +275,7 @@ demo.launch()</div>
 )
 tutor_interface.launch()</div>
           <p>Launch produces a real, shareable link — no more "open Jupyter, hit Shift+Enter" for a non-technical user to try the app.</p>
-          <div class="callout violet"><b>Architect's note —</b> This is UI generated purely from a function signature's input/output <i>shape</i>, not hand-built markup — think of it as the lowest-effort way to put an internal tool or POC in front of a stakeholder, roughly the AI-engineering equivalent of an auto-generated admin panel.</div>
+          <div class="callout violet"><b>Architect angle —</b> This is UI generated purely from a function signature's input/output <i>shape</i>, not hand-built markup — think of it as the lowest-effort way to put an internal tool or POC in front of a stakeholder, roughly the AI-engineering equivalent of an auto-generated admin panel. The shareable link also matters: a non-technical stakeholder can interact with your prototype without installing anything, which compresses the feedback loop from days to hours.</div>
         </div></div>
       </div>
 
@@ -339,7 +332,8 @@ tutor_interface.launch()</div>
             full_response += chunk.choices[0].delta.content
             <span class="c1">yield</span> full_response   <span class="c1"># hand the growing string back each time</span></div>
           <p>Note <code>full_response</code> accumulates and is re-yielded in full each time (not just the new delta) — Gradio expects each yield to be the complete current output, not an incremental diff.</p>
-          <div class="callout violet"><b>Architect's note —</b> This is the same mechanic as Server-Sent Events or HTTP chunked transfer encoding — the server (OpenAI) pushes partial data as it's produced instead of buffering the full response. <code>yield</code> is Python's native tool for exposing that as an iterable stream to the caller.</div>
+          <div class="callout violet"><b>Architect angle —</b> This is the same mechanic as Server-Sent Events or HTTP chunked transfer encoding — the server (OpenAI) pushes partial data as it's produced instead of buffering the full response. <code>yield</code> is Python's native tool for exposing that as an iterable stream to the caller.</div>
+          <div class="callout violet"><b>AI Philosophy —</b> Perceived latency and actual latency are separate engineering problems, and they often deserve separate solutions. Streaming is effectively <b>free UX improvement</b> — same compute, same cost, dramatically better perceived responsiveness. But it also changes what "done" means in your state model: instead of a single completion event, you now have a live stream that must be displayed, possibly interrupted, and error-handled mid-flight. That complexity is worth it at any non-trivial response length. Get comfortable with the generator pattern early — agentic pipelines, tool-call loops, and multi-step reasoning chains all produce output the same way.</div>
         </div></div>
       </div>
 
@@ -356,7 +350,7 @@ tutor_interface.launch()</div>
           <span class="chevron">›</span>
         </div>
         <div class="task-body"><div class="task-body-inner">
-          <p>Send an identical multi-paragraph prompt (e.g. "explain in detail how EVs work") to both the streaming and non-streaming interfaces. Solution finding: non-streaming took roughly <b style="color:var(--ink-bright)">~6 seconds of dead wait</b> before any text appeared; streaming showed text within roughly a second and kept building — same total generation time, dramatically different <i>perceived</i> latency.</p>
+          <p>Send an identical multi-paragraph prompt (e.g. "explain in detail how EVs work") to both the streaming and non-streaming interfaces. Non-streaming takes roughly <b style="color:var(--ink-bright)">~6 seconds of dead wait</b> before any text appears; streaming shows text within roughly a second and keeps building — same total generation time, dramatically different <i>perceived</i> latency.</p>
           <div class="callout green"><b>Takeaway —</b> Total response time is identical either way; only perceived responsiveness changes. This is the same principle behind progress bars and skeleton screens in traditional UI — streaming is effectively free UX improvement for any non-trivial LLM response length.</div>
         </div></div>
       </div>
@@ -405,7 +399,8 @@ tutor_interface.launch()</div>
     allow_flagging=<span class="c2">"never"</span>,
 ).launch()</div>
           <p><code>.get(explanation_level, "clearly and concisely")</code> provides a safe fallback if an unmapped value ever arrives — the same defensive-default pattern as Task 3's <code>try/except</code>.</p>
-          <div class="callout violet"><b>Architect's note —</b> <code>inputs</code> is now a <b>list</b> of components matching the function's positional arguments in order — Gradio wires UI components to function parameters purely by position, the same convention as unpacking args into a call.</div>
+          <div class="callout violet"><b>Architect angle —</b> <code>inputs</code> is now a <b>list</b> of components matching the function's positional arguments in order — Gradio wires UI components to function parameters purely by position, the same convention as unpacking args into a call.</div>
+          <div class="callout violet"><b>AI Philosophy —</b> A dict mapping levels to prompt fragments is a primitive <b>behavior manifest</b> — configuration that describes what the AI should do, separated from the code that calls it. This separation scales. LLM applications increasingly split into two distinct layers: the behavior layer (prompts, personas, level descriptions), which domain experts and product managers can own and iterate on, and the infrastructure layer (API calls, streaming logic, routing), which engineers own. Teams that establish this boundary early can change AI behavior without touching code — and hand the behavior layer to the people who actually understand the domain, regardless of whether they can write Python.</div>
         </div></div>
       </div>
 
@@ -427,7 +422,7 @@ tutor_interface.launch()</div>
             <div class="cap amber"><div class="cap-title">1 · Extend the dict</div><div class="cap-body"><code>explanation_levels[6] = "as an Einstein-level PhD mad scientist"</code></div></div>
             <div class="cap amber"><div class="cap-title">2 · Extend the slider range</div><div class="cap-body"><code>gr.Slider(minimum=1, maximum=6, ...)</code> — the dict key alone isn't enough; the slider's own <code>maximum</code> must be raised or level 6 is simply unreachable in the UI.</div></div>
           </div>
-          <p>Result: level 6 produced noticeably denser, more ornate language ("let's embark on a journey through the electric ether...") versus level 1's toy-box simplicity — confirms the prompt-level lever scales smoothly across the whole range.</p>
+          <p>Level 6 produces noticeably denser, more ornate language ("let's embark on a journey through the electric ether...") versus level 1's toy-box simplicity — the prompt-level lever scales smoothly across the whole range.</p>
           <div class="callout amber"><b>Common gotcha —</b> Forgetting to bump the slider's <code>maximum</code> alongside a new dict entry is an easy mismatch bug — the config (UI bounds) and the data (lookup table) have to be kept in sync manually since nothing here derives one from the other automatically.</div>
         </div></div>
       </div>
@@ -438,7 +433,7 @@ tutor_interface.launch()</div>
     <section id="recap">
       <div class="section-head">
         <span class="tag">RECAP</span>
-        <h2>Module Close-Out — Project 3 Complete</h2>
+        <h2>What Project 3 Demonstrates</h2>
       </div>
       <div class="recap-grid">
         <div class="recap-card"><div class="num">01</div><p><b style="color:var(--ink-bright)">Gradio</b> deploys powerful, shareable UIs around any Python function in a handful of lines.</p></div>
@@ -446,7 +441,7 @@ tutor_interface.launch()</div>
         <div class="recap-card"><div class="num">03</div><p>Gradio components — <b style="color:var(--ink-bright)">textboxes, sliders, markdown outputs</b> — compose declaratively to build genuinely interactive AI apps.</p></div>
         <div class="recap-card"><div class="num">04</div><p>A dict-based lookup table (levels → prompt fragments) is a reusable pattern for <b style="color:var(--ink-bright)">any</b> "select a mode, change the AI's behavior" feature.</p></div>
       </div>
-      <div class="callout"><b>Task sequence recap —</b> (1) Overview → (2) Gradio + API setup → (3) core tutor function, no UI → (4) practice: swap question/persona → (5) UI wrap with <code>gr.Interface</code> → (6) practice: customize title/description/size → (7) streaming via generator → (8) practice: streaming vs. non-streaming UX → (9) explanation-level slider → (10) practice: extend to level 6.</div>
+      <div class="callout"><b>Build sequence —</b> (1) Overview → (2) Gradio + API setup → (3) core tutor function, no UI → (4) swap question/persona → (5) UI wrap with <code>gr.Interface</code> → (6) customize title/description/size → (7) streaming via generator → (8) streaming vs. non-streaming UX → (9) explanation-level slider → (10) extend to level 6.</div>
     </section>
 
     <!-- ACTIVE RECALL -->

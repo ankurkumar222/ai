@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open-Source LLMs — Hugging Face, Quantization &amp; Document Q&amp;A · Architects Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#070a11; --panel:#0e131d; --panel-2:#131a27; --panel-3:#18202f;
+  --line:#212b3e; --line-soft:#1a2231;
+  --text:#dae1ee; --text-dim:#98a4bb; --text-faint:#6b7893;
+  --beam:#5b8cff; --amber:#ffa63d; --violet:#c07bff; --mint:#3ecf9a; --rose:#ff6b81;
+  --display:"Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --body:"Newsreader", Georgia, serif;
+  --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --maxw:1200px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:100px}
+body{
+  margin:0; background:var(--ink); color:var(--text);
+  font-family:var(--body); font-size:17.5px; line-height:1.72; -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(1100px 520px at 12% -8%, rgba(91,140,255,.10), transparent 62%),
+    radial-gradient(900px 460px at 94% 3%, rgba(192,123,255,.07), transparent 60%);
+  background-attachment:fixed;
+}
+h1,h2,h3,h4{font-family:var(--display); font-weight:600; line-height:1.2; letter-spacing:-.015em; margin:0}
+p{margin:0 0 1.05em}
+a{color:var(--beam); text-underline-offset:3px}
+code,kbd{font-family:var(--mono); font-size:.86em; color:#b9c6de}
+::selection{background:rgba(91,140,255,.32)}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 26px}
+.eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-faint); margin:0 0 10px; display:flex; align-items:center; gap:10px}
+.eyebrow::after{content:""; flex:1; height:1px; background:linear-gradient(90deg,var(--line),transparent)}
+
+/* topbar */
+.topbar{position:fixed; top:0; left:0; right:0; z-index:60; background:rgba(7,10,17,.88); backdrop-filter:blur(14px); border-bottom:1px solid var(--line-soft)}
+.topbar-in{display:flex; align-items:center; gap:16px; padding:10px 26px; max-width:var(--maxw); margin:0 auto}
+.brand{font-family:var(--mono); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-dim); white-space:nowrap}
+.brand b{color:var(--beam); font-weight:500}
+.navchips{display:flex; gap:5px; overflow-x:auto; scrollbar-width:none; flex:1}
+.navchips::-webkit-scrollbar{display:none}
+.navchips a{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; color:var(--text-faint); text-decoration:none; padding:5px 8px; border:1px solid transparent; border-radius:4px; white-space:nowrap; transition:.18s}
+.navchips a:hover{color:var(--text); border-color:var(--line); background:var(--panel)}
+.navchips a.on{color:var(--beam); border-color:rgba(91,140,255,.4); background:rgba(91,140,255,.08)}
+#scrollbar{position:absolute; bottom:-1px; left:0; height:2px; width:0; background:linear-gradient(90deg,var(--beam),var(--violet))}
+
+/* hero */
+.hero{padding:150px 0 54px; border-bottom:1px solid var(--line-soft)}
+.hero h1{font-size:clamp(36px,6vw,66px); font-weight:700; letter-spacing:-.03em; max-width:17ch}
+.hero h1 em{font-style:normal; color:var(--beam)}
+.lede{font-size:clamp(17.5px,2.1vw,20.5px); color:var(--text-dim); max-width:64ch; margin-top:20px; font-weight:300}
+.readout{margin-top:36px; border:1px solid var(--line); border-radius:8px; background:var(--panel); display:grid; grid-template-columns:repeat(4,1fr); overflow:hidden}
+.readout div{padding:15px 18px; border-right:1px solid var(--line-soft)}
+.readout div:last-child{border-right:0}
+.readout .k{font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-faint)}
+.readout .v{font-family:var(--display); font-size:23px; font-weight:600; margin-top:5px; letter-spacing:-.02em}
+.readout .v small{font-size:11.5px; color:var(--text-dim); font-weight:400; margin-left:5px; font-family:var(--mono)}
+
+/* part divider */
+.part{padding:54px 0 10px}
+.part .bar{display:flex; align-items:center; gap:18px}
+.part .tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--violet); border:1px solid rgba(192,123,255,.35); background:rgba(192,123,255,.07); padding:5px 11px; border-radius:4px; white-space:nowrap}
+.part h2{font-size:clamp(24px,3.4vw,34px); color:#eef2fb}
+.part .bar::after{content:""; flex:1; height:1px; background:linear-gradient(90deg,rgba(192,123,255,.4),transparent)}
+.part p{color:var(--text-dim); max-width:70ch; margin-top:12px; font-size:16.5px}
+
+/* sections */
+.sec{padding:44px 0; border-bottom:1px solid var(--line-soft)}
+.sec-head{display:flex; gap:20px; align-items:baseline; margin-bottom:22px}
+.sec-num{font-family:var(--mono); font-size:13px; font-weight:700; color:var(--beam); border:1px solid rgba(91,140,255,.35); border-radius:4px; padding:4px 8px; flex:none; background:rgba(91,140,255,.07)}
+.sec h2{font-size:clamp(24px,3.2vw,33px)}
+.sec h3{font-size:19px; margin:30px 0 11px; color:#eaeffa}
+.sec h3::before{content:"▸ "; color:var(--beam); font-size:13px}
+.sec p{max-width:76ch}
+ul.tight,ol.tight{max-width:76ch; padding-left:20px; margin:0 0 1.1em}
+ul.tight li,ol.tight li{margin:.4em 0}
+ul.tight li::marker,ol.tight li::marker{color:var(--beam)}
+strong{color:#f0f4fc; font-weight:500}
+.term{color:var(--violet); font-weight:500}
+
+/* ascii */
+.ascii{
+  margin:22px 0; border:1px solid var(--line); border-radius:8px; background:#080c14; overflow:hidden;
+}
+.ascii .cap{padding:8px 14px; background:var(--panel-2); border-bottom:1px solid var(--line); font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-faint)}
+.ascii pre{margin:0; padding:18px; overflow-x:auto; font-family:var(--mono); font-size:12.5px; line-height:1.5; color:#8fa6c9; white-space:pre}
+.ascii pre b{color:var(--beam); font-weight:400}
+.ascii pre i{color:var(--mint); font-style:normal}
+.ascii pre u{color:var(--amber); text-decoration:none}
+.ascii pre s{color:var(--violet); text-decoration:none}
+
+/* cards */
+.grid{display:grid; gap:14px; margin:22px 0}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.card{border:1px solid var(--line); background:var(--panel); border-radius:8px; padding:17px 19px; transition:border-color .2s}
+.card:hover{border-color:#2d3a52}
+.card h4{font-size:15px; margin-bottom:8px}
+.card p{font-size:15.5px; color:var(--text-dim); margin:0; line-height:1.6}
+.card .tag{font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); display:block; margin-bottom:8px}
+
+/* notes */
+.note{border-left:2px solid var(--beam); background:linear-gradient(90deg,rgba(91,140,255,.07),transparent); padding:14px 18px; margin:20px 0; border-radius:0 6px 6px 0}
+.note.warn{border-color:var(--amber); background:linear-gradient(90deg,rgba(255,166,61,.08),transparent)}
+.note.trap{border-color:var(--rose); background:linear-gradient(90deg,rgba(255,107,129,.08),transparent)}
+.note.good{border-color:var(--mint); background:linear-gradient(90deg,rgba(62,207,154,.08),transparent)}
+.note.phi{border-color:var(--violet); background:linear-gradient(90deg,rgba(192,123,255,.08),transparent)}
+.note p{margin:0 0 .6em; font-size:16px; max-width:80ch}
+.note p:last-child{margin:0}
+.note .lbl{font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--amber); display:block; margin-bottom:6px}
+.note .lbl.b{color:var(--beam)} .note .lbl.r{color:var(--rose)} .note .lbl.m{color:var(--mint)} .note .lbl.v{color:var(--violet)}
+
+/* tables */
+.tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:8px; margin:20px 0; background:var(--panel)}
+table{border-collapse:collapse; width:100%; font-family:var(--mono); font-size:12.5px}
+th{text-align:left; padding:11px 14px; font-weight:500; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-faint); border-bottom:1px solid var(--line); background:var(--panel-2); white-space:nowrap}
+td{padding:10px 14px; border-bottom:1px solid var(--line-soft); color:var(--text-dim); vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:rgba(91,140,255,.04); color:var(--text)}
+td.n{color:var(--text); font-weight:500}
+td .win{color:var(--mint)}
+
+/* code */
+.codeblock{position:relative; margin:20px 0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#080c14}
+.codehead{display:flex; justify-content:space-between; align-items:center; padding:8px 14px; background:var(--panel-2); border-bottom:1px solid var(--line); font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-faint)}
+.copy{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; background:transparent; border:1px solid var(--line); color:var(--text-faint); padding:3px 9px; border-radius:4px; cursor:pointer; transition:.18s}
+.copy:hover{color:var(--beam); border-color:rgba(91,140,255,.5)}
+pre.code{margin:0; padding:16px 18px; overflow-x:auto; font-family:var(--mono); font-size:12.8px; line-height:1.65; color:#c6d0e4}
+.c-kw{color:#c07bff} .c-str{color:#3ecf9a} .c-com{color:#5a6780; font-style:italic} .c-fn{color:#5b8cff} .c-num{color:#ffa63d}
+
+/* recall */
+.recall{margin:26px 0 0; border:1px dashed #2a3752; border-radius:8px; background:rgba(19,26,39,.55); overflow:hidden}
+.recall summary{list-style:none; cursor:pointer; padding:14px 18px; display:flex; gap:12px; align-items:flex-start; font-family:var(--display); font-size:16px; color:#e6ecf8}
+.recall summary::-webkit-details-marker{display:none}
+.recall summary::before{content:"RECALL"; font-family:var(--mono); font-size:9.5px; letter-spacing:.18em; color:var(--mint); border:1px solid rgba(62,207,154,.35); padding:3px 7px; border-radius:3px; flex:none; margin-top:2px}
+.recall summary::after{content:"+"; margin-left:auto; color:var(--text-faint); font-family:var(--mono); font-size:18px; line-height:1}
+.recall[open] summary::after{content:"–"}
+.recall .ans{padding:14px 18px 16px; border-top:1px solid var(--line-soft); color:var(--text-dim); font-size:16px}
+.recall .ans p{margin:0 0 .7em; max-width:78ch}
+.recall .ans p:last-child{margin:0}
+
+/* bench */
+.bench{border:1px solid var(--line); border-radius:10px; background:linear-gradient(180deg,var(--panel-2),var(--panel)); overflow:hidden; margin:24px 0}
+.bench-top{padding:15px 20px; border-bottom:1px solid var(--line); display:flex; gap:13px; align-items:center; flex-wrap:wrap}
+.bench-top .ttl{font-family:var(--mono); font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--text-faint); margin-right:auto}
+select,input[type=text],textarea{font-family:var(--mono); font-size:12px; background:var(--panel-3); color:var(--text); border:1px solid var(--line); border-radius:5px; padding:8px 10px}
+select{cursor:pointer; min-width:168px}
+select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--beam); outline-offset:2px}
+.vs{font-family:var(--display); font-size:12px; color:var(--text-faint); letter-spacing:.1em}
+.bench-body{padding:6px 20px 20px}
+.metric{padding:13px 0; border-bottom:1px solid var(--line-soft)}
+.metric:last-child{border-bottom:0}
+.metric-h{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; gap:12px}
+.metric-h .name{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-faint)}
+.metric-h .hint{font-size:13px; color:var(--text-faint); font-style:italic}
+.bar-row{display:grid; grid-template-columns:1fr 96px; align-items:center; gap:12px; margin:5px 0}
+.track{height:9px; background:#0b101a; border:1px solid var(--line-soft); border-radius:5px; overflow:hidden}
+.fill{height:100%; width:0; border-radius:4px; transition:width .75s cubic-bezier(.2,.8,.25,1)}
+.fill.a{background:linear-gradient(90deg,rgba(91,140,255,.45),var(--beam))}
+.fill.b{background:linear-gradient(90deg,rgba(192,123,255,.4),var(--violet))}
+.val{font-family:var(--mono); font-size:12.5px; text-align:right; color:var(--text)}
+.val.none{color:var(--text-faint)}
+.legend{display:flex; gap:20px; padding:12px 20px; border-top:1px solid var(--line); font-family:var(--mono); font-size:11px; color:var(--text-faint); flex-wrap:wrap}
+.dot{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px; vertical-align:middle}
+.dot.a{background:var(--beam)} .dot.b{background:var(--violet)}
+
+/* prompt builder */
+.builder{border:1px solid var(--line); border-radius:10px; background:linear-gradient(180deg,var(--panel-2),var(--panel)); overflow:hidden; margin:24px 0}
+.builder-head{padding:15px 20px; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--text-faint)}
+.builder-body{display:grid; grid-template-columns:340px 1fr; gap:0}
+.bl{padding:18px 20px; border-right:1px solid var(--line)}
+.br{padding:18px 20px; min-width:0}
+.fld{margin-bottom:14px}
+.fld label{display:block; font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px}
+.fld input[type=text],.fld textarea{width:100%; font-size:12.5px; line-height:1.5}
+.fld textarea{resize:vertical; min-height:76px; font-family:var(--mono)}
+.checks{display:grid; gap:6px; margin-top:4px}
+.checks label{display:flex; gap:9px; align-items:center; font-family:var(--body); font-size:15px; color:var(--text-dim); text-transform:none; letter-spacing:0; cursor:pointer; margin:0}
+.checks input{accent-color:var(--beam); width:15px; height:15px; cursor:pointer}
+#promptOut{width:100%; min-height:330px; font-family:var(--mono); font-size:12.3px; line-height:1.6; background:#080c14; color:#a9bcd8; resize:vertical}
+.brhead{display:flex; justify-content:space-between; align-items:center; margin-bottom:9px}
+.brhead span{font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint)}
+
+/* checklist */
+.tasks{border:1px solid var(--line); border-radius:9px; background:var(--panel); overflow:hidden; margin:22px 0}
+.task{display:flex; gap:13px; align-items:flex-start; padding:12px 18px; border-bottom:1px solid var(--line-soft); cursor:pointer}
+.task:last-child{border-bottom:0}
+.task:hover{background:rgba(91,140,255,.04)}
+.task input{accent-color:var(--mint); width:16px; height:16px; margin-top:4px; cursor:pointer; flex:none}
+.task .t{font-size:16px; color:var(--text-dim)}
+.task .t b{color:#eef2fb; font-weight:500; font-family:var(--display); font-size:15px; display:block; margin-bottom:2px}
+.task.done .t{opacity:.45; text-decoration:line-through}
+.taskbar{padding:12px 18px; border-top:1px solid var(--line); background:var(--panel-2); font-family:var(--mono); font-size:11.5px; color:var(--text-dim); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap}
+
+/* quiz */
+.quiz{border:1px solid var(--line); border-radius:10px; background:var(--panel); padding:4px 22px 20px; margin:22px 0}
+.q{padding:19px 0; border-bottom:1px solid var(--line-soft)}
+.q:last-of-type{border-bottom:0}
+.q .qt{font-family:var(--display); font-size:16.5px; margin-bottom:12px; display:flex; gap:11px}
+.q .qt span{font-family:var(--mono); font-size:12px; color:var(--beam); flex:none}
+.opts{display:grid; gap:7px}
+.opt{text-align:left; font-family:var(--body); font-size:15.5px; color:var(--text-dim); background:var(--panel-2); border:1px solid var(--line); border-radius:6px; padding:9px 14px; cursor:pointer; transition:.15s}
+.opt:hover:not(:disabled){border-color:#33425e; color:var(--text)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:rgba(62,207,154,.6); background:rgba(62,207,154,.1); color:#c9f3e2}
+.opt.wrong{border-color:rgba(255,107,129,.55); background:rgba(255,107,129,.09); color:#ffc9d1}
+.why{margin-top:10px; font-size:15px; color:var(--text-faint); border-left:2px solid var(--line); padding-left:13px; display:none}
+.why.show{display:block}
+.score{margin-top:18px; padding:14px 18px; border:1px solid var(--line); border-radius:8px; background:var(--panel-2); font-family:var(--mono); font-size:13px; color:var(--text-dim); display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap}
+.score b{color:var(--beam); font-size:19px; font-weight:700}
+.btn{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; background:transparent; border:1px solid var(--line); color:var(--text-dim); padding:7px 13px; border-radius:5px; cursor:pointer; transition:.18s}
+.btn:hover{color:var(--beam); border-color:rgba(91,140,255,.5)}
+
+/* glossary */
+.gloss{display:grid; grid-template-columns:repeat(auto-fill,minmax(272px,1fr)); gap:11px; margin:20px 0}
+.gitem{border:1px solid var(--line-soft); border-radius:7px; padding:12px 15px; background:var(--panel)}
+.gitem dt{font-family:var(--mono); font-size:12px; color:var(--beam); letter-spacing:.05em; margin-bottom:5px}
+.gitem dd{margin:0; font-size:15px; color:var(--text-dim); line-height:1.55}
+
+footer{padding:44px 0 66px; color:var(--text-faint); font-size:14.5px}
+footer .wrap{display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; align-items:center}
+footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase}
+
+/* ---------- collapsible ---------- */
+.toggle{
+  margin-left:auto; align-self:center; flex:none;
+  font-family:var(--mono); font-size:15px; line-height:1; font-weight:400;
+  width:28px; height:28px; display:grid; place-items:center;
+  border:1px solid var(--line); border-radius:6px;
+  color:var(--text-faint); background:var(--panel); cursor:pointer; transition:.18s;
+}
+.sec-head:hover .toggle,.part .bar:hover .toggle{color:var(--beam); border-color:rgba(91,140,255,.5); background:rgba(91,140,255,.08)}
+.sec-head{cursor:pointer; user-select:none}
+.sec-head:hover h2{color:#fff}
+.sec-head:focus-visible,.cap:focus-visible,.tabhead:focus-visible,.part .bar:focus-visible{outline:2px solid var(--beam); outline-offset:4px; border-radius:4px}
+.sec.collapsed .sec-body{display:none}
+.sec.collapsed{padding:15px 0}
+.sec.collapsed .sec-head{margin-bottom:0}
+.sec.collapsed h2{font-size:20px}
+.part.collapsed{padding:34px 0 6px}
+.sec-body{animation:drop .28s ease}
+@keyframes drop{from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:none}}
+
+.mini{
+  font-family:var(--mono); font-size:12px; line-height:1;
+  width:22px; height:20px; display:grid; place-items:center;
+  background:transparent; border:1px solid var(--line); color:var(--text-faint);
+  border-radius:4px; cursor:pointer; transition:.18s; flex:none;
+}
+.mini:hover{color:var(--beam); border-color:rgba(91,140,255,.5)}
+.codehead{gap:10px}
+.codehead .grp{display:flex; gap:7px; align-items:center; flex:none}
+.codehead .lbl-txt{cursor:pointer; user-select:none; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.codehead .lbl-txt:hover{color:var(--beam)}
+.codeblock.collapsed pre.code{display:none}
+
+.ascii .cap{display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none}
+.ascii .cap:hover{color:var(--beam)}
+.ascii .cap span{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ascii.collapsed pre{display:none}
+
+.tabhead{
+  display:flex; align-items:center; gap:10px; padding:8px 14px;
+  background:var(--panel-2); border-bottom:1px solid var(--line);
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text-faint); cursor:pointer; user-select:none;
+}
+.tabhead:hover{color:var(--beam)}
+.tabhead span{flex:1}
+.tabhead{position:sticky; left:0}
+.part .bar .toggle{margin-left:0; order:3}
+.tablewrap.collapsed table{display:none}
+.tablewrap.collapsed .tabhead{border-bottom:0}
+
+.part .bar{cursor:pointer; user-select:none}
+.part .bar::after{margin-right:8px}
+.part.collapsed p{display:none}
+
+.allctl{display:flex; gap:6px; flex:none}
+.allctl button{
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase;
+  background:transparent; border:1px solid var(--line); color:var(--text-faint);
+  padding:5px 8px; border-radius:4px; cursor:pointer; transition:.18s; white-space:nowrap;
+}
+.allctl button:hover{color:var(--beam); border-color:rgba(91,140,255,.5); background:rgba(91,140,255,.07)}
+
+.reveal{opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease}
+.reveal.in{opacity:1; transform:none}
+
+@media (max-width:900px){
+  body{font-size:16.5px}
+  .readout{grid-template-columns:1fr 1fr}
+  .readout div:nth-child(2){border-right:0}
+  .readout div:nth-child(-n+2){border-bottom:1px solid var(--line-soft)}
+  .g2,.g3{grid-template-columns:1fr}
+  .builder-body{grid-template-columns:1fr}
+  .bl{border-right:0; border-bottom:1px solid var(--line)}
+  .hero{padding:126px 0 42px}
+  .brand{display:none}
+  .ascii pre{font-size:10.5px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important; transition:none !important}
+  html{scroll-behavior:auto}
+  .reveal{opacity:1; transform:none}
+}
+</style>
+</head>
+<body>
+<style>
+/* --- section-6 additions --- */
+.recall.think summary::before{content:"THINK"; color:var(--violet); border-color:rgba(192,123,255,.4)}
+.recall.think{border-color:#3a2b52}
+.recall.arch summary::before{content:"ARCHITECT"; color:var(--amber); border-color:rgba(255,166,61,.4)}
+.recall.arch{border-color:#4a3720}
+.linkrow{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 4px}
+.linkrow a{
+  font-family:var(--mono); font-size:11px; letter-spacing:.04em; text-decoration:none;
+  color:var(--text-dim); border:1px solid var(--line); background:var(--panel);
+  padding:6px 11px; border-radius:5px; transition:.18s;
+}
+.linkrow a:hover{color:var(--beam); border-color:rgba(91,140,255,.5); background:rgba(91,140,255,.07)}
+.linkrow a::before{content:"↗ "; color:var(--text-faint)}
+
+/* calculator */
+.calc{border:1px solid var(--line); border-radius:10px; background:linear-gradient(180deg,var(--panel-2),var(--panel)); overflow:hidden; margin:24px 0}
+.calc-head{padding:15px 20px; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--text-faint)}
+.calc-body{display:grid; grid-template-columns:300px 1fr}
+.calc-l{padding:18px 20px; border-right:1px solid var(--line)}
+.calc-r{padding:18px 20px; min-width:0}
+.calc .fld{margin-bottom:15px}
+.calc .fld label{display:block; font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px}
+.calc select{width:100%}
+.calc .chk{display:flex; gap:9px; align-items:center; font-size:15px; color:var(--text-dim); cursor:pointer}
+.calc .chk input{accent-color:var(--beam); width:15px; height:15px; cursor:pointer}
+.bignum{font-family:var(--display); font-size:38px; font-weight:600; letter-spacing:-.02em; color:#eef3fc; line-height:1}
+.bignum small{font-size:14px; color:var(--text-dim); font-family:var(--mono); margin-left:8px; font-weight:400}
+.breakdown{font-family:var(--mono); font-size:12px; color:var(--text-faint); margin:10px 0 18px}
+.dev{margin:11px 0}
+.dev-h{display:flex; justify-content:space-between; font-family:var(--mono); font-size:11px; color:var(--text-faint); margin-bottom:5px}
+.dev-h .verdict{font-weight:500}
+.fits{color:var(--mint)} .tight{color:var(--amber)} .nope{color:var(--rose)}
+.devtrack{height:11px; background:#0b101a; border:1px solid var(--line-soft); border-radius:5px; overflow:hidden; position:relative}
+.devfill{height:100%; width:0; border-radius:4px; transition:width .6s cubic-bezier(.2,.8,.25,1)}
+.devfill.ok{background:linear-gradient(90deg,rgba(62,207,154,.4),var(--mint))}
+.devfill.warn{background:linear-gradient(90deg,rgba(255,166,61,.4),var(--amber))}
+.devfill.bad{background:linear-gradient(90deg,rgba(255,107,129,.4),var(--rose))}
+
+/* template switcher */
+.tmpl{border:1px solid var(--line); border-radius:10px; background:var(--panel); overflow:hidden; margin:24px 0}
+.tmpl-tabs{display:flex; gap:0; border-bottom:1px solid var(--line); background:var(--panel-2); overflow-x:auto}
+.tmpl-tabs button{
+  font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  background:transparent; border:0; border-right:1px solid var(--line); border-bottom:2px solid transparent;
+  color:var(--text-faint); padding:11px 16px; cursor:pointer; transition:.18s; white-space:nowrap;
+}
+.tmpl-tabs button:hover{color:var(--text)}
+.tmpl-tabs button.on{color:var(--beam); border-bottom-color:var(--beam); background:rgba(91,140,255,.06)}
+.tmpl pre{margin:0; padding:18px; font-family:var(--mono); font-size:12.5px; line-height:1.65; color:#a9bcd8; overflow-x:auto; background:#080c14}
+.tmpl pre em{color:var(--amber); font-style:normal}
+.tmpl pre b{color:var(--mint); font-weight:400}
+.tmpl .foot{padding:12px 18px; border-top:1px solid var(--line); font-size:15px; color:var(--text-dim)}
+
+@media (max-width:900px){ .calc-body{grid-template-columns:1fr} .calc-l{border-right:0; border-bottom:1px solid var(--line)} }
+</style>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">Architects <b>Lab</b></div>
+    <nav class="navchips" id="nav">
+      <a href="#s1">01 Owning weights</a>
+      <a href="#s2">02 The Hub</a>
+      <a href="#s3">03 Model names</a>
+      <a href="#s4">04 GPUs</a>
+      <a href="#s5">05 Quantization</a>
+      <a href="#s6">06 KV cache</a>
+      <a href="#s7">07 Pipeline</a>
+      <a href="#s8">08 Tokenizer</a>
+      <a href="#s9">09 Loading models</a>
+      <a href="#s10">10 Generation</a>
+      <a href="#s11">11 PDFs</a>
+      <a href="#s12">12 Chat templates</a>
+      <a href="#s13">13 The RAG hole</a>
+      <a href="#s14">14 Parsing output</a>
+      <a href="#s15">15 Gradio</a>
+      <a href="#s16">16 Production</a>
+      <a href="#s17">17 Full script</a>
+      <a href="#tasks">Checklist</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#cheat">Cheat sheet</a>
+      <a href="#gloss">Glossary</a>
+    </nav>
+    <div class="allctl">
+      <button id="expandAll" title="Expand everything">Expand all</button>
+      <button id="collapseAll" title="Collapse into an index">Collapse all</button>
+    </div>
+  </div>
+  <div id="scrollbar"></div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Module notes · Open-source LLMs on Hugging Face</p>
+    <h1>You can own the brain. <em>Now you own the problems too.</em></h1>
+    <p class="lede">Section 5 rented intelligence over an API. This one downloads it. That single change moves the hard part from prompt design to memory budgets, tokenizers, quantization and serving — and it turns you from an API consumer into someone who has to make architecture decisions. These notes cover the mechanics and, more importantly, the judgement.</p>
+    <div class="readout">
+      <div><div class="k">Abstraction levels</div><div class="v">3 <small>pipeline · auto · raw</small></div></div>
+      <div><div class="k">ASCII sketches</div><div class="v">14 <small>the mental models</small></div></div>
+      <div><div class="k">Thinking prompts</div><div class="v">30+ <small>recall · think · architect</small></div></div>
+      <div><div class="k">Live tools</div><div class="v">3 <small>VRAM calc · templates · quiz</small></div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ PART ONE ============ -->
+<div class="part reveal">
+  <div class="wrap">
+    <div class="bar"><span class="tag">Part one</span><h2>The open-weight decision</h2></div>
+    <p>Before any code: what actually changes when the model lives on your disk instead of someone else's server. This is a procurement and architecture decision disguised as a technical one.</p>
+  </div>
+</div>
+
+<section class="sec reveal" id="s1">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">01</span><h2>What changes when you own the weights</h2></div>
+
+    <p>In Section 5 you called GPT-4o, Gemini and Claude. You sent text over HTTPS and got text back. You never touched the model. Here, you <strong>download the model itself</strong> — billions of numbers — and run it on hardware you're responsible for.</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 1 · What you're actually responsible for</div>
+<pre>
+   CLOSED API                          OPEN WEIGHTS
+   ==========                          ============
+   [ your prompt ]                     [ your prompt ]
+         |                                   |
+   ------|------ vendor boundary ------      |
+         v                                   v
+    tokenizer      <i>they own</i>            tokenizer      <u>you own</u>
+    weights        <i>they own</i>            weights        <u>you own</u>
+    GPU / serving  <i>they own</i>            GPU / serving  <u>you own</u>
+    batching       <i>they own</i>            batching       <u>you own</u>
+    scaling        <i>they own</i>            scaling        <u>you own</u>
+    uptime         <i>they own</i>            uptime         <u>you own</u>
+    versioning     <i>they own</i>            versioning     <u>you own</u>
+   ------|-------------------------------    |
+         v                                   v
+   [ answer ]  + invoice                [ answer ]  + a GPU bill
+                                                   + an on-call rota
+
+   You did not buy a cheaper model.
+   You bought a <b>different set of responsibilities</b>.
+</pre>
+    </div>
+
+    <h3>The five real reasons to self-host</h3>
+    <div class="grid g2">
+      <div class="card"><span class="tag">01 · Data residency</span><h4>Nothing leaves the perimeter</h4><p>The decisive one in banking, healthcare and defence. If customer PII, KYC documents or trade data cannot legally cross into a third-party API, capability comparisons are irrelevant — self-hosting is the only compliant path.</p></div>
+      <div class="card"><span class="tag">02 · Unit economics at volume</span><h4>Fixed cost beats per-token</h4><p>API pricing is linear in usage. A GPU is a fixed cost. Below a certain volume the API always wins; above a crossover point, self-hosting wins. Know where your crossover is before arguing about it.</p></div>
+      <div class="card"><span class="tag">03 · Customisation</span><h4>Fine-tuning is only possible here</h4><p>You can continue training on your own domain data — your product catalogue, your regulatory language, your ticket history. No closed API gives you deep weight-level adaptation.</p></div>
+      <div class="card"><span class="tag">04 · Version stability</span><h4>The model doesn't change under you</h4><p>A downloaded checkpoint is frozen forever. Hosted models get silently updated and deprecated, which can break carefully tuned prompts overnight. For anything you must audit or reproduce, this matters enormously.</p></div>
+      <div class="card"><span class="tag">05 · Offline & edge</span><h4>Works with no internet</h4><p>Air-gapped environments, factory floors, on-device inference, disaster-recovery sites. Not possible with an API by definition.</p></div>
+      <div class="card"><span class="tag">Bonus · Transparency</span><h4>You can inspect it</h4><p>Architecture, layer counts, attention shapes are all visible. Useful for research, for security review, and for explaining behaviour to a regulator who asks "how does it work?"</p></div>
+    </div>
+
+    <div class="note trap">
+      <span class="lbl r">The honest counter-argument</span>
+      <p>Most teams that self-host underestimate the total cost. You are now paying for: GPU capacity that sits idle between requests, an inference server, model-update evaluation, monitoring, a security review of downloaded artefacts, and engineers who understand CUDA errors at 2am. <strong>A frontier API is often cheaper and better until you hit either a compliance wall or serious volume.</strong> "We should self-host to save money" is the most common wrong reason.</p>
+    </div>
+
+    <div class="linkrow">
+      <a href="https://huggingface.co" target="_blank" rel="noopener">huggingface.co</a>
+      <a href="https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard" target="_blank" rel="noopener">Open LLM Leaderboard</a>
+      <a href="https://colab.research.google.com" target="_blank" rel="noopener">Google Colab</a>
+    </div>
+
+    <details class="recall">
+      <summary>Name the one reason to self-host that no amount of API improvement can ever overturn.</summary>
+      <div class="ans">
+        <p><strong>Data residency / legal constraint.</strong> Cost, quality and latency arguments all shift as vendors improve and prices fall. But if the law or your contract says the data cannot leave your network, no API — however cheap or brilliant — becomes eligible. Every other reason is a moving target; this one is a hard boundary.</p>
+      </div>
+    </details>
+
+    <details class="recall arch">
+      <summary>Your CFO asks: "at what point does self-hosting actually become cheaper?" Sketch how you'd answer.</summary>
+      <div class="ans">
+        <p>Set up a break-even, not an opinion. <strong>API cost</strong> = (tokens per request × requests per month) × blended price per token. <strong>Self-host cost</strong> = GPU instance hours per month + engineering time amortised + storage/egress. Then solve for the request volume where they cross.</p>
+        <p>Two things people forget. <strong>Utilisation:</strong> a GPU you rent 24×7 but use 6% of the time makes your effective per-token cost enormous — the API's elasticity is a real feature you're giving up. <strong>Quality per rupee:</strong> if the open model needs three retries to match one frontier-model answer, the token count in your comparison is wrong.</p>
+        <p>The honest answer usually is: "cheaper above roughly X million tokens a month at Y% GPU utilisation, and we're currently at 5% of X." Which reframes the conversation to the reason that actually applies — compliance or customisation.</p>
+      </div>
+    </details>
+
+    <details class="recall think">
+      <summary>Frozen weights are listed above as an advantage. When are they a serious liability?</summary>
+      <div class="ans">
+        <p>The moment safety, accuracy or capability improves elsewhere and you don't get it. A frozen checkpoint keeps every bias, jailbreak and factual error it shipped with, forever. Hosted models get patched; yours doesn't unless you re-evaluate, re-download and re-test.</p>
+        <p>So "version stability" isn't free — it converts an implicit vendor responsibility into an explicit internal process. If you self-host and never revisit the model, you haven't chosen stability; you've chosen decay. The mature version is a <strong>deliberate upgrade cadence</strong>: pinned in production, evaluated quarterly against your own test set.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s2">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">02</span><h2>The Hugging Face Hub, read like an engineer</h2></div>
+
+    <p>Hugging Face is the package registry for machine learning — npm or PyPI, but the packages are trained brains. Three things live there.</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 2 · The three floors of the Hub</div>
+<pre>
+  +----------------------------------------------------------------+
+  |  MODELS      ~1.6 million pre-trained checkpoints               |
+  |  grouped by TASK, not by vendor:                                |
+  |    multimodal ....... image-text-to-text, audio-text-to-text    |
+  |    vision ........... classification, detection, segmentation   |
+  |    NLP .............. <b>text-generation</b>, classification, QA      |
+  |    audio ............ ASR, TTS      tabular, RL, robotics       |
+  +----------------------------------------------------------------+
+  |  DATASETS    ~370,000 training / evaluation corpora             |
+  |  filter by modality, size, licence, language                    |
+  +----------------------------------------------------------------+
+  |  SPACES      hosted demo apps (mostly Gradio) you can try free   |
+  |  run a 32B model in the browser before you download 60GB        |
+  +----------------------------------------------------------------+
+</pre>
+    </div>
+
+    <h3>How to read a model card in ninety seconds</h3>
+    <p>The model card is a README. Most people skim the benchmark table and stop. Here's the order an engineer should read it in:</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Check</th><th>Question</th><th>Why it decides things</th></tr></thead>
+        <tbody>
+          <tr><td class="n">Licence</td><td>Apache-2.0? MIT? Custom community licence?</td><td>Some restrict commercial use, redistribution, or use above a user threshold. This is a legal gate, not a footnote</td></tr>
+          <tr><td class="n">Gated?</td><td>Does it require accepting terms before download?</td><td>Llama models do. You must be logged in with a token, and CI/CD needs that token too</td></tr>
+          <tr><td class="n">Parameter count</td><td>0.5B, 3B, 7B, 32B?</td><td>Directly sets your VRAM requirement — see section 05</td></tr>
+          <tr><td class="n">Base or Instruct?</td><td>Does the name end in <code>-instruct</code> / <code>-it</code> / <code>-chat</code>?</td><td>Base models complete text; they do <em>not</em> follow instructions. Picking base for a Q&amp;A app is a classic wasted afternoon</td></tr>
+          <tr><td class="n">Context length</td><td>4K? 32K? 128K?</td><td>Caps how much document you can feed per call. The <code>-4k-</code> in a name is a hard limit</td></tr>
+          <tr><td class="n">Chat template</td><td>Which special tokens does it expect?</td><td>Get this wrong and output quality collapses — see section 12</td></tr>
+          <tr><td class="n">Training data notes</td><td>Languages, cutoff, known gaps</td><td>A model trained mostly on English web text will be weak on Hindi legal text, whatever its benchmark score</td></tr>
+          <tr><td class="n">Downloads / likes</td><td>Popular?</td><td>Weak signal. Useful for "is this maintained and battle-tested", useless for "is this good at my task"</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note warn">
+      <span class="lbl">Downloads are a lagging, biased metric</span>
+      <p>In the course walkthrough, the most-downloaded text-generation model was a small older model with ~35M downloads while Llama 3.1 had ~5.4M. That does <strong>not</strong> mean the small model is better. Download counts reward: models small enough to be pulled repeatedly in CI, models used as tokenizer-only dependencies, tutorial defaults, and models that have simply existed longer. <strong>Popularity measures friction, not quality.</strong></p>
+    </div>
+
+    <h3>Use Spaces as a free trial</h3>
+    <p>Before you download tens of gigabytes onto a GPU you're paying for, find the model's Space (or the inference widget on the model card) and give it three of your <em>own</em> domain prompts. Five minutes there routinely saves an hour of downloading.</p>
+
+    <div class="linkrow">
+      <a href="https://huggingface.co/models" target="_blank" rel="noopener">Browse models</a>
+      <a href="https://huggingface.co/datasets" target="_blank" rel="noopener">Browse datasets</a>
+      <a href="https://huggingface.co/spaces" target="_blank" rel="noopener">Browse spaces</a>
+      <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">Access tokens</a>
+    </div>
+
+    <details class="recall">
+      <summary>You load a model and it rambles instead of answering your question. What's the first thing to check?</summary>
+      <div class="ans">
+        <p>Whether you grabbed the <strong>base</strong> model rather than the <strong>instruct</strong> variant. Base models are trained purely to continue text — asked "What is the capital of France?" they may cheerfully generate five more exam questions. Instruction-tuned versions (<code>-instruct</code>, <code>-it</code>, <code>-chat</code>) have been further trained to treat your input as a request.</p>
+        <p>Second thing to check: whether you applied the model's chat template. Right model, wrong formatting produces the same symptom.</p>
+      </div>
+    </details>
+
+    <details class="recall think">
+      <summary>Why is "1.6 million models available" a problem as much as a feature?</summary>
+      <div class="ans">
+        <p>Because selection cost becomes the bottleneck, and most of those checkpoints are unmaintained forks, experiments and abandoned fine-tunes. An open registry with no gatekeeping gives you both extraordinary choice and no quality signal.</p>
+        <p>The practical response is to narrow hard before you browse: filter by task, then by organisation you'd trust to still exist next year (Meta, Google, Microsoft, Alibaba, Mistral, DeepSeek), then by licence, then by size that fits your hardware. That takes 1.6 million down to about a dozen. <strong>Treat model selection like dependency selection</strong> — you would not install a random npm package with four stars into a payments system, and a fine-tune is a far larger trust surface than a package.</p>
+      </div>
+    </details>
+
+    <details class="recall arch">
+      <summary>What is the supply-chain security question nobody in the tutorial asks?</summary>
+      <div class="ans">
+        <p>You are downloading executable-adjacent artefacts from a public registry and loading them into a process with GPU and filesystem access. The questions a security review will ask:</p>
+        <p><strong>Format:</strong> is it <code>safetensors</code> or legacy pickle? Pickle files can execute arbitrary code on load. Prefer safetensors, always.<br>
+        <strong>Remote code:</strong> does it require <code>trust_remote_code=True</code>? That flag means "run Python from this repo on my machine" — see section 09.<br>
+        <strong>Provenance:</strong> is the repo the official org, or a lookalike? Typosquatting exists here too.<br>
+        <strong>Pinning:</strong> are you pulling <code>main</code>, or a specific commit revision? Unpinned means the artefact can change under you.<br>
+        <strong>Mirroring:</strong> in a regulated shop, models should be pulled once, scanned, and served from an internal registry — never fetched from the internet at container start.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s3">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">03</span><h2>Decoding a model name</h2></div>
+
+    <p>Model names are dense with information. Learn to read them and you can filter a candidate list without opening a single page.</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 3 · The anatomy of a model ID</div>
+<pre>
+   microsoft / Phi-3-mini-4k-instruct
+   ~~~~~~~~~   ~~~~ ~ ~~~~ ~~ ~~~~~~~~
+      |         |   |   |   |     |
+      |         |   |   |   |     +-- instruction-tuned (follows orders)
+      |         |   |   |   +-------- 4,096-token context window
+      |         |   |   +------------ size tier within the family
+      |         |   +---------------- generation / version
+      |         +-------------------- family name
+      +------------------------------ organisation (the trust anchor)
+
+   MORE EXAMPLES
+   -------------------------------------------------------------
+   Qwen/Qwen2.5-3B-Instruct        3 billion params, instruct
+   meta-llama/Llama-3.2-3B-Instruct  gated: must accept licence
+   google/gemma-3-4b-it            "it" = instruction tuned
+   deepseek-ai/DeepSeek-R1-...     R = reasoning model, thinks first
+   ...-GGUF / -AWQ / -GPTQ         already quantized by someone else
+   ...-base (or no suffix)         completion only, NOT chat
+
+   READ IT AS: who made it / what family / how big / how much
+               context / has it been taught to obey
+</pre>
+    </div>
+
+    <div class="note good">
+      <span class="lbl m">The parameter-count intuition</span>
+      <p><strong>B = billions of weights.</strong> Qwen3-32B has 32 billion numbers in it. This single figure predicts your GPU bill, your latency and roughly your capability — which is why it's in the name. A useful ladder: <strong>0.5–3B</strong> runs on a laptop or a free Colab GPU and handles extraction, classification and simple Q&amp;A. <strong>7–14B</strong> is the sweet spot for most self-hosted production work. <strong>30B+</strong> needs serious hardware and starts approaching frontier quality on narrow tasks.</p>
+    </div>
+
+    <details class="recall">
+      <summary>Two candidates: <code>Phi-3-mini-4k-instruct</code> and <code>Phi-3-mini-128k-instruct</code>. Same family, same size. When does the 4k version still win?</summary>
+      <div class="ans">
+        <p>When your inputs are short. Longer context isn't free — it costs VRAM for the KV cache (section 06), it costs latency, and long-context variants are sometimes slightly weaker on short-input tasks because capacity was spent on length. If you're classifying support tickets of 200 tokens, buying a 128k window is paying for a warehouse to store a envelope.</p>
+        <p>The 128k version wins the moment a single document genuinely can't be split without losing meaning.</p>
+      </div>
+    </details>
+
+    <details class="recall think">
+      <summary>You see <code>-GGUF</code> and <code>-AWQ</code> variants of a model you like. What does their existence tell you about the model's real-world usage?</summary>
+      <div class="ans">
+        <p>That people are actually deploying it on constrained hardware — those are community quantization formats produced because there's demand. Their presence is a decent proxy for "this model has an ecosystem": tooling support, inference-engine compatibility, people who've hit and documented the bugs.</p>
+        <p>It also tells you something about your own next step. If a well-maintained quantized build already exists, you may not need to quantize at load time yourself — you can pull a pre-quantized artefact that someone has already validated, which is faster to load and often better tuned than a naive on-the-fly conversion.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ============ PART TWO ============ -->
+<div class="part reveal">
+  <div class="wrap">
+    <div class="bar"><span class="tag">Part two</span><h2>Hardware is the real constraint</h2></div>
+    <p>With APIs, capability was the constraint. Here, memory is. This part is the difference between "the model I want" and "the model I can actually run" — and it's where most self-hosting projects die.</p>
+  </div>
+</div>
+
+<section class="sec reveal" id="s4">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">04</span><h2>Why a GPU, and which one</h2></div>
+
+    <p>Running an LLM is, mechanically, an enormous pile of matrix multiplications. Every generated token requires passing a vector through billions of weights. CPUs execute a few operations at a time, very fast. GPUs execute thousands simultaneously, somewhat slower each. For this workload, width beats speed by orders of magnitude.</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 4 · Why width beats speed here</div>
+<pre>
+   CPU  (a few very fast lanes)        GPU  (thousands of narrow lanes)
+   ------------------------------      -------------------------------
+   [====>]                             [=>][=>][=>][=>][=>][=>][=>][=>]
+   [====>]                             [=>][=>][=>][=>][=>][=>][=>][=>]
+   [====>]                             [=>][=>][=>][=>][=>][=>][=>][=>]
+   [====>]                             [=>][=>][=>][=>][=>][=>][=>][=>]
+    ~8-64 cores                         ~thousands of CUDA cores
+
+   One token = multiply a vector through BILLIONS of weights.
+   That work is embarrassingly parallel -> the wide machine wins.
+
+   Rough Colab ladder (from the course):
+     CPU        1x     baseline. Fine for tokenizers, hopeless for 3B+ inference
+     T4 GPU     5-10x  free / Pro tier, ~15GB VRAM, the workhorse here
+     A100       20-50x Pro+ / enterprise, 40-80GB, what frontier models
+                       were trained on
+</pre>
+    </div>
+
+    <div class="note warn">
+      <span class="lbl">VRAM matters more than speed</span>
+      <p>Notice the trap: people compare GPUs on <em>throughput</em>, but the thing that stops you is <em>capacity</em>. A slow GPU with enough VRAM runs your model; a fast GPU without enough VRAM throws <code>CUDA out of memory</code> and runs nothing. When choosing hardware for inference, <strong>check that the model fits first, then optimise for speed.</strong></p>
+    </div>
+
+    <p>In Colab: <strong>Runtime → Change runtime type → Hardware accelerator</strong>. Then verify from code rather than trusting the menu:</p>
+
+    <div class="codeblock">
+      <div class="codehead"><span>Always verify the GPU before loading anything</span><button class="copy">Copy</button></div>
+<pre class="code"><span class="c-kw">import</span> torch
+
+<span class="c-kw">if</span> torch.cuda.is_available():
+    name = torch.cuda.get_device_name(<span class="c-num">0</span>)
+    total = torch.cuda.get_device_properties(<span class="c-num">0</span>).total_memory / <span class="c-num">1024</span>**<span class="c-num">3</span>
+    <span class="c-fn">print</span>(f<span class="c-str">"GPU: {name} — {total:.1f} GB VRAM"</span>)
+<span class="c-kw">else</span>:
+    <span class="c-fn">print</span>(<span class="c-str">"No GPU. Loading a 3B model here will take minutes per token."</span>)</pre>
+    </div>
+
+    <details class="recall">
+      <summary>Your notebook idles for twenty minutes, then every cell fails with "torch is not defined". What happened?</summary>
+      <div class="ans">
+        <p>Colab reclaimed your runtime. The VM was recycled, so every import, variable, downloaded model and logged-in session is gone. You have to re-run from the top — install, import, log in, reload the model (which re-downloads gigabytes).</p>
+        <p>The engineering lesson beyond the annoyance: <strong>your notebook state is not durable infrastructure.</strong> Anything that takes five minutes to rebuild and lives only in RAM is a demo, not a system. Real deployments load the model once into a long-lived process precisely to avoid this cost.</p>
+      </div>
+    </details>
+
+    <details class="recall arch">
+      <summary>Why would a production team accept a <em>slower</em> GPU than the one their benchmark says is fastest?</summary>
+      <div class="ans">
+        <p>Because inference cost is dominated by utilisation, not peak speed. A cheaper GPU that stays 70% busy beats an A100 at 8% busy on cost-per-query, every time. Add availability (top-tier GPUs are frequently unobtainable in your region), quota limits, and the fact that a bigger card only helps if your model and batch actually fill it.</p>
+        <p>The real question is never "which GPU is fastest?" but <strong>"what is my cost per thousand queries at realistic traffic, including idle time?"</strong> That reframing usually points at smaller cards, aggressive batching, and autoscaling to zero — or, honestly, back at the API.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s5">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">05</span><h2>Precision and quantization</h2></div>
+
+    <p>Every weight is a number, and you choose how many bits to store it in. That choice is the single biggest lever you have over whether a model fits on your hardware.</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 5 · The precision ladder</div>
+<pre>
+   FORMAT   BITS  BYTES/WEIGHT   7B MODEL   WHAT YOU GIVE UP
+   ------------------------------------------------------------------
+   fp32      32      4.0          ~26 GB    nothing (training default)
+   fp16/bf16 16      2.0          ~13 GB    almost nothing for inference
+   int8       8      1.0          ~6.5 GB   very little
+   int4       4      0.5          ~3.5 GB   a little; usually acceptable
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^
+   THE FORMULA YOU SHOULD MEMORISE
+   -------------------------------------------------------------
+       VRAM for weights (GB)  ~=  params(B)  x  bytes-per-weight
+
+       7B  x 2 bytes (fp16) = 14 GB   -> will NOT fit a 15GB T4 with
+                                         room for anything else
+       7B  x 0.5 (int4)     = 3.5 GB  -> fits comfortably
+
+   Quantization is <b>lossy compression for weights</b>. You are rounding
+   billions of numbers to a coarser grid. The remarkable empirical
+   finding is how little that costs you at 8 and even 4 bits.
+</pre>
+    </div>
+
+    <h3>Try it: does your model fit?</h3>
+    <p>Pick a size and a precision. The bars show the fit against the devices you're likely to have.</p>
+
+    <div class="calc">
+      <div class="calc-head">VRAM fit calculator</div>
+      <div class="calc-body">
+        <div class="calc-l">
+          <div class="fld">
+            <label for="cParams">Model size</label>
+            <select id="cParams">
+              <option value="0.5">0.5B — Qwen tiny</option>
+              <option value="1.5">1.5B — Qwen 1.5B</option>
+              <option value="3">3B — Llama 3.2 / Qwen 2.5</option>
+              <option value="3.8" selected>3.8B — Phi-3-mini</option>
+              <option value="4">4B — Gemma 3</option>
+              <option value="7">7B — Mistral / Qwen</option>
+              <option value="8">8B — Llama 3.1</option>
+              <option value="13">13B</option>
+              <option value="32">32B — Qwen 32B</option>
+              <option value="70">70B — Llama 70B</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label for="cPrec">Precision</label>
+            <select id="cPrec">
+              <option value="4">fp32 — 4 bytes/weight</option>
+              <option value="2">fp16 / bf16 — 2 bytes</option>
+              <option value="1">int8 — 1 byte</option>
+              <option value="0.55" selected>int4 (NF4) — ~0.5 bytes</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label for="cCtx">Context in use</label>
+            <select id="cCtx">
+              <option value="2048">2K tokens — short Q&amp;A</option>
+              <option value="6000" selected>6K tokens — this project</option>
+              <option value="16384">16K tokens</option>
+              <option value="131072">128K tokens — full document</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label class="chk"><input type="checkbox" id="cTrain"> Full fine-tuning, not inference</label>
+          </div>
+        </div>
+        <div class="calc-r">
+          <div class="bignum" id="cTotal">—<small>GB total</small></div>
+          <div class="breakdown" id="cBreak"></div>
+          <div id="cDevices"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note warn">
+      <span class="lbl">Read this as an order of magnitude, not a guarantee</span>
+      <p>The estimate uses weights + a rough KV-cache and activation allowance. Real usage varies with architecture (grouped-query attention shrinks the KV cache a lot), batch size, and framework overhead. <strong>Use it to answer "is this plausible?" not "will this exactly fit?"</strong> — and always leave 10–15% headroom, because a GPU at 99% will OOM on the first unusual request.</p>
+    </div>
+
+    <h3>How you actually ask for it</h3>
+    <div class="codeblock">
+      <div class="codehead"><span>4-bit quantization via bitsandbytes</span><button class="copy">Copy</button></div>
+<pre class="code"><span class="c-kw">from</span> transformers <span class="c-kw">import</span> AutoModelForCausalLM, BitsAndBytesConfig
+<span class="c-kw">import</span> torch
+
+bnb = BitsAndBytesConfig(
+    load_in_4bit=<span class="c-kw">True</span>,
+    bnb_4bit_quant_type=<span class="c-str">"nf4"</span>,              <span class="c-com"># NF4 &gt; plain int4 for LLM weights</span>
+    bnb_4bit_compute_dtype=torch.float16,   <span class="c-com"># maths still runs in fp16</span>
+    bnb_4bit_use_double_quant=<span class="c-kw">True</span>,        <span class="c-com"># quantize the quantization constants too</span>
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    quantization_config=bnb,
+    device_map=<span class="c-str">"auto"</span>,
+)</pre>
+    </div>
+
+    <div class="note good">
+      <span class="lbl m">The subtlety worth understanding</span>
+      <p><strong>Storage precision and compute precision are different things.</strong> Weights sit in memory at 4 bits, but they're dequantized to fp16 to do the actual matrix multiply. That's why <code>bnb_4bit_compute_dtype</code> exists. It also explains why 4-bit saves enormous memory but doesn't make inference proportionally faster — you've reduced what you store, not the arithmetic you perform. Quantization is a <strong>memory optimisation that buys you access, not a speed optimisation.</strong></p>
+    </div>
+
+    <details class="recall">
+      <summary>You quantize to 4-bit and quality drops noticeably on your task. What are your options, in order of cost?</summary>
+      <div class="ans">
+        <p><strong>1. Step up to 8-bit.</strong> Roughly doubles memory but usually recovers most of the loss. Cheapest fix if it fits.</p>
+        <p><strong>2. Try a better quantization scheme.</strong> NF4 with double quantization, or a community AWQ/GPTQ build that was calibrated properly, often beats a naive conversion at the same bit width.</p>
+        <p><strong>3. Drop to a smaller model at higher precision.</strong> A 3B at fp16 frequently beats a 7B crushed to 4-bit — same memory, better behaviour. This trade is underused.</p>
+        <p><strong>4. Rent a bigger GPU.</strong> The honest last resort, and sometimes the right one.</p>
+      </div>
+    </details>
+
+    <details class="recall think">
+      <summary>Quantization is lossy. Why doesn't it destroy the model the way lossy compression destroys a spreadsheet?</summary>
+      <div class="ans">
+        <p>Because neural networks are massively redundant and inherently noise-tolerant. No single weight carries decisive information; the behaviour emerges from patterns across billions of them. Small rounding errors distributed across all weights largely cancel rather than compound — the network was trained with noise (dropout, stochastic gradients) and is robust to more of it.</p>
+        <p>A spreadsheet is the opposite: every cell is load-bearing, and one wrong digit is one wrong answer. <strong>Redundancy is what makes compression survivable</strong>, and it's why the same trick doesn't transfer to systems where each value matters individually.</p>
+        <p>Follow-on worth sitting with: this is also why quantization damage isn't uniform. It tends to show up first in the rarest, most precise behaviours — long arithmetic, exact recall of obscure facts, low-resource languages — while fluent conversation stays intact. So a quantized model can feel fine in casual testing and fail on exactly the edge cases you care about.</p>
+      </div>
+    </details>
+
+    <details class="recall arch">
+      <summary>When is running a quantized model actively the wrong call, even though it fits?</summary>
+      <div class="ans">
+        <p>When the failure mode is silent and the stakes are high. Quantization degrades precision-sensitive behaviour first — numerical reasoning, exact figure extraction, rare-token handling. In a financial-document pipeline that pulls numbers out of filings, a 4-bit model that transposes a digit produces a plausible, fluent, wrong answer that no error handler catches.</p>
+        <p>The test isn't "does it still sound good." It's <strong>"does it still get the numbers right, measured on my own labelled set."</strong> If you haven't measured that specifically, you don't know what quantization cost you — you only know it loads.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s6">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">06</span><h2>The memory budget nobody warns you about</h2></div>
+
+    <p>Weights are the number everyone quotes. They're not the only thing in VRAM, and the other components are the ones that make your app fail in production but work in testing.</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 6 · What's actually sitting in your GPU</div>
+<pre>
+   +--------------------------------------------------+  15 GB (T4)
+   |                                                  |
+   |  ACTIVATIONS + framework overhead                |   <- varies
+   |  ................................................|
+   |                                                  |
+   |  KV CACHE                                        |   <- grows with
+   |  every token attends to every previous token,    |      CONTEXT LENGTH
+   |  so K and V for the whole sequence are cached    |      and BATCH SIZE
+   |  ................................................|
+   |                                                  |
+   |  MODEL WEIGHTS                                   |   <- fixed once
+   |  params x bytes-per-weight                       |      loaded
+   |                                                  |
+   +--------------------------------------------------+
+
+   THE TRAP
+   --------
+   You test with a 500-token prompt.   Everything fits. Ship it.
+   A user pastes a 50-page contract.   KV cache explodes. OOM.
+
+   The weights are constant. The <u>cache is a function of your input</u>,
+   which means your memory ceiling is set by your WORST request,
+   not your average one.
+</pre>
+    </div>
+
+    <div class="note">
+      <span class="lbl b">Why this changes your API design</span>
+      <p>Because memory scales with context length and concurrency, a self-hosted LLM service must enforce an <strong>input token limit at the edge</strong> — before the request reaches the model. Rejecting a 200K-token request with a clean 413 is infinitely better than accepting it and crashing the worker for every other user in flight. Same discipline as a max upload size on a file endpoint.</p>
+    </div>
+
+    <details class="recall">
+      <summary>Model weights fit in 4GB of a 15GB GPU. Why can you still run out of memory?</summary>
+      <div class="ans">
+        <p>Because weights are the floor, not the ceiling. The KV cache grows with sequence length and with the number of concurrent requests, and activations spike during the forward pass. Long inputs, big batches, or several users at once can consume many times the weight footprint.</p>
+        <p>It's the classic capacity-planning error: sizing for the static component and forgetting the one that scales with load.</p>
+      </div>
+    </details>
+
+    <details class="recall arch">
+      <summary>Design question: your Q&amp;A service must serve 50 concurrent users on one GPU. What levers do you have?</summary>
+      <div class="ans">
+        <p><strong>Cap input length</strong> at the API gateway — the single most effective lever, since KV cache is linear in tokens.<br>
+        <strong>Use a real inference server</strong> (vLLM, TGI) rather than a loop over <code>pipeline()</code>. These implement paged attention and continuous batching, which is the difference between 3 concurrent users and 50 on identical hardware.<br>
+        <strong>Choose a model with grouped-query attention</strong> — it shrinks the KV cache substantially for the same quality.<br>
+        <strong>Quantize the KV cache</strong>, not just the weights.<br>
+        <strong>Queue and admission-control</strong>: bound the in-flight requests and make the 51st user wait rather than making all 50 fail.</p>
+        <p>The meta-point: the notebook in this module can serve exactly one user at a time, and nothing about it degrades gracefully. Concurrency is not a tuning parameter you add later — it's an architectural property of the serving layer you chose.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ============ PART THREE ============ -->
+<div class="part reveal">
+  <div class="wrap">
+    <div class="bar"><span class="tag">Part three</span><h2>Transformers: three levels of control</h2></div>
+    <p>The library gives you the same capability at three altitudes. Knowing which altitude to fly at — and what each one hides — is most of the skill.</p>
+  </div>
+</div>
+
+<section class="sec reveal" id="s7">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">07</span><h2>Pipeline — the easy door</h2></div>
+
+    <p>A <span class="term">pipeline</span> is a ready-made application: it downloads the model and tokenizer, handles preprocessing, runs inference, and converts raw scores back into human-readable output.</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 7 · What the pipeline is hiding</div>
+<pre>
+   WITHOUT pipeline                      WITH pipeline
+   ----------------                      -------------
+   text                                  text
+     |                                     |
+     v                                     v
+   tokenizer  -> input IDs             +---------+
+     |                                 | pipeline|
+     v                                 +---------+
+   model      -> logits                     |
+     |                                      v
+     v                                    output
+   softmax / argmax / decode
+     |
+     v
+   output
+
+   Five steps you write and can get wrong,
+   versus one you cannot.
+</pre>
+    </div>
+
+    <div class="codeblock">
+      <div class="codehead"><span>Sentiment in three lines — FinBERT on financial text</span><button class="copy">Copy</button></div>
+<pre class="code"><span class="c-kw">from</span> transformers <span class="c-kw">import</span> pipeline
+
+clf = pipeline(<span class="c-str">"text-classification"</span>, model=<span class="c-str">"ProsusAI/finbert"</span>)
+
+<span class="c-fn">print</span>(clf(<span class="c-str">"Tesla stock surges after record-breaking quarterly earnings"</span>))
+<span class="c-com"># [{'label': 'positive', 'score': 0.94}]</span>
+
+<span class="c-fn">print</span>(clf(<span class="c-str">"Microsoft is scheduled to release its earnings report next week"</span>))
+<span class="c-com"># [{'label': 'neutral', 'score': 0.88}]  &lt;- correctly NOT positive</span></pre>
+    </div>
+
+    <div class="note good">
+      <span class="lbl m">Why the neutral result is the interesting one</span>
+      <p>A naive keyword classifier sees "earnings report" and guesses positive. FinBERT correctly identifies a scheduling announcement as carrying no sentiment. <strong>That distinction — between an event and a judgement about an event — is exactly what domain fine-tuning buys you</strong>, and it's why a 110M-parameter specialist can beat a general-purpose giant on a narrow task while costing a thousandth as much to run.</p>
+    </div>
+
+    <p>Other task strings worth knowing: <code>text-generation</code>, <code>summarization</code>, <code>translation</code>, <code>question-answering</code>, <code>zero-shot-classification</code>, <code>image-classification</code>, <code>automatic-speech-recognition</code>.</p>
+
+    <details class="recall">
+      <summary>When should you stop using <code>pipeline()</code> and drop a level?</summary>
+      <div class="ans">
+        <p>When you need control over something it abstracts away: quantization config at load time, custom device placement, batching strategy, access to logits or attention weights, streaming output token by token, or reusing one loaded model across several different tasks without loading it twice.</p>
+        <p>Note the useful middle path this module actually uses: load the tokenizer and model yourself with full control, <em>then</em> wrap them in a pipeline. You get the configuration you need and the convenience you want.</p>
+      </div>
+    </details>
+
+    <details class="recall think">
+      <summary>Abstractions that hide five steps also hide five failure modes. Which ones does <code>pipeline()</code> hide?</summary>
+      <div class="ans">
+        <p><strong>Silent truncation.</strong> Input longer than the model's window gets cut, usually without a loud error. Your model answers confidently about a document whose second half it never saw.</p>
+        <p><strong>Default model selection.</strong> <code>pipeline("sentiment-analysis")</code> with no model argument silently picks a small English default — fine in a tutorial, wrong the moment your text is Hindi or financial.</p>
+        <p><strong>Label semantics.</strong> "POSITIVE"/"LABEL_1"/"positive" vary by model; code that string-matches one breaks on another.</p>
+        <p><strong>Device placement and dtype</strong>, chosen for you — which is how you end up running on CPU without noticing.</p>
+        <p>The general principle: <strong>convenience abstractions make the happy path shorter and the failure path more mysterious.</strong> Use them, but know exactly what you'd have written by hand.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s8">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">08</span><h2>AutoTokenizer — the model's private language</h2></div>
+
+    <p>Models don't read text. They read integers. The tokenizer is the dictionary that converts between the two — and <strong>every model family has its own dictionary.</strong></p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 8 · Same sentence, two tokenizers, two different languages</div>
+<pre>
+   TEXT:  "AI is transforming industries and the future of work."
+
+   BERT (WordPiece, uncased)          GPT-2 (byte-level BPE)
+   -----------------------------      ---------------------------
+   lowercases everything              PRESERVES case
+   ['ai', 'is', 'transforming',       ['AI', 'Ġis', 'Ġtransforming',
+    'industries', 'and', 'the',        'Ġindustries', 'Ġand', 'Ġthe',
+    'future', 'of', 'work', '.']       'Ġfuture', 'Ġof', 'Ġwork', '.']
+                                              ^
+   IDs: [9932, 2003, 17903, ...]      the Ġ IS the leading space
+                                      IDs: [20185, 318, 25449, ...]
+
+   THE SAME WORDS -> COMPLETELY DIFFERENT NUMBERS
+
+   +---------------------------------------------------------------+
+   |  Feed BERT's IDs to a GPT model and you get no error at all.   |
+   |  ID 9932 is valid in both vocabularies - it just means         |
+   |  something entirely different. You get FLUENT NONSENSE.        |
+   +---------------------------------------------------------------+
+</pre>
+    </div>
+
+    <div class="codeblock">
+      <div class="codehead"><span>Inspect any tokenizer in four lines</span><button class="copy">Copy</button></div>
+<pre class="code"><span class="c-kw">from</span> transformers <span class="c-kw">import</span> AutoTokenizer
+
+tok = AutoTokenizer.from_pretrained(<span class="c-str">"gpt2"</span>)
+text = <span class="c-str">"AI is transforming industries and the future of work."</span>
+
+<span class="c-fn">print</span>(tok.tokenize(text))              <span class="c-com"># human-readable pieces</span>
+<span class="c-fn">print</span>(tok(text)[<span class="c-str">"input_ids"</span>])          <span class="c-com"># what the model actually sees</span>
+<span class="c-fn">print</span>(<span class="c-fn">len</span>(tok(text)[<span class="c-str">"input_ids"</span>]))     <span class="c-com"># your billing unit / context spend</span></pre>
+    </div>
+
+    <div class="note trap">
+      <span class="lbl r">The rule you must not break</span>
+      <p><strong>The tokenizer must come from the same checkpoint as the model.</strong> Always <code>AutoTokenizer.from_pretrained(model_id)</code> with the <em>identical</em> ID you passed to the model. Mismatching them doesn't crash — it silently produces garbage, which is far worse than crashing, because it looks like the model is just bad.</p>
+    </div>
+
+    <h3>Why tokenization is a business concern, not a detail</h3>
+    <ul class="tight">
+      <li><strong>It's your billing unit.</strong> API pricing and context limits are in tokens, not words.</li>
+      <li><strong>It's unfair across languages.</strong> Most tokenizers were fitted on English-heavy corpora. The same sentence in Hindi, Tamil or Arabic often costs 2–3× more tokens than in English — meaning higher cost, and less content fitting in the same window. If you're building for Indian users, measure this before you size anything.</li>
+      <li><strong>It explains "dumb" failures.</strong> Character-counting and spelling tasks fail because the model never sees characters. Arithmetic is shaky partly because numbers split into arbitrary chunks.</li>
+      <li><strong>It bounds retrieval design.</strong> Chunk sizes for RAG are token budgets, so you need the tokenizer to plan them honestly.</li>
+    </ul>
+
+    <div class="linkrow">
+      <a href="https://platform.openai.com/tokenizer" target="_blank" rel="noopener">OpenAI tokenizer demo</a>
+      <a href="https://tiktokenizer.vercel.app" target="_blank" rel="noopener">Tiktokenizer (compare models)</a>
+      <a href="https://huggingface.co/docs/transformers" target="_blank" rel="noopener">Transformers docs</a>
+    </div>
+
+    <details class="recall">
+      <summary>Why does mismatching a tokenizer produce fluent nonsense rather than an error?</summary>
+      <div class="ans">
+        <p>Because the model receives a perfectly valid sequence of integers. It has no way to know those integers were produced by a different dictionary — they're all inside its vocabulary range, so nothing is out of bounds. It does exactly what it always does: predicts a plausible continuation of the token sequence it was given.</p>
+        <p>This is a general and important category of bug: <strong>a type error that the type system can't see.</strong> Both sides agree the payload is "a list of ints"; they disagree on what the ints mean. The same shape hides the same class of bug in currency codes, unit systems and enum mappings.</p>
+      </div>
+    </details>
+
+    <details class="recall think">
+      <summary>Your Hindi-language support bot costs 2.5× more per conversation than the English one, on the same model. Explain it to your finance team, then fix it.</summary>
+      <div class="ans">
+        <p><strong>The explanation:</strong> billing is per token, and tokenizers are fitted to their training corpus. A vocabulary learned mostly from English represents common English words as single tokens but shatters Devanagari into many small pieces. Same meaning, more tokens, more cost — and less conversation fitting in the context window before truncation.</p>
+        <p><strong>The fixes, in order:</strong> pick a model whose tokenizer was trained multilingually (several Qwen and Gemma builds handle Indic scripts far more efficiently); measure tokens-per-message empirically across your actual traffic rather than assuming; shorten system prompts, which you pay for on every single turn; and consider summarising conversation history rather than resending it.</p>
+        <p>The wider point for anyone building for Indian users: <strong>tokenizer efficiency is a first-class model selection criterion here, and it never appears on a leaderboard.</strong></p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s9">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">09</span><h2>AutoModelForCausalLM — loading the brain</h2></div>
+
+    <p><strong>Causal</strong> means left-to-right: the model predicts the next token given everything before it, and can never look ahead. That's the architecture behind every generative chat model.</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 9 · Causal generation is a loop, not a function</div>
+<pre>
+   prompt: "The capital of France is"
+              |
+              v
+   +----------------------------+
+   | forward pass through model |
+   +----------------------------+
+              |
+              v   next-token probabilities
+        Paris 0.91   the 0.03   a 0.02  ...
+              |
+              v   pick one (temperature / top_p decide how)
+   "The capital of France is Paris"
+              |
+              +--------> feed the WHOLE thing back in
+                         and predict the next token again
+                         ... until max_new_tokens or a stop token
+
+   Consequences that follow directly from this loop:
+     * generation is inherently SEQUENTIAL -> can't parallelise a
+       single response, which is why latency scales with output length
+     * the model never revises. A wrong third token is now part of
+       the "evidence" for token four. Errors compound forwards.
+     * the KV cache exists so you don't recompute the whole prefix
+       every step - that's the memory cost from section 06
+</pre>
+    </div>
+
+    <div class="codeblock">
+      <div class="codehead"><span>The three-step load</span><button class="copy">Copy</button></div>
+<pre class="code"><span class="c-kw">from</span> transformers <span class="c-kw">import</span> AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+<span class="c-kw">import</span> torch
+
+<span class="c-com"># 1. choose ONE id and reuse it everywhere</span>
+model_id = <span class="c-str">"microsoft/Phi-3-mini-4k-instruct"</span>
+
+<span class="c-com"># 2. tokenizer — must match the model exactly</span>
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+<span class="c-com"># 3. the weights</span>
+bnb = BitsAndBytesConfig(load_in_4bit=<span class="c-kw">True</span>,
+                         bnb_4bit_compute_dtype=torch.float16)
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    quantization_config=bnb,   <span class="c-com"># fit it in the GPU you actually have</span>
+    device_map=<span class="c-str">"auto"</span>,        <span class="c-com"># let accelerate place the layers</span>
+    <span class="c-com"># trust_remote_code=True,  &lt;- read the warning below first</span>
+)</pre>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Argument</th><th>What it does</th><th>What to watch</th></tr></thead>
+        <tbody>
+          <tr><td class="n">torch_dtype / compute_dtype</td><td>Numeric format for the maths</td><td>fp16 on older GPUs, bf16 on newer ones (wider range, fewer overflow surprises)</td></tr>
+          <tr><td class="n">quantization_config</td><td>Compress weights at load time</td><td>Needs bitsandbytes installed and reasonably current — a very common first error</td></tr>
+          <tr><td class="n">device_map="auto"</td><td>Accelerate spreads layers across available devices</td><td>Can silently offload to CPU or disk when VRAM is short. Result: it "works" but is 50× slower. Check the device map</td></tr>
+          <tr><td class="n">trust_remote_code</td><td>Executes custom Python from the model repo</td><td>A security decision, not a convenience flag. See below</td></tr>
+          <tr><td class="n">revision</td><td>Pin a specific commit</td><td>Not in the tutorial, but essential for reproducibility in production</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note trap">
+      <span class="lbl r">trust_remote_code=True deserves a pause</span>
+      <p>It means: <em>download Python from this repository and execute it in my process.</em> Some genuinely new architectures need it, because the modelling code isn't in the installed library version yet. But the tutorial framing — "just set it to true, it's fine" — is exactly how supply-chain compromises happen.</p>
+      <p>The right posture: prefer models supported natively by your <code>transformers</code> version so the flag isn't needed. If it is needed, pin a specific <code>revision</code>, read the custom modelling file, and treat it as a dependency that goes through review — because that's what it is.</p>
+    </div>
+
+    <details class="recall">
+      <summary>Loading succeeded and the GPU is barely used, but generation takes 90 seconds per answer. Diagnose it.</summary>
+      <div class="ans">
+        <p><code>device_map="auto"</code> almost certainly offloaded part of the model to CPU or disk because it didn't fit in VRAM. Layers living in system RAM mean every forward pass shuffles weights across the PCIe bus, which is orders of magnitude slower than on-GPU memory.</p>
+        <p>Verify with <code>print(model.hf_device_map)</code>. If you see <code>cpu</code> or <code>disk</code> entries, fix the fit: quantize harder, choose a smaller model, or get a bigger card. <strong>"It loaded" and "it's on the GPU" are different claims</strong>, and only one of them is fast.</p>
+      </div>
+    </details>
+
+    <details class="recall arch">
+      <summary>Your security team asks whether downloading models from Hugging Face is different from installing a Python package. Answer them.</summary>
+      <div class="ans">
+        <p>It's the same category of risk with a larger and less inspectable payload. A pip package is code you can read; a model is gigabytes of opaque tensors <em>plus</em>, sometimes, code you can read.</p>
+        <p><strong>Comparable risks:</strong> arbitrary code execution on load (pickle-format checkpoints, <code>trust_remote_code</code>), typosquatted repositories, unpinned versions changing under you.</p>
+        <p><strong>Risks with no packaging analogue:</strong> the weights themselves can be backdoored — trained to behave normally except on a trigger phrase — and no static scan will find that. You cannot diff a tensor for intent.</p>
+        <p><strong>Therefore the controls are:</strong> safetensors only; pin revisions; mirror into an internal registry after scanning; treat any model touching a sensitive path as requiring behavioural evaluation, not just a file scan. And be honest that the last control is imperfect — which is itself an argument for preferring a small number of models from major labs over a long tail of community fine-tunes.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s10">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">10</span><h2>Generating text: the knobs that matter</h2></div>
+
+    <p>Two ways to run inference once you have a model and tokenizer. Both appear in the course; one is for understanding, one is for using.</p>
+
+    <div class="codeblock">
+      <div class="codehead"><span>Method 1 — manual, so you can see the machinery</span><button class="copy">Copy</button></div>
+<pre class="code">inputs  = tokenizer(prompt, return_tensors=<span class="c-str">"pt"</span>).to(model.device)
+outputs = model.generate(**inputs, max_new_tokens=<span class="c-num">500</span>)
+answer  = tokenizer.decode(outputs[<span class="c-num">0</span>], skip_special_tokens=<span class="c-kw">True</span>)</pre>
+    </div>
+
+    <div class="codeblock">
+      <div class="codehead"><span>Method 2 — wrap your own model in a pipeline (use this)</span><button class="copy">Copy</button></div>
+<pre class="code"><span class="c-kw">from</span> transformers <span class="c-kw">import</span> pipeline
+
+pipe = pipeline(
+    <span class="c-str">"text-generation"</span>,
+    model=model,              <span class="c-com"># the one YOU loaded and configured</span>
+    tokenizer=tokenizer,      <span class="c-com"># guaranteed matched</span>
+    torch_dtype=<span class="c-str">"auto"</span>,
+    device_map=<span class="c-str">"auto"</span>,
+)
+
+out = pipe(prompt, max_new_tokens=<span class="c-num">500</span>, do_sample=<span class="c-kw">True</span>,
+           temperature=<span class="c-num">0.2</span>, top_p=<span class="c-num">0.9</span>)
+<span class="c-fn">print</span>(out[<span class="c-num">0</span>][<span class="c-str">"generated_text"</span>])</pre>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Parameter</th><th>What it controls</th><th>Setting for document Q&amp;A</th></tr></thead>
+        <tbody>
+          <tr><td class="n">max_new_tokens</td><td>Length cap on the answer only (not the prompt)</td><td>300–500. Too low truncates mid-sentence; too high wastes time and VRAM</td></tr>
+          <tr><td class="n">do_sample</td><td>Random sampling on/off</td><td><code>False</code> for maximum determinism. The course uses <code>True</code> with low temperature</td></tr>
+          <tr><td class="n">temperature</td><td>Flattens or sharpens the probability distribution</td><td>0.1–0.2. You want the document's answer, not a creative one</td></tr>
+          <tr><td class="n">top_p</td><td>Nucleus sampling — consider only the top mass of probability</td><td>0.9. Cuts off the long tail of unlikely tokens</td></tr>
+          <tr><td class="n">repetition_penalty</td><td>Discourages loops</td><td>1.1 if the model starts repeating itself</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note good">
+      <span class="lbl m">The reasoning behind temperature 0.2 here</span>
+      <p>In Section 5 you wanted variety — a poem, a landing page, several plausible designs. Here you want <strong>the opposite</strong>: the answer that is actually in the document, reproducibly. High temperature in a grounded Q&amp;A system doesn't make it creative, it makes it <em>wrong more often</em> — and in a financial context, a confidently-worded invented number is the single most dangerous output your system can produce.</p>
+      <p>Match temperature to consequence: creative tasks tolerate variance, extraction tasks do not.</p>
+    </div>
+
+    <details class="recall">
+      <summary>Same prompt, same model, different answer each run. Is that a bug?</summary>
+      <div class="ans">
+        <p>Not by itself — it's <code>do_sample=True</code> doing exactly what it's told. Set <code>do_sample=False</code> (greedy decoding) and you get near-determinism for the same input.</p>
+        <p>But "near". Even greedy decoding can vary slightly across runs due to floating-point non-determinism in GPU kernels and batching effects. <strong>If your system requires byte-identical reproducibility — an audit trail, a regression test — you cannot get it from the model alone.</strong> You cache the output and audit the cache. That's a real architectural constraint people discover late.</p>
+      </div>
+    </details>
+
+    <details class="recall think">
+      <summary>Latency is proportional to output length, not input length. Why, and what does that imply for your UX?</summary>
+      <div class="ans">
+        <p>The prompt is processed in a single parallel forward pass (prefill), but every output token requires its own sequential pass. 500 output tokens means 500 round trips through the network, one after another, that cannot be parallelised.</p>
+        <p><strong>UX implications:</strong> stream tokens as they're produced, so perceived latency is time-to-first-token rather than total time. Ask for concise answers in the prompt — brevity is a latency optimisation, not just a style preference. And cap <code>max_new_tokens</code> to what you'll actually display; generating text nobody reads costs real seconds and real VRAM.</p>
+        <p>It also explains a counterintuitive result: feeding a much longer document often costs less added time than asking for a slightly longer answer.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ============ PART FOUR ============ -->
+<div class="part reveal">
+  <div class="wrap">
+    <div class="bar"><span class="tag">Part four</span><h2>The document Q&amp;A system</h2></div>
+    <p>Now the project: upload an earnings transcript, ask questions, get grounded answers. The code is short. The design decisions inside it are where the real learning is — including one that quietly defines the whole architecture.</p>
+  </div>
+</div>
+
+<section class="sec reveal" id="s11">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">11</span><h2>PDFs: extraction is lossy</h2></div>
+
+    <p>Reading a PDF with <code>pypdf</code> is four lines. Understanding what you lost in those four lines takes longer and matters more.</p>
+
+    <div class="codeblock">
+      <div class="codehead"><span>Extract text from every page</span><button class="copy">Copy</button></div>
+<pre class="code"><span class="c-kw">from</span> pypdf <span class="c-kw">import</span> PdfReader
+
+reader = PdfReader(<span class="c-str">"earnings_call.pdf"</span>)
+<span class="c-fn">print</span>(f<span class="c-str">"PDF has {len(reader.pages)} pages"</span>)
+
+pages = []
+<span class="c-kw">for</span> i, page <span class="c-kw">in</span> <span class="c-fn">enumerate</span>(reader.pages):
+    text = page.extract_text() <span class="c-kw">or</span> <span class="c-str">""</span>      <span class="c-com"># can return None on image pages</span>
+    pages.append(text)
+
+pdf_text = <span class="c-str">"\n\n"</span>.join(pages)
+<span class="c-fn">print</span>(f<span class="c-str">"extracted {len(pdf_text):,} characters"</span>)
+
+<span class="c-com"># sanity check BOTH ends — not just the start</span>
+<span class="c-fn">print</span>(pdf_text[:<span class="c-num">1000</span>])
+<span class="c-fn">print</span>(<span class="c-str">"..."</span>)
+<span class="c-fn">print</span>(pdf_text[-<span class="c-num">500</span>:])</pre>
+    </div>
+
+    <div class="ascii">
+      <div class="cap">Sketch 10 · What PDF extraction destroys</div>
+<pre>
+   WHAT YOU SEE                    WHAT extract_text() RETURNS
+   ------------------------        ---------------------------
+   +----------+ +----------+
+   | Column A | | Column B |  ->   "Revenue rose Costs also
+   | Revenue  | | Costs    |        rose 12% in the 8% in the
+   | rose 12% | | rose 8%  |        quarter quarter"
+   +----------+ +----------+        (columns interleaved!)
+
+   +------------------------+
+   | Q1     Q2     Q3       |  ->   "Q1 Q2 Q3 12.4 13.1 14.0"
+   | 12.4   13.1   14.0     |        (structure gone; which
+   +------------------------+         number belongs to which?)
+
+   [ scanned image of text ]   ->   ""  (empty. no OCR happened.)
+
+   THE RULE: a PDF is a description of MARKS ON A PAGE, not a
+   document with structure. Text extraction guesses reading order.
+   For tables and multi-column layouts, it guesses badly.
+</pre>
+    </div>
+
+    <div class="note trap">
+      <span class="lbl r">The failure that costs a week</span>
+      <p>A financial Q&amp;A system whose PDF extraction silently scrambles table columns will answer with <strong>real-looking numbers attached to the wrong labels</strong>. There is no error, no exception, no warning. The model faithfully reports what it was given, and it was given nonsense.</p>
+      <p>Which is why the sanity check above prints both the first 1,000 and the last 500 characters. Checking only the beginning is how you ship a pipeline that dropped the final eight pages.</p>
+    </div>
+
+    <h3>When pypdf isn't enough</h3>
+    <ul class="tight">
+      <li><strong>Scanned documents</strong> → you need OCR (Tesseract, or a vision model). <code>extract_text()</code> returns empty strings and you must detect that, not ignore it.</li>
+      <li><strong>Tables that matter</strong> → dedicated table extraction (camelot, pdfplumber) or a layout-aware model. Never trust flattened table text for figures.</li>
+      <li><strong>Complex layouts</strong> → layout-aware parsers that preserve reading order and hierarchy.</li>
+      <li><strong>Any of the above at scale</strong> → an ingestion pipeline with per-document quality checks, not a for-loop.</li>
+    </ul>
+
+    <div class="linkrow">
+      <a href="https://pypdf.readthedocs.io" target="_blank" rel="noopener">pypdf docs</a>
+    </div>
+
+    <details class="recall">
+      <summary>Write three automated checks your ingestion step should run on every extracted document.</summary>
+      <div class="ans">
+        <p><strong>1. Non-empty and plausible density.</strong> Characters-per-page below some floor almost certainly means a scanned or image-based page — flag for OCR rather than passing an empty string downstream.</p>
+        <p><strong>2. Page-count reconciliation.</strong> Number of extracted page-strings equals <code>len(reader.pages)</code>, and no page is silently empty in the middle of a run.</p>
+        <p><strong>3. Encoding and content sanity.</strong> Check for a reasonable ratio of alphabetic characters — a wall of replacement characters or ligature artefacts means the font mapping failed.</p>
+        <p>A fourth, if figures matter: verify that a known anchor string (a heading, a date, a total you expect) is present. Cheap, and it catches the scrambled-column case that the other three miss.</p>
+      </div>
+    </details>
+
+    <details class="recall arch">
+      <summary>Why is document ingestion, not the model, usually the biggest quality lever in a real RAG system?</summary>
+      <div class="ans">
+        <p>Because everything downstream is bounded by it. A frontier model reasoning over scrambled text produces confident wrong answers; a modest model reasoning over cleanly parsed, well-chunked text produces good ones. You cannot prompt your way out of corrupted input.</p>
+        <p>Teams consistently misallocate here — they spend weeks comparing models and an afternoon on the parser, then wonder why accuracy plateaus. <strong>In most document-AI projects the ranking of effort should be: ingestion quality &gt; chunking and retrieval &gt; prompt design &gt; model choice.</strong> The last one gets all the attention because it's the most fun and the easiest to have opinions about.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s12">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">12</span><h2>Chat templates and special tokens</h2></div>
+
+    <p>With OpenAI or Anthropic you pass <code>messages=[{"role": "user", ...}]</code> and the provider handles formatting. With open weights, <strong>you are the provider</strong>. The model was fine-tuned on a very specific text format, and you have to reproduce it exactly.</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 11 · Why special tokens exist</div>
+<pre>
+   The model only ever sees one flat stream of tokens. Special
+   tokens are the punctuation that tells it WHO IS SPEAKING:
+
+   &lt;|system|&gt;   here are your instructions        &lt;|end|&gt;
+   &lt;|user|&gt;     here is the human's question      &lt;|end|&gt;
+   &lt;|assistant|&gt;  &lt;-- and now it is YOUR TURN, generate from here
+
+   These strings were in the fine-tuning data millions of times.
+   They are not decoration - they are the <b>protocol</b>.
+
+   GET THEM WRONG AND:
+     * the model doesn't know where its turn starts
+     * it may answer, then keep going and invent the next
+       user question, and answer that too
+     * it may ignore the system instruction entirely
+     * quality drops in a way that looks like "this model is bad"
+</pre>
+    </div>
+
+    <h3>Every family speaks a different dialect</h3>
+    <p>Click through to see how the same conversation is encoded by different model families.</p>
+
+    <div class="tmpl">
+      <div class="tmpl-tabs" id="tmplTabs"></div>
+      <pre id="tmplOut"></pre>
+      <div class="foot" id="tmplNote"></div>
+    </div>
+
+    <div class="note good">
+      <span class="lbl m">Do not hand-write these — ask the tokenizer</span>
+      <p>Every instruct model on the Hub ships its own template inside the tokenizer. Use it, and switching models becomes a one-line change instead of a formatting rewrite.</p>
+    </div>
+
+    <div class="codeblock">
+      <div class="codehead"><span>The portable way — works across all model families</span><button class="copy">Copy</button></div>
+<pre class="code">messages = [
+    {<span class="c-str">"role"</span>: <span class="c-str">"system"</span>, <span class="c-str">"content"</span>: (
+        <span class="c-str">"You are an assistant answering questions about a document. "</span>
+        <span class="c-str">"Answer ONLY from the document text provided. If the answer is "</span>
+        <span class="c-str">"not in the document, reply exactly: "</span>
+        <span class="c-str">"'The document does not contain information on that topic.' "</span>
+        <span class="c-str">"Do not use prior knowledge.\n\n"</span>
+        f<span class="c-str">"DOCUMENT TEXT:\n{context}"</span>
+    )},
+    {<span class="c-str">"role"</span>: <span class="c-str">"user"</span>, <span class="c-str">"content"</span>: question},
+]
+
+prompt = tokenizer.apply_chat_template(
+    messages,
+    tokenize=<span class="c-kw">False</span>,
+    add_generation_prompt=<span class="c-kw">True</span>,   <span class="c-com"># appends the "your turn" marker</span>
+)
+
+<span class="c-com"># Now `prompt` is correctly formatted for WHICHEVER model you loaded.</span>
+out = pipe(prompt, max_new_tokens=<span class="c-num">400</span>, temperature=<span class="c-num">0.2</span>, top_p=<span class="c-num">0.9</span>)</pre>
+    </div>
+
+    <h3>The grounding instruction, dissected</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Clause</th><th>What it's defending against</th></tr></thead>
+        <tbody>
+          <tr><td class="n">"Answer ONLY from the document text"</td><td>The model happily answering from training data instead of your document</td></tr>
+          <tr><td class="n">"If not in the document, reply exactly: ..."</td><td>Gives it a licensed way to fail. Without an explicit escape hatch, models invent rather than decline</td></tr>
+          <tr><td class="n">A fixed refusal string</td><td>Lets your code detect "no answer" reliably instead of parsing prose</td></tr>
+          <tr><td class="n">"Do not use prior knowledge"</td><td>Blocks the subtlest failure: a correct-sounding answer that isn't in the source and therefore can't be cited</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note warn">
+      <span class="lbl">An instruction is a request, not a constraint</span>
+      <p>None of this is enforced. The model can and sometimes will answer from training data anyway, especially about famous companies whose earnings it has memorised. <strong>If groundedness matters, you must verify it in code</strong> — check that the answer's key claims appear in the retrieved context, and return citations so a human can check. Prompting reduces the failure rate; only verification detects it.</p>
+    </div>
+
+    <details class="recall">
+      <summary>Your model answers a question correctly, but the answer is nowhere in the uploaded document. Bug or feature?</summary>
+      <div class="ans">
+        <p>Bug — and a dangerous one, because correctness masks it. The system's contract is "answer from this document." An answer sourced from training data is unverifiable, uncitable, possibly outdated, and will be confidently wrong the day the document contradicts what the model memorised.</p>
+        <p>Worse, it makes your testing misleading. You test on Google's earnings call, the model already knows Google's numbers, everything looks excellent. Then you deploy on your own internal documents that the model has never seen, and accuracy falls off a cliff. <strong>Always include documents the model cannot have memorised in your evaluation set</strong> — ideally, ones with facts that contradict common knowledge.</p>
+      </div>
+    </details>
+
+    <details class="recall think">
+      <summary>Why does giving the model an explicit way to say "I don't know" improve accuracy more than telling it not to hallucinate?</summary>
+      <div class="ans">
+        <p>Because the model is fundamentally a next-token predictor optimised to produce a plausible continuation. "Don't hallucinate" is a negative instruction with no alternative behaviour attached — the model still has to emit something, and something plausible is exactly what hallucination is.</p>
+        <p>Giving it a specific, high-probability output for the not-found case ("The document does not contain information on that topic") supplies a concrete continuation that competes with invention. You've turned an abstract prohibition into a concrete choice between two available paths.</p>
+        <p>This generalises well beyond LLMs: <strong>specifying the desired fallback behaviour beats prohibiting the undesired one.</strong> Same reason error handling works better than "don't crash."</p>
+      </div>
+    </details>
+
+    <details class="recall arch">
+      <summary>You support four models behind a dropdown. Where does the chat-template logic belong in your codebase?</summary>
+      <div class="ans">
+        <p>Nowhere in your codebase — that's the point. Templates belong to the model, so <code>tokenizer.apply_chat_template()</code> is the abstraction boundary. Adding a fifth model becomes a config entry, not a code change.</p>
+        <p>If you hand-write templates instead, you've created a lookup table that must be updated for every new model, silently rots when a vendor revises their format, and produces degraded quality rather than a loud error when it's wrong. That's the worst failure signature possible: <strong>a config bug that manifests as "the model seems dumber than the benchmarks said."</strong></p>
+        <p>Generalisable rule: when a vendor ships metadata describing how to talk to their artefact, consume the metadata rather than re-encoding your interpretation of it.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s13">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">13</span><h2>The 6,000-character truncation — and the RAG-shaped hole</h2></div>
+
+    <p>Here is the most important line in the entire project, and the course passes over it in a sentence:</p>
+
+    <div class="codeblock">
+      <div class="codehead"><span>The line that defines the architecture</span><button class="copy">Copy</button></div>
+<pre class="code">MAX_CONTEXT_CHARS = <span class="c-num">6000</span>
+
+<span class="c-kw">if</span> <span class="c-fn">len</span>(document_text) &gt; MAX_CONTEXT_CHARS:
+    context = document_text[:MAX_CONTEXT_CHARS]   <span class="c-com"># &lt;-- the first 6,000 chars.</span>
+                                                 <span class="c-com">#     the other 58,000 are GONE.</span></pre>
+    </div>
+
+    <p>The transcript is ~64,000 characters. You are feeding the model <strong>the first 9% of the document</strong> and asking questions about all of it. The practice exercise even acknowledges this: "don't ask about things later in the document, because the model will say it doesn't know."</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 12 · Truncation vs retrieval — the fork in the road</div>
+<pre>
+   WHAT THIS PROJECT DOES (truncation)
+   ------------------------------------
+   [############################################]  64,000 chars
+   [#####]                                          send first 6,000
+    ^^^^^ 91% of the document is invisible.
+          Questions about page 12 are unanswerable BY DESIGN.
+
+   WHAT A REAL SYSTEM DOES (retrieval / RAG)
+   ------------------------------------------
+   [############################################]  64,000 chars
+     |                                                 |
+     v  1. CHUNK  (~500-1000 tokens, with overlap)
+   [##][##][##][##][##][##][##][##][##][##][##][##]
+     |
+     v  2. EMBED each chunk -> vector
+   [..][..][..][..][..][..][..][..][..][..][..][..]
+     |
+     v  3. store in a vector DB
+     |
+   question: "what did they say about cloud margins?"
+     |
+     v  4. embed the question, find nearest chunks
+   [  ][  ][##][  ][  ][##][  ][  ][  ][##][  ][  ]  <- top 3
+     |
+     v  5. send ONLY those chunks as context
+   +---------------------------------------------+
+   | system: answer only from this context        |
+   | context: [chunk 3][chunk 6][chunk 10]        |
+   | user: what did they say about cloud margins? |
+   +---------------------------------------------+
+     |
+     v  6. answer + CITATIONS back to source chunks
+
+   Same model. Same GPU. Entire document now answerable.
+   The difference is <b>architecture, not compute</b>.
+</pre>
+    </div>
+
+    <div class="note">
+      <span class="lbl b">Why the tutorial is still right to truncate</span>
+      <p>Adding embeddings, a vector store and a retrieval step would triple the length of the module and bury the lesson it's actually teaching — how to load and drive an open-weight model. Truncation is a legitimate <strong>teaching simplification</strong>.</p>
+      <p>The mistake is not making it. The mistake is <em>not noticing you made it</em>, and carrying the pattern into something real. Recognising that <code>[:6000]</code> is a placeholder for a retrieval system is the single most valuable thing to take from this section.</p>
+    </div>
+
+    <h3>Even without a vector database, you can do better</h3>
+    <ul class="tight">
+      <li><strong>Chunk and score by keyword overlap.</strong> Split into ~1,000-character chunks, rank them by term overlap with the question (BM25 is a short function), send the top 5. No embeddings, no new infrastructure, dramatically better coverage.</li>
+      <li><strong>Truncate in the middle, not the end.</strong> Documents front-load context and back-load conclusions; keeping the head and tail beats keeping only the head.</li>
+      <li><strong>Map-reduce for summaries.</strong> Summarise each chunk, then summarise the summaries. Slower, but it actually reads the whole document.</li>
+      <li><strong>Tell the user what you did.</strong> "Answering from pages 1–3 of 21" is honest. Silent truncation is not.</li>
+    </ul>
+
+    <details class="recall">
+      <summary>Why is truncating by <em>characters</em> rather than tokens a second, separate bug?</summary>
+      <div class="ans">
+        <p>Because the model's limit is in tokens, and the characters-to-tokens ratio varies by content and language. 6,000 characters of English prose is roughly 1,500 tokens; 6,000 characters of dense tables, code, or Devanagari can be two to three times that. You've set a limit in a unit that doesn't correspond to the constraint you're managing.</p>
+        <p>Consequence: your safety margin is illusory. It holds for the document you tested and silently blows through the context window on a different one — which then gets truncated again, invisibly, inside the tokenizer. <strong>Measure in the unit the system actually enforces.</strong></p>
+      </div>
+    </details>
+
+    <details class="recall arch">
+      <summary>Your team wants document Q&amp;A over 10,000 internal PDFs. Sketch the architecture, and name the parts this notebook doesn't have.</summary>
+      <div class="ans">
+        <p><strong>Ingestion:</strong> a pipeline that parses (with OCR fallback), validates quality, extracts metadata (source, page, date, access level), chunks with overlap, and is re-runnable when the parser improves.</p>
+        <p><strong>Indexing:</strong> an embedding model, a vector store, and — importantly — hybrid search, because pure semantic retrieval is poor at exact identifiers like invoice numbers and ticker symbols.</p>
+        <p><strong>Retrieval:</strong> top-k with a reranker, plus <em>permission filtering applied at query time</em>. This is the one most prototypes get catastrophically wrong: if retrieval ignores access control, your Q&amp;A bot becomes a data-exfiltration tool that cheerfully summarises documents the user was never allowed to open.</p>
+        <p><strong>Generation:</strong> the model, with mandatory citations back to chunk and page.</p>
+        <p><strong>Evaluation:</strong> a labelled question set with known answers, measuring retrieval hit-rate and answer faithfulness separately — because when quality drops you must know which half broke.</p>
+        <p><strong>Operations:</strong> incremental re-indexing, cost per query, latency budget, an audit log of who asked what and which documents were surfaced.</p>
+        <p>This notebook has the generation step and nothing else. That's not a criticism of the notebook — it's a map of the work.</p>
+      </div>
+    </details>
+
+    <details class="recall think">
+      <summary>RAG adds retrieval failure modes on top of generation failure modes. Name two, and say how you'd detect them.</summary>
+      <div class="ans">
+        <p><strong>Retrieval miss:</strong> the correct chunk exists but wasn't retrieved, so the model correctly says "not in the document" — a false negative that looks like polite, well-behaved output. Detect by measuring <em>retrieval recall</em> separately against a labelled set: for each question, is the gold chunk in the top-k? An answer-only metric will never surface this.</p>
+        <p><strong>Distractor retrieval:</strong> chunks that are semantically similar but factually about a different quarter, entity or year get retrieved, and the model dutifully answers from the wrong one. This is worse than a miss because the output is confident and specific. Detect by requiring citations and auditing whether the cited chunk actually supports the claim — which is exactly why citations are a correctness mechanism, not a UI nicety.</p>
+        <p>The general lesson: <strong>in a multi-stage pipeline, end-to-end metrics tell you that something is broken and never which thing.</strong> Instrument each stage.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s14">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">14</span><h2>Getting the answer back out</h2></div>
+
+    <p>Text generation returns the prompt <em>plus</em> the continuation. The course extracts the answer by finding the string <code>"Answer:"</code> and slicing after it. It works in the demo and it is fragile.</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 13 · Why string-slicing the output is brittle</div>
+<pre>
+   RAW OUTPUT
+   -----------------------------------------------------------
+   &lt;|system|&gt;You are an assistant...&lt;|end|&gt;
+   &lt;|user|&gt;What quarter does this cover?&lt;|end|&gt;
+   &lt;|assistant|&gt;Answer: Alphabet's Q1 2025 earnings call.&lt;|end|&gt;
+                ^^^^^^^                                  ^^^^^^^
+                slice after this                 and strip this
+
+   BREAKS WHEN:
+     * the model omits "Answer:"           -> find() returns -1
+                                              -> slice from index 6
+                                              -> you return the PROMPT
+     * the document itself contains "Answer:" earlier in the context
+     * you switch models and the special tokens change
+     * the model writes "**Answer:**" in markdown
+
+   THE ROBUST VERSION: don't parse. Ask the library to return only
+   the new tokens, and never include the prompt in the first place.
+</pre>
+    </div>
+
+    <div class="codeblock">
+      <div class="codehead"><span>Two safer approaches</span><button class="copy">Copy</button></div>
+<pre class="code"><span class="c-com"># Option A — let the pipeline return only what was generated</span>
+out = pipe(prompt, max_new_tokens=<span class="c-num">400</span>, return_full_text=<span class="c-kw">False</span>)
+answer = out[<span class="c-num">0</span>][<span class="c-str">"generated_text"</span>].strip()
+
+
+<span class="c-com"># Option B — slice by TOKEN COUNT, which cannot be confused by content</span>
+inputs  = tokenizer(prompt, return_tensors=<span class="c-str">"pt"</span>).to(model.device)
+outputs = model.generate(**inputs, max_new_tokens=<span class="c-num">400</span>)
+
+new_tokens = outputs[<span class="c-num">0</span>][inputs[<span class="c-str">"input_ids"</span>].shape[-<span class="c-num">1</span>]:]   <span class="c-com"># drop the prompt</span>
+answer = tokenizer.decode(new_tokens, skip_special_tokens=<span class="c-kw">True</span>).strip()
+
+
+<span class="c-com"># And ALWAYS defend the downstream code</span>
+<span class="c-kw">if</span> <span class="c-kw">not</span> answer:
+    answer = <span class="c-str">"The model returned an empty response."</span></pre>
+    </div>
+
+    <details class="recall think">
+      <summary>Both fixes replace string parsing with structural boundaries. Where else does that principle apply?</summary>
+      <div class="ans">
+        <p>Everywhere the boundary is knowable without inspecting content. Token-count slicing works because the library <em>knows</em> how many tokens went in — you don't have to infer it from the text. String matching guesses at a boundary that content can imitate.</p>
+        <p>Same shape as: parsing HTML with a parser rather than regex; splitting CSV with a reader that understands quoting rather than <code>split(",")</code>; using length-prefixed frames rather than delimiter-scanning in a network protocol. In every case the failure mode is identical and nasty — <strong>it works until the data contains the thing you're searching for</strong>, at which point it fails silently on exactly the inputs that matter most.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s15">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">15</span><h2>Gradio and hot-swapping models</h2></div>
+
+    <p>The final build wraps everything in a UI with a model dropdown. Selecting a different model unloads the current one and loads the new one — because 15GB of VRAM holds exactly one of these at a time.</p>
+
+    <div class="ascii">
+      <div class="cap">Sketch 14 · The app, and the memory dance underneath</div>
+<pre>
+   UI LAYER (Gradio)
+   +--------------------------------------------------+
+   |  # PDF Q&A Bot                                    |
+   |  [ dropdown: Phi-3 | Llama 3.2 | Gemma | Qwen ]   |--+
+   |  status: model loaded successfully                |  |
+   |  [ your question ...................... ]         |  |
+   |  [ Submit ]                                       |--|--+
+   |  answer: ......................................   |  |  |
+   +--------------------------------------------------+  |  |
+                                                          |  |
+   EVENTS                              on .change() ------+  |
+                                       on .click()  ---------+
+        |                                    |
+        v                                    v
+   load_llm_model(name)               handle_submit(question)
+        |                                    |
+        v                                    v
+   +----------------------+           answer_question_from_pdf(
+   | 1 same model? return |             pdf_text, question,
+   | 2 del pipe,model,tok |             CURRENT_PIPELINE)
+   | 3 gc.collect()       |
+   | 4 empty_cache()      |    <-- all three are REQUIRED.
+   | 5 load new tokenizer |        del alone frees the Python
+   | 6 load new model 4bit|        reference, NOT the VRAM.
+   | 7 build new pipeline |
+   | 8 set global state   |
+   +----------------------+
+</pre>
+    </div>
+
+    <div class="codeblock">
+      <div class="codehead"><span>The unload sequence — order matters</span><button class="copy">Copy</button></div>
+<pre class="code"><span class="c-kw">import</span> gc, torch
+
+CURRENT = {<span class="c-str">"id"</span>: <span class="c-kw">None</span>, <span class="c-str">"pipe"</span>: <span class="c-kw">None</span>, <span class="c-str">"model"</span>: <span class="c-kw">None</span>, <span class="c-str">"tok"</span>: <span class="c-kw">None</span>}
+
+<span class="c-kw">def</span> <span class="c-fn">load_llm_model</span>(display_name):
+    model_id = AVAILABLE_MODELS[display_name]
+    <span class="c-kw">if</span> model_id == CURRENT[<span class="c-str">"id"</span>]:
+        <span class="c-kw">return</span> f<span class="c-str">"{display_name} already loaded."</span>
+
+    <span class="c-com"># --- unload: all three steps, in this order ---</span>
+    <span class="c-kw">for</span> k <span class="c-kw">in</span> (<span class="c-str">"pipe"</span>, <span class="c-str">"model"</span>, <span class="c-str">"tok"</span>):
+        CURRENT[k] = <span class="c-kw">None</span>          <span class="c-com"># 1. drop Python references</span>
+    gc.collect()                     <span class="c-com"># 2. actually collect them</span>
+    torch.cuda.empty_cache()         <span class="c-com"># 3. return the VRAM to the driver</span>
+
+    <span class="c-com"># --- load the new one ---</span>
+    tok = AutoTokenizer.from_pretrained(model_id)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id, quantization_config=bnb, device_map=<span class="c-str">"auto"</span>)
+    pipe = pipeline(<span class="c-str">"text-generation"</span>, model=model, tokenizer=tok)
+
+    CURRENT.update(id=model_id, pipe=pipe, model=model, tok=tok)
+    <span class="c-kw">return</span> f<span class="c-str">"{display_name} loaded."</span></pre>
+    </div>
+
+    <div class="note warn">
+      <span class="lbl">Why <code>del</code> on its own does nothing</span>
+      <p>Python's <code>del</code> removes a name binding. The GPU memory is only released when the last reference is gone <em>and</em> the garbage collector runs <em>and</em> PyTorch's caching allocator returns the block. Miss any of the three and your "unloaded" model is still occupying VRAM — which is why the second model swap OOMs even though the first worked. This exact sequence is the fix.</p>
+    </div>
+
+    <div class="note trap">
+      <span class="lbl r">Also note: the dropdown label mapping is a real design choice</span>
+      <p>Mapping <code>"Llama 3.2 (3B)" → "meta-llama/Llama-3.2-3B-Instruct"</code> in a dictionary isn't cosmetic. It decouples the UI from the model registry, so swapping a checkpoint doesn't change what users see, and adding a model is a one-line config change. Small pattern, but it's the difference between a demo and something maintainable.</p>
+    </div>
+
+    <div class="linkrow">
+      <a href="https://www.gradio.app/docs" target="_blank" rel="noopener">Gradio docs</a>
+    </div>
+
+    <details class="recall">
+      <summary>Two users hit this Gradio app at once and one switches models. What happens?</summary>
+      <div class="ans">
+        <p>Chaos. <code>CURRENT</code> is process-global with no locking. User A's question can be answered by user B's model, or by a half-loaded one; worse, a swap triggered mid-generation frees memory a running forward pass is still using.</p>
+        <p>This isn't a Gradio flaw — it's an architecture that assumes a single user, made explicit. The fix isn't a mutex bolted on; it's recognising that <strong>model lifecycle and request handling belong in different layers</strong>. Real systems load models into dedicated long-lived workers and route requests to them; they never load a model in response to a UI event.</p>
+      </div>
+    </details>
+
+    <details class="recall arch">
+      <summary>Your demo works. Someone asks "can we put this in front of customers next month?" What do you say?</summary>
+      <div class="ans">
+        <p>Say yes to the idea and be precise about the gap. Missing pieces, roughly in order of how badly they bite:</p>
+        <p><strong>Concurrency</strong> — one global model, no queue, no locking. Two users break it.<br>
+        <strong>Cold starts</strong> — a model swap takes minutes and downloads gigabytes. No customer waits.<br>
+        <strong>Coverage</strong> — 6,000 characters of a 64,000-character document. Retrieval is not optional.<br>
+        <strong>Groundedness</strong> — no citations, no verification that answers came from the source.<br>
+        <strong>Access control</strong> — no notion of who may see which document.<br>
+        <strong>Evaluation</strong> — no labelled question set, so no way to detect regression when anything changes.<br>
+        <strong>Observability</strong> — no logging of questions, retrieved context, latency or cost per query.<br>
+        <strong>Failure behaviour</strong> — an OOM takes down the whole app for everyone.</p>
+        <p>The framing that lands with leadership: <strong>the notebook proved feasibility, which was the risky unknown. What remains is engineering with known solutions and a knowable cost.</strong> That's a good position to be in — just not a one-month one.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s16">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">16</span><h2>Notebook versus production</h2></div>
+
+    <p>A summary table you can hand to anyone who asks "how far is this from real?"</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Concern</th><th>This notebook</th><th>Production</th></tr></thead>
+        <tbody>
+          <tr><td class="n">Serving</td><td><code>pipeline()</code> in a Gradio callback</td><td>vLLM / TGI with continuous batching and paged attention</td></tr>
+          <tr><td class="n">Concurrency</td><td>One user, global state</td><td>Request queue, admission control, horizontal workers</td></tr>
+          <tr><td class="n">Model loading</td><td>On UI event, minutes</td><td>At worker startup, once, with health checks before traffic</td></tr>
+          <tr><td class="n">Context</td><td>First 6,000 characters</td><td>Chunk → embed → retrieve → rerank, with citations</td></tr>
+          <tr><td class="n">Model artefacts</td><td>Pulled from the internet at runtime</td><td>Scanned, pinned by revision, mirrored to an internal registry</td></tr>
+          <tr><td class="n">Quality</td><td>"Looks right to me"</td><td>Labelled eval set; retrieval recall and answer faithfulness tracked separately</td></tr>
+          <tr><td class="n">Cost</td><td>Free Colab GPU</td><td>Cost per thousand queries, tracked and budgeted</td></tr>
+          <tr><td class="n">Security</td><td><code>trust_remote_code=True</code></td><td>safetensors only; remote code reviewed or avoided</td></tr>
+          <tr><td class="n">Access control</td><td>None</td><td>Permission filtering applied inside retrieval, not after</td></tr>
+          <tr><td class="n">Failure</td><td>OOM kills the app</td><td>Graceful degradation, input limits, circuit breakers, fallback model</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note good">
+      <span class="lbl m">How to use this table well</span>
+      <p>Not as a criticism of the course — as a checklist. Every row is a real decision someone has to make, and knowing the row exists is most of the value. <strong>The engineers who ship AI systems successfully aren't the ones who know the most about models; they're the ones who know which of these rows they've quietly skipped.</strong></p>
+    </div>
+
+    <div class="linkrow">
+      <a href="https://docs.vllm.ai" target="_blank" rel="noopener">vLLM docs</a>
+      <a href="https://huggingface.co/docs/text-generation-inference" target="_blank" rel="noopener">Text Generation Inference</a>
+    </div>
+
+    <details class="recall arch">
+      <summary>Pick the single row above that most often kills these projects after launch. Defend your choice.</summary>
+      <div class="ans">
+        <p>Reasonable people differ, but the strongest case is <strong>evaluation</strong>. Without a labelled set you cannot tell whether a change helped. Every subsequent decision — new model, new chunk size, new prompt, quantization level — becomes a matter of opinion and vibes, and the system drifts. Teams then can't answer the one question leadership always asks: "is it getting better?"</p>
+        <p>The runner-up is <strong>access control in retrieval</strong>, because it fails differently: it doesn't degrade quality, it creates an incident. A Q&amp;A system that retrieves across documents a user can't open is a data breach with a friendly chat interface — and it will pass every quality test you wrote.</p>
+        <p>Worth noticing the pattern: the rows that kill projects are the ones with <em>no visible symptom during development</em>. Concurrency and cold starts announce themselves loudly. Evaluation and access control stay silent until they're expensive.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="sec reveal" id="s17">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">17</span><h2>The whole thing, in one script</h2></div>
+
+    <p>The tutorial's project with the improvements from these notes folded in: chat templates instead of hand-written tokens, keyword-ranked chunks instead of blind truncation, token-based extraction instead of string slicing.</p>
+
+    <div class="codeblock">
+      <div class="codehead"><span>pdf_qa.py — runnable end to end</span><button class="copy">Copy</button></div>
+<pre class="code"><span class="c-str">"""Open-weight document Q&A. Colab: pip install -q transformers accelerate
+bitsandbytes torch pypdf gradio"""</span>
+<span class="c-kw">import</span> gc, re, torch, gradio <span class="c-kw">as</span> gr
+<span class="c-kw">from</span> pypdf <span class="c-kw">import</span> PdfReader
+<span class="c-kw">from</span> transformers <span class="c-kw">import</span> (AutoTokenizer, AutoModelForCausalLM,
+                          BitsAndBytesConfig, pipeline)
+
+<span class="c-com"># ---------- 1. model registry: UI label -> hub id -----------------</span>
+MODELS = {
+    <span class="c-str">"Phi-3 mini (3.8B)"</span>:  <span class="c-str">"microsoft/Phi-3-mini-4k-instruct"</span>,
+    <span class="c-str">"Llama 3.2 (3B)"</span>:     <span class="c-str">"meta-llama/Llama-3.2-3B-Instruct"</span>,
+    <span class="c-str">"Qwen 2.5 (3B)"</span>:      <span class="c-str">"Qwen/Qwen2.5-3B-Instruct"</span>,
+    <span class="c-str">"Gemma 3 (4B)"</span>:       <span class="c-str">"google/gemma-3-4b-it"</span>,
+}
+BNB = BitsAndBytesConfig(load_in_4bit=<span class="c-kw">True</span>,
+                         bnb_4bit_quant_type=<span class="c-str">"nf4"</span>,
+                         bnb_4bit_compute_dtype=torch.float16,
+                         bnb_4bit_use_double_quant=<span class="c-kw">True</span>)
+CUR = {<span class="c-str">"id"</span>: <span class="c-kw">None</span>, <span class="c-str">"pipe"</span>: <span class="c-kw">None</span>, <span class="c-str">"model"</span>: <span class="c-kw">None</span>, <span class="c-str">"tok"</span>: <span class="c-kw">None</span>}
+
+<span class="c-com"># ---------- 2. PDF ingestion with a real sanity check -------------</span>
+<span class="c-kw">def</span> <span class="c-fn">read_pdf</span>(path):
+    reader = PdfReader(path)
+    pages = [(p.extract_text() <span class="c-kw">or</span> <span class="c-str">""</span>) <span class="c-kw">for</span> p <span class="c-kw">in</span> reader.pages]
+    empty = [i <span class="c-kw">for</span> i, t <span class="c-kw">in</span> <span class="c-fn">enumerate</span>(pages) <span class="c-kw">if</span> <span class="c-fn">len</span>(t.strip()) &lt; <span class="c-num">50</span>]
+    <span class="c-kw">if</span> empty:
+        <span class="c-fn">print</span>(f<span class="c-str">"WARNING: pages {empty} look empty — scanned? needs OCR"</span>)
+    <span class="c-kw">return</span> pages
+
+<span class="c-com"># ---------- 3. retrieval-lite: rank chunks, don't truncate --------</span>
+<span class="c-kw">def</span> <span class="c-fn">best_chunks</span>(pages, question, size=<span class="c-num">1200</span>, overlap=<span class="c-num">200</span>, k=<span class="c-num">5</span>):
+    <span class="c-str">"""Keyword overlap beats [:6000] and needs no vector DB."""</span>
+    chunks = []
+    <span class="c-kw">for</span> pno, text <span class="c-kw">in</span> <span class="c-fn">enumerate</span>(pages, start=<span class="c-num">1</span>):
+        <span class="c-kw">for</span> i <span class="c-kw">in</span> <span class="c-fn">range</span>(<span class="c-num">0</span>, <span class="c-fn">len</span>(text), size - overlap):
+            body = text[i:i + size].strip()
+            <span class="c-kw">if</span> body:
+                chunks.append((pno, body))
+
+    q = <span class="c-fn">set</span>(re.findall(<span class="c-str">r"\w+"</span>, question.lower())) - {
+        <span class="c-str">"the"</span>, <span class="c-str">"a"</span>, <span class="c-str">"of"</span>, <span class="c-str">"is"</span>, <span class="c-str">"in"</span>, <span class="c-str">"what"</span>, <span class="c-str">"does"</span>, <span class="c-str">"and"</span>}
+    scored = <span class="c-fn">sorted</span>(chunks,
+        key=<span class="c-kw">lambda</span> c: <span class="c-fn">len</span>(q & <span class="c-fn">set</span>(re.findall(<span class="c-str">r"\w+"</span>, c[<span class="c-num">1</span>].lower()))),
+        reverse=<span class="c-kw">True</span>)[:k]
+    scored.sort(key=<span class="c-kw">lambda</span> c: c[<span class="c-num">0</span>])                <span class="c-com"># restore doc order</span>
+    <span class="c-kw">return</span> <span class="c-str">"\n\n"</span>.join(f<span class="c-str">"[page {p}]\n{t}"</span> <span class="c-kw">for</span> p, t <span class="c-kw">in</span> scored)
+
+<span class="c-com"># ---------- 4. model lifecycle ------------------------------------</span>
+<span class="c-kw">def</span> <span class="c-fn">load_model</span>(label):
+    mid = MODELS[label]
+    <span class="c-kw">if</span> mid == CUR[<span class="c-str">"id"</span>]:
+        <span class="c-kw">return</span> f<span class="c-str">"{label} already loaded."</span>
+    <span class="c-kw">for</span> key <span class="c-kw">in</span> (<span class="c-str">"pipe"</span>, <span class="c-str">"model"</span>, <span class="c-str">"tok"</span>):
+        CUR[key] = <span class="c-kw">None</span>
+    gc.collect(); torch.cuda.empty_cache()
+
+    tok = AutoTokenizer.from_pretrained(mid)
+    mdl = AutoModelForCausalLM.from_pretrained(
+        mid, quantization_config=BNB, device_map=<span class="c-str">"auto"</span>)
+    CUR.update(id=mid, tok=tok, model=mdl,
+               pipe=pipeline(<span class="c-str">"text-generation"</span>, model=mdl, tokenizer=tok))
+    <span class="c-kw">return</span> f<span class="c-str">"{label} loaded."</span>
+
+<span class="c-com"># ---------- 5. the grounded answer --------------------------------</span>
+SYSTEM = (<span class="c-str">"You answer questions about a document. Use ONLY the document "</span>
+          <span class="c-str">"text below. If the answer is not there, reply exactly: "</span>
+          <span class="c-str">"'The document does not contain information on that topic.' "</span>
+          <span class="c-str">"Cite the page number you used. Do not use prior knowledge."</span>)
+
+<span class="c-kw">def</span> <span class="c-fn">answer</span>(pages, question):
+    <span class="c-kw">if</span> CUR[<span class="c-str">"pipe"</span>] <span class="c-kw">is</span> <span class="c-kw">None</span>:
+        <span class="c-kw">return</span> <span class="c-str">"Load a model first."</span>
+    context = <span class="c-fn">best_chunks</span>(pages, question)
+    messages = [
+        {<span class="c-str">"role"</span>: <span class="c-str">"system"</span>, <span class="c-str">"content"</span>: f<span class="c-str">"{SYSTEM}\n\nDOCUMENT:\n{context}"</span>},
+        {<span class="c-str">"role"</span>: <span class="c-str">"user"</span>,   <span class="c-str">"content"</span>: question},
+    ]
+    prompt = CUR[<span class="c-str">"tok"</span>].apply_chat_template(
+        messages, tokenize=<span class="c-kw">False</span>, add_generation_prompt=<span class="c-kw">True</span>)
+    out = CUR[<span class="c-str">"pipe"</span>](prompt, max_new_tokens=<span class="c-num">400</span>, do_sample=<span class="c-kw">True</span>,
+                       temperature=<span class="c-num">0.2</span>, top_p=<span class="c-num">0.9</span>,
+                       return_full_text=<span class="c-kw">False</span>)          <span class="c-com"># no string slicing</span>
+    <span class="c-kw">return</span> out[<span class="c-num">0</span>][<span class="c-str">"generated_text"</span>].strip() <span class="c-kw">or</span> <span class="c-str">"(empty response)"</span>
+
+<span class="c-com"># ---------- 6. UI --------------------------------------------------</span>
+PAGES = <span class="c-fn">read_pdf</span>(<span class="c-str">"earnings_call.pdf"</span>)
+
+<span class="c-kw">with</span> gr.Blocks() <span class="c-kw">as</span> demo:
+    gr.Markdown(<span class="c-str">"# PDF Q&A — open-weight models"</span>)
+    pick   = gr.Dropdown(<span class="c-fn">list</span>(MODELS), value=<span class="c-fn">list</span>(MODELS)[<span class="c-num">0</span>],
+                         label=<span class="c-str">"Model"</span>)
+    status = gr.Textbox(label=<span class="c-str">"Status"</span>, interactive=<span class="c-kw">False</span>)
+    q      = gr.Textbox(label=<span class="c-str">"Your question"</span>)
+    btn    = gr.Button(<span class="c-str">"Ask"</span>, variant=<span class="c-str">"primary"</span>)
+    ans    = gr.Textbox(label=<span class="c-str">"Answer"</span>, lines=<span class="c-num">8</span>)
+
+    pick.change(load_model, inputs=pick, outputs=status)
+    btn.click(<span class="c-kw">lambda</span> question: <span class="c-fn">answer</span>(PAGES, question),
+              inputs=q, outputs=ans)
+
+demo.launch(debug=<span class="c-kw">True</span>)</pre>
+    </div>
+
+    <div class="note">
+      <span class="lbl b">Four changes from the tutorial, and why</span>
+      <p><strong>1.</strong> <code>apply_chat_template</code> instead of hand-written <code>&lt;|system|&gt;</code> tokens — so all four models work without per-model formatting code.<br>
+      <strong>2.</strong> <code>best_chunks</code> instead of <code>[:6000]</code> — the whole document becomes answerable with no new infrastructure.<br>
+      <strong>3.</strong> <code>return_full_text=False</code> instead of splitting on <code>"Answer:"</code> — a structural boundary rather than a content guess.<br>
+      <strong>4.</strong> Page numbers in the context and a citation instruction — so answers can be checked.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec reveal" id="tasks">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">✓</span><h2>Every practice task, in one list</h2></div>
+    <p>All the exercises from the module plus a few worth adding. State resets on reload — use it as a working session tracker.</p>
+    <div class="tasks" id="taskList"></div>
+    <div class="taskbar">
+      <span>Done <b id="taskDone">0</b> of <b id="taskTotal">0</b></span>
+      <button class="btn" id="taskReset">Clear all</button>
+    </div>
+  </div>
+</section>
+
+<section class="sec reveal" id="quiz">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">?</span><h2>Check yourself — 14 questions</h2></div>
+    <p>Answer before scrolling back. Retrieval is what moves this into long-term memory.</p>
+    <div class="quiz" id="quizBox"></div>
+    <div class="score" id="scoreBox">
+      <span>Answered <b id="answered">0</b> / 14 · Correct <b id="correct">0</b></span>
+      <button class="btn" id="resetQuiz">Reset</button>
+    </div>
+  </div>
+</section>
+
+<section class="sec reveal" id="cheat">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">★</span><h2>One-page cheat sheet</h2></div>
+    <p>If you keep one screenshot from these notes, make it this.</p>
+
+    <div class="ascii">
+      <div class="cap">The whole module on one card</div>
+<pre>
+  ================================================================
+   THE MEMORY FORMULA  (memorise this one)
+  ================================================================
+   VRAM for weights (GB)  ~=  params(B)  x  bytes-per-weight
+     fp32 = 4      fp16/bf16 = 2      int8 = 1      int4 = 0.5
+
+     7B fp16 = 14 GB  -> will NOT fit a 15GB T4
+     7B int4 = 3.5 GB -> fits easily
+
+   ...then add KV cache, which grows with CONTEXT x BATCH.
+   Weights are the floor. Your ceiling is set by your WORST request.
+
+  ================================================================
+   THREE LEVELS OF CONTROL
+  ================================================================
+   pipeline("task")           easiest. hides truncation, defaults,
+                              label naming, device placement
+   AutoTokenizer +            the working level: you control
+   AutoModelForCausalLM       quantization + placement, then wrap
+     -> then pipeline(...)    them in a pipeline
+   raw generate()             when you need logits or streaming
+
+  ================================================================
+   THE THREE-STEP LOAD
+  ================================================================
+   model_id  = "org/Model-size-context-instruct"
+   tokenizer = AutoTokenizer.from_pretrained(<u>same id</u>)
+   model     = AutoModelForCausalLM.from_pretrained(
+                   model_id, quantization_config=bnb,
+                   device_map="auto")
+
+   NEVER mix a tokenizer from one model with weights from another.
+   It does not error. It produces fluent nonsense.
+
+  ================================================================
+   PROMPTING AN OPEN MODEL
+  ================================================================
+   messages = [{"role":"system",...},{"role":"user",...}]
+   prompt = tokenizer.apply_chat_template(
+              messages, tokenize=False, add_generation_prompt=True)
+
+   Do NOT hand-write &lt;|system|&gt; / &lt;|im_start|&gt; / &lt;start_of_turn&gt;.
+   Every family differs; the tokenizer already knows.
+
+   Grounding recipe: "answer ONLY from the document; if it isn't
+   there say &lt;exact string&gt;; cite the page; no prior knowledge."
+   -> give the model a licensed way to FAIL, or it will invent.
+
+  ================================================================
+   DECODING SETTINGS
+  ================================================================
+   document Q&A ->  temperature 0.1-0.2, top_p 0.9, max_new 300-500
+   creative     ->  temperature 0.7-1.0
+   latency scales with OUTPUT length, not input length -> stream
+
+  ================================================================
+   THE BIG ARCHITECTURAL TRUTH
+  ================================================================
+   context = document[:6000]      <-- this is not a system.
+                                      it is a placeholder for
+                                      CHUNK -> EMBED -> RETRIEVE
+                                      -> RERANK -> CITE
+
+   In document AI, effort should go:
+     ingestion quality > retrieval > prompt > model choice
+   Most teams do it exactly backwards.
+
+  ================================================================
+   GOTCHAS
+  ================================================================
+   * del alone does NOT free VRAM. del + gc.collect()
+     + torch.cuda.empty_cache() - all three, in that order
+   * device_map="auto" can silently offload to CPU -> 50x slower.
+     check model.hf_device_map
+   * base vs instruct: base models do not follow instructions
+   * trust_remote_code=True runs their Python on your machine
+   * pypdf silently returns "" for scanned pages, and scrambles
+     multi-column layouts and tables
+   * truncating by CHARACTERS when the limit is in TOKENS
+   * Colab idles out and wipes everything. That is not a bug,
+     it is a reminder that a notebook is not infrastructure.
+</pre>
+    </div>
+  </div>
+</section>
+
+<section class="sec reveal" id="gloss">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">§</span><h2>Glossary</h2></div>
+    <dl class="gloss">
+      <div class="gitem"><dt>Open weights</dt><dd>Downloadable model parameters you can run, inspect and fine-tune. Not the same as open source, which would also mean public training data and code.</dd></div>
+      <div class="gitem"><dt>Hugging Face Hub</dt><dd>Public registry of models, datasets and demo Spaces. The npm of machine learning.</dd></div>
+      <div class="gitem"><dt>Model card</dt><dd>The README of a model: licence, size, context, intended use, benchmarks, limitations. Read the licence before the benchmarks.</dd></div>
+      <div class="gitem"><dt>Gated model</dt><dd>Requires accepting terms and authenticating with a token before download. Llama models are gated.</dd></div>
+      <div class="gitem"><dt>Base vs Instruct</dt><dd>Base models continue text. Instruct/it/chat models have been further trained to follow requests. Use instruct for anything conversational.</dd></div>
+      <div class="gitem"><dt>Parameters (B)</dt><dd>Billions of learned weights. Predicts VRAM need, latency and roughly capability.</dd></div>
+      <div class="gitem"><dt>Quantization</dt><dd>Storing weights at lower precision (int8, int4) to shrink memory. Lossy, but neural networks tolerate it remarkably well.</dd></div>
+      <div class="gitem"><dt>NF4</dt><dd>A 4-bit format designed for the bell-shaped distribution of neural network weights. Better quality than naive int4 at the same size.</dd></div>
+      <div class="gitem"><dt>bitsandbytes</dt><dd>The library that performs on-the-fly quantization when loading a model in Transformers.</dd></div>
+      <div class="gitem"><dt>VRAM</dt><dd>GPU memory. The binding constraint in self-hosting — capacity stops you before speed does.</dd></div>
+      <div class="gitem"><dt>KV cache</dt><dd>Cached attention keys and values for the sequence so far. Grows with context length and batch size; the hidden memory cost.</dd></div>
+      <div class="gitem"><dt>Transformers</dt><dd>Hugging Face's Python library for loading and running models. Built on the 2017 "Attention Is All You Need" architecture.</dd></div>
+      <div class="gitem"><dt>Pipeline</dt><dd>High-level wrapper that chains tokenizer → model → post-processing into one call.</dd></div>
+      <div class="gitem"><dt>Tokenizer</dt><dd>Converts text to integer IDs and back. Model-specific — must always match the checkpoint.</dd></div>
+      <div class="gitem"><dt>Token</dt><dd>The unit a model reads. Roughly ¾ of an English word; considerably less efficient for Indic scripts.</dd></div>
+      <div class="gitem"><dt>Causal LM</dt><dd>Left-to-right next-token prediction. The architecture behind all generative chat models.</dd></div>
+      <div class="gitem"><dt>Chat template</dt><dd>The exact special-token format a model was fine-tuned on. Retrieve it with <code>apply_chat_template</code>; never hand-write it.</dd></div>
+      <div class="gitem"><dt>Special tokens</dt><dd>Markers like <code>&lt;|user|&gt;</code> or <code>&lt;|im_start|&gt;</code> that tell the model whose turn it is.</dd></div>
+      <div class="gitem"><dt>device_map="auto"</dt><dd>Lets accelerate place layers across GPU, CPU and disk. Convenient, and a silent performance trap when VRAM is short.</dd></div>
+      <div class="gitem"><dt>trust_remote_code</dt><dd>Executes custom Python shipped in the model repo. A security decision, not a convenience flag.</dd></div>
+      <div class="gitem"><dt>safetensors</dt><dd>A checkpoint format that cannot execute code on load, unlike legacy pickle files. Always prefer it.</dd></div>
+      <div class="gitem"><dt>Grounding</dt><dd>Constraining answers to a supplied source rather than the model's training data.</dd></div>
+      <div class="gitem"><dt>RAG</dt><dd>Retrieval-Augmented Generation: chunk, embed, retrieve the relevant pieces, then generate from them. What <code>[:6000]</code> is standing in for.</dd></div>
+      <div class="gitem"><dt>Chunking</dt><dd>Splitting a document into overlapping pieces sized to your context budget. Overlap prevents answers being severed at boundaries.</dd></div>
+      <div class="gitem"><dt>Continuous batching</dt><dd>Serving technique (vLLM, TGI) that packs requests together dynamically. The difference between 3 and 50 concurrent users on one GPU.</dd></div>
+      <div class="gitem"><dt>Gradio</dt><dd>Python library for building quick web UIs around models. Excellent for demos; not a production serving layer.</dd></div>
+      <div class="gitem"><dt>OCR</dt><dd>Optical Character Recognition — needed when a PDF is a scanned image and <code>extract_text()</code> returns nothing.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="mono">Architects Lab · Open-source LLM master notes</span>
+    <span>Model IDs, prices and hardware tiers change constantly. Verify against the Hub and provider docs before committing to anything.</span>
+  </div>
+</footer>
+
+<script>
+/* ================= VRAM CALCULATOR ================= */
+const DEVICES = [
+  {name:"Colab CPU RAM", gb:12.7},
+  {name:"T4 GPU (free/Pro Colab)", gb:15},
+  {name:"A100 40GB", gb:40},
+  {name:"A100 80GB / H100", gb:80},
+];
+
+function calc(){
+  const p = parseFloat(document.getElementById("cParams").value);
+  const bytes = parseFloat(document.getElementById("cPrec").value);
+  const ctx = parseInt(document.getElementById("cCtx").value,10);
+  const training = document.getElementById("cTrain").checked;
+
+  const weights = p * bytes * 1e9 / (1024**3);
+  // rough KV cache: scales with params^(1/2)-ish layer/hidden growth; keep it simple and honest
+  const kv = ctx * Math.sqrt(p) * 0.00018 * (bytes >= 2 ? 1 : 0.6);
+  const act = weights * 0.12 + 0.6;
+  let total = weights + kv + act;
+  let extra = "";
+  if (training){
+    // gradients + Adam optimizer states, fp32-ish
+    const optim = p * 12 * 1e9 / (1024**3);
+    total = weights + optim + kv + act*2;
+    extra = ` · optimiser+gradients ${optim.toFixed(1)} GB`;
+  }
+
+  document.getElementById("cTotal").innerHTML =
+    `${total.toFixed(1)}<small>GB estimated</small>`;
+  document.getElementById("cBreak").textContent =
+    `weights ${weights.toFixed(1)} GB · KV cache ~${kv.toFixed(1)} GB · activations ~${act.toFixed(1)} GB${extra}`;
+
+  document.getElementById("cDevices").innerHTML = DEVICES.map(d=>{
+    const pct = Math.min(100, total / d.gb * 100);
+    const cls = pct > 100 ? "bad" : pct > 85 ? "warn" : "ok";
+    const vcls = pct > 100 ? "nope" : pct > 85 ? "tight" : "fits";
+    const verdict = pct > 100 ? "will not fit" : pct > 85 ? "tight — expect OOM" : "fits";
+    return `<div class="dev">
+      <div class="dev-h"><span>${d.name} — ${d.gb} GB</span>
+      <span class="verdict ${vcls}">${verdict} (${Math.round(pct)}%)</span></div>
+      <div class="devtrack"><div class="devfill ${cls}" data-w="${Math.min(100,pct)}"></div></div>
+    </div>`;
+  }).join("");
+  requestAnimationFrame(()=>{
+    document.querySelectorAll(".devfill").forEach(f=>f.style.width=f.dataset.w+"%");
+  });
+}
+["cParams","cPrec","cCtx","cTrain"].forEach(id=>
+  document.getElementById(id).addEventListener("change",calc));
+calc();
+
+/* ================= CHAT TEMPLATE SWITCHER ================= */
+const TEMPLATES = {
+  "Phi-3": {
+    code:`<em>&lt;|system|&gt;</em>
+You answer questions about a document. Use ONLY the text below.<em>&lt;|end|&gt;</em>
+<em>&lt;|user|&gt;</em>
+What quarter does this document cover?<em>&lt;|end|&gt;</em>
+<em>&lt;|assistant|&gt;</em>
+<b>&lt;-- the model generates from here</b>`,
+    note:"Simple and readable. This is the format the course hand-writes — which works, until you switch models."
+  },
+  "Llama 3": {
+    code:`<em>&lt;|begin_of_text|&gt;&lt;|start_header_id|&gt;</em>system<em>&lt;|end_header_id|&gt;</em>
+
+You answer questions about a document. Use ONLY the text below.<em>&lt;|eot_id|&gt;</em><em>&lt;|start_header_id|&gt;</em>user<em>&lt;|end_header_id|&gt;</em>
+
+What quarter does this document cover?<em>&lt;|eot_id|&gt;</em><em>&lt;|start_header_id|&gt;</em>assistant<em>&lt;|end_header_id|&gt;</em>
+
+<b>&lt;-- generates from here</b>`,
+    note:"Header-based, and note the blank lines are significant. Copying a Phi-3 prompt into Llama produces markedly worse output with no error."
+  },
+  "Qwen / ChatML": {
+    code:`<em>&lt;|im_start|&gt;</em>system
+You answer questions about a document. Use ONLY the text below.<em>&lt;|im_end|&gt;</em>
+<em>&lt;|im_start|&gt;</em>user
+What quarter does this document cover?<em>&lt;|im_end|&gt;</em>
+<em>&lt;|im_start|&gt;</em>assistant
+<b>&lt;-- generates from here</b>`,
+    note:"ChatML, originally from OpenAI, now used widely across open models. If you only learn one by sight, learn this one."
+  },
+  "Gemma": {
+    code:`<em>&lt;start_of_turn&gt;</em>user
+You answer questions about a document. Use ONLY the text below.
+
+What quarter does this document cover?<em>&lt;end_of_turn&gt;</em>
+<em>&lt;start_of_turn&gt;</em>model
+<b>&lt;-- generates from here</b>`,
+    note:"Note what is MISSING: Gemma has no separate system role. Your system instruction has to be folded into the first user turn — which is exactly the kind of per-family quirk that makes hand-written templates a losing game."
+  }
+};
+const tabsBox = document.getElementById("tmplTabs");
+Object.keys(TEMPLATES).forEach((k,i)=>{
+  const b=document.createElement("button");
+  b.type="button"; b.textContent=k; if(i===0) b.className="on";
+  b.addEventListener("click",()=>{
+    tabsBox.querySelectorAll("button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    document.getElementById("tmplOut").innerHTML = TEMPLATES[k].code;
+    document.getElementById("tmplNote").textContent = TEMPLATES[k].note;
+  });
+  tabsBox.appendChild(b);
+});
+document.getElementById("tmplOut").innerHTML = TEMPLATES["Phi-3"].code;
+document.getElementById("tmplNote").textContent = TEMPLATES["Phi-3"].note;
+
+/* ================= CHECKLIST ================= */
+const TASKS = [
+  ["Explore the Hub by task","Filter models by text-generation. Sort by downloads. Notice that popularity ranks small old models highest — and ask yourself why."],
+  ["Read three model cards properly","Phi-3-mini, Llama 3.2 3B, Qwen 2.5 3B. For each, note licence, gated status, context length, base vs instruct."],
+  ["Test a model in a Space before downloading","Ask it three prompts from your own domain. Five minutes here saves an hour of downloading."],
+  ["Create a Hugging Face access token","Read scope only, unless you plan to push. Store it in Colab Secrets, never in a cell."],
+  ["Accept a gated model licence","Try meta-llama. Read what you're agreeing to — it's a real licence with real restrictions."],
+  ["Compare hardware tiers","Runtime → Change runtime type. Verify from code with torch.cuda.get_device_name, not from the menu."],
+  ["Compute the VRAM for three models by hand","params × bytes. Then check against the calculator in section 05. Do it until the arithmetic is automatic."],
+  ["Run FinBERT through a pipeline","Both course examples. Note that 'scheduled to release earnings' comes back neutral, not positive — and understand why that matters."],
+  ["Tokenize one sentence with two tokenizers","BERT and GPT-2. Compare tokens and IDs. Observe casing and the Ġ space marker."],
+  ["Tokenize the same sentence in Hindi or Tamil","Count tokens versus the English version. This ratio is a real cost multiplier for any Indian product."],
+  ["Load a model in 4-bit and check placement","print(model.hf_device_map). Confirm nothing landed on CPU or disk."],
+  ["Run inference both ways","Manual generate(), then a pipeline wrapping your own model. Understand what each line does."],
+  ["Extract a PDF and sanity-check BOTH ends","First 1000 and last 500 characters. Then find a table in the PDF and see what happened to it."],
+  ["Replace hand-written tokens with apply_chat_template","Then switch models without touching the prompt code. Feel the difference."],
+  ["Ask a question about page 15 of the document","Watch it fail. Understand that this is truncation, not a model limitation — the design decided this."],
+  ["Replace [:6000] with keyword-ranked chunks","Use best_chunks from section 17. Re-ask the page-15 question."],
+  ["Add page citations to the answer","Then verify one manually against the PDF. This is the habit that catches hallucination."],
+  ["Add a fourth model to the dropdown","Qwen 2.5 3B. Watch the unload/reload sequence and monitor GPU RAM as it swaps."],
+  ["Deliberately break the tokenizer match","Load Phi-3 weights with a GPT-2 tokenizer. Observe fluent nonsense and no error. Never forget it."],
+  ["Write ten evaluation questions with known answers","From your own documents, not Google's. This is the artefact that outlives the notebook."]
+];
+const taskList=document.getElementById("taskList");
+document.getElementById("taskTotal").textContent=TASKS.length;
+function renderTasks(){
+  taskList.innerHTML="";
+  TASKS.forEach(([title,desc],i)=>{
+    const d=document.createElement("label");
+    d.className="task";
+    d.innerHTML=`<input type="checkbox"><div class="t"><b>${i+1}. ${title}</b>${desc}</div>`;
+    d.querySelector("input").addEventListener("change",e=>{
+      d.classList.toggle("done",e.target.checked);
+      document.getElementById("taskDone").textContent=
+        taskList.querySelectorAll("input:checked").length;
+    });
+    taskList.appendChild(d);
+  });
+  document.getElementById("taskDone").textContent=0;
+}
+renderTasks();
+document.getElementById("taskReset").addEventListener("click",renderTasks);
+
+/* ================= QUIZ ================= */
+const QUIZ = [
+  {q:"A 7B model at fp16 — roughly how much VRAM do the weights need?",
+   o:["3.5 GB","7 GB","14 GB","28 GB"],a:2,
+   why:"params × bytes-per-weight = 7 × 2 = 14 GB. Which is why it will not fit a 15GB T4 once you add the KV cache."},
+
+  {q:"You load the tokenizer from 'gpt2' and the weights from Phi-3. What happens?",
+   o:["An exception on load","An exception at generation","Fluent, confident nonsense","Slightly degraded quality"],a:2,
+   why:"The IDs are valid integers in both vocabularies — they just mean different things. Nothing errors; the model predicts a plausible continuation of garbage."},
+
+  {q:"Why is 'downloads' a weak signal for model quality on the Hub?",
+   o:["The counter is inaccurate","It rewards age, small size and tutorial defaults","Only researchers download models","It only counts unique users"],a:1,
+   why:"Small older models get pulled repeatedly in CI and used as tokenizer-only dependencies. Popularity measures friction, not quality."},
+
+  {q:"Quantizing to 4-bit primarily buys you what?",
+   o:["Faster inference","Access — the model now fits in your VRAM","Better accuracy","A smaller download"],a:1,
+   why:"Weights are dequantized to fp16 to do the maths, so arithmetic volume is unchanged. It is a memory optimisation that makes the model runnable, not faster."},
+
+  {q:"Your model loads fine but generates at 90 seconds per answer with low GPU usage. Most likely cause?",
+   o:["Temperature is too low","device_map offloaded layers to CPU or disk","max_new_tokens is too high","The tokenizer is slow"],a:1,
+   why:"When VRAM is short, accelerate silently places layers in system RAM. Check model.hf_device_map — 'it loaded' and 'it's on the GPU' are different claims."},
+
+  {q:"Why does the Q&A prompt include an exact string to use when the answer isn't found?",
+   o:["To save tokens","It gives the model a concrete alternative to inventing, and lets your code detect 'no answer'","It is required by Transformers","To improve latency"],a:1,
+   why:"A next-token predictor must emit something. Supplying a specific high-probability fallback competes with invention, and a fixed string is machine-detectable."},
+
+  {q:"The project sends document[:6000] of a 64,000-character transcript. What is this really a placeholder for?",
+   o:["A bigger context window","A retrieval system: chunk, embed, retrieve, rerank, cite","A faster GPU","A summarisation step"],a:1,
+   why:"91% of the document is invisible by design. The fix is architectural — retrieval — not more compute."},
+
+  {q:"Why is truncating by characters, when the limit is in tokens, a second separate bug?",
+   o:["Characters are slower to count","The chars-per-token ratio varies by content and language, so the margin is illusory","Tokens are always shorter","It breaks Unicode"],a:1,
+   why:"6,000 characters of English prose is ~1,500 tokens; the same in Devanagari or dense tables can be 2–3× that. Measure in the unit the system enforces."},
+
+  {q:"After switching models in the Gradio app, the second swap runs out of memory. What was missed?",
+   o:["A bigger GPU","del alone doesn't free VRAM — you need gc.collect() and torch.cuda.empty_cache() too","The model was too large","Quantization was disabled"],a:1,
+   why:"Memory is released only when the last reference is gone, the collector runs, and PyTorch's caching allocator returns the block. All three steps, in that order."},
+
+  {q:"pypdf returns an empty string for several pages. What does that most likely mean?",
+   o:["The PDF is corrupt","Those pages are scanned images and need OCR","The file is encrypted","pypdf hit a page limit"],a:1,
+   why:"extract_text() reads text objects. A scanned page contains an image, not text. Detect this explicitly or you'll silently answer from a partial document."},
+
+  {q:"trust_remote_code=True does what?",
+   o:["Skips checksum verification","Downloads and executes Python from the model repo in your process","Allows gated model access","Enables faster loading"],a:1,
+   why:"It is a supply-chain decision. Prefer models supported natively; if you must use it, pin a revision and review the code."},
+
+  {q:"Your bot answers correctly, but the fact isn't in the uploaded document. Bug or feature?",
+   o:["Feature — it's helpful","Bug — the answer is uncitable, unverifiable, and your testing is now misleading","Neither","Bug, but harmless"],a:1,
+   why:"It also poisons your evaluation: testing on documents the model memorised makes accuracy look great until you deploy on internal documents it has never seen."},
+
+  {q:"Latency in generation scales primarily with what?",
+   o:["Input length","Output length","Model file size","Context window setting"],a:1,
+   why:"The prompt is processed in one parallel prefill pass; every output token needs its own sequential pass. Hence: stream, and ask for concise answers."},
+
+  {q:"In a document-AI project, where does effort usually pay off most?",
+   o:["Model choice","Prompt engineering","Ingestion quality, then retrieval","Quantization tuning"],a:2,
+   why:"Everything downstream is bounded by input quality. You cannot prompt your way out of scrambled text. Most teams rank these exactly backwards."}
+];
+const box=document.getElementById("quizBox");
+let answered=0,correct=0;
+function buildQuiz(){
+  box.innerHTML=""; answered=0; correct=0;
+  document.getElementById("answered").textContent=0;
+  document.getElementById("correct").textContent=0;
+  QUIZ.forEach((item,i)=>{
+    const d=document.createElement("div"); d.className="q";
+    d.innerHTML=`<div class="qt"><span>${String(i+1).padStart(2,"0")}</span><div>${item.q}</div></div><div class="opts"></div><div class="why">${item.why}</div>`;
+    const opts=d.querySelector(".opts");
+    item.o.forEach((text,j)=>{
+      const btn=document.createElement("button");
+      btn.className="opt"; btn.type="button"; btn.textContent=text;
+      btn.addEventListener("click",()=>{
+        if(d.dataset.done) return;
+        d.dataset.done="1"; answered++;
+        opts.querySelectorAll(".opt").forEach((b,k)=>{
+          b.disabled=true;
+          if(k===item.a) b.classList.add("right");
+          else if(k===j) b.classList.add("wrong");
+        });
+        if(j===item.a) correct++;
+        d.querySelector(".why").classList.add("show");
+        document.getElementById("answered").textContent=answered;
+        document.getElementById("correct").textContent=correct;
+      });
+      opts.appendChild(btn);
+    });
+    box.appendChild(d);
+  });
+}
+buildQuiz();
+document.getElementById("resetQuiz").addEventListener("click",buildQuiz);
+
+
+/* ================= COPY BUTTONS ================= */
+document.querySelectorAll(".copy").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const code=btn.closest(".codeblock").querySelector("pre").innerText;
+    navigator.clipboard.writeText(code).then(()=>{
+      const old=btn.textContent; btn.textContent="Copied";
+      setTimeout(()=>btn.textContent=old,1400);
+    }).catch(()=>{btn.textContent="Select manually";});
+  });
+});
+
+/* ================= COLLAPSIBLE ================= */
+const SIGN = open => open ? "–" : "+";
+
+function makeToggle(open){
+  const b=document.createElement("span");
+  b.className="toggle"; b.textContent=SIGN(open);
+  b.setAttribute("aria-hidden","true");
+  return b;
+}
+
+/* --- sections --- */
+document.querySelectorAll(".sec").forEach(sec=>{
+  const wrap=sec.querySelector(":scope > .wrap");
+  const head=wrap.querySelector(".sec-head");
+  if(!head) return;
+  const body=document.createElement("div");
+  body.className="sec-body";
+  let n=head.nextElementSibling;
+  while(n){ const next=n.nextElementSibling; body.appendChild(n); n=next; }
+  wrap.appendChild(body);
+
+  head.appendChild(makeToggle(true));
+  head.setAttribute("role","button");
+  head.setAttribute("tabindex","0");
+  head.setAttribute("aria-expanded","true");
+
+  const flip=()=>{
+    const closed=sec.classList.toggle("collapsed");
+    head.querySelector(".toggle").textContent=SIGN(!closed);
+    head.setAttribute("aria-expanded",String(!closed));
+  };
+  head.addEventListener("click",flip);
+  head.addEventListener("keydown",e=>{
+    if(e.key==="Enter"||e.key===" "){ e.preventDefault(); flip(); }
+  });
+});
+
+/* --- code blocks --- */
+document.querySelectorAll(".codeblock").forEach(cb=>{
+  const head=cb.querySelector(".codehead");
+  const label=head.querySelector("span");
+  const copy=head.querySelector(".copy");
+  label.classList.add("lbl-txt");
+
+  const grp=document.createElement("div");
+  grp.className="grp";
+  const mini=document.createElement("button");
+  mini.className="mini"; mini.type="button"; mini.textContent="–";
+  mini.setAttribute("aria-label","Collapse code block");
+  if(copy) grp.appendChild(copy);
+  grp.appendChild(mini);
+  head.appendChild(grp);
+
+  const flip=()=>{
+    const closed=cb.classList.toggle("collapsed");
+    mini.textContent=SIGN(!closed);
+  };
+  mini.addEventListener("click",flip);
+  label.addEventListener("click",flip);
+});
+
+/* --- ascii sketches --- */
+document.querySelectorAll(".ascii").forEach(a=>{
+  const cap=a.querySelector(".cap");
+  cap.innerHTML=`<span>${cap.textContent.trim()}</span>`;
+  cap.appendChild(makeToggle(true));
+  cap.setAttribute("role","button");
+  cap.setAttribute("tabindex","0");
+  const flip=()=>{
+    const closed=a.classList.toggle("collapsed");
+    cap.querySelector(".toggle").textContent=SIGN(!closed);
+  };
+  cap.addEventListener("click",flip);
+  cap.addEventListener("keydown",e=>{
+    if(e.key==="Enter"||e.key===" "){ e.preventDefault(); flip(); }
+  });
+});
+
+/* --- tables --- */
+document.querySelectorAll(".tablewrap").forEach(tw=>{
+  const table=tw.querySelector("table");
+  const first=table.querySelector("thead th");
+  const name=first && first.textContent.trim() ? first.textContent.trim() : "Reference table";
+  const rows=table.querySelectorAll("tbody tr").length;
+
+  const head=document.createElement("div");
+  head.className="tabhead";
+  head.setAttribute("role","button");
+  head.setAttribute("tabindex","0");
+  head.innerHTML=`<span>${name} · ${rows} rows</span>`;
+  head.appendChild(makeToggle(true));
+  tw.insertBefore(head, table);
+
+  const flip=()=>{
+    const closed=tw.classList.toggle("collapsed");
+    head.querySelector(".toggle").textContent=SIGN(!closed);
+  };
+  head.addEventListener("click",flip);
+  head.addEventListener("keydown",e=>{
+    if(e.key==="Enter"||e.key===" "){ e.preventDefault(); flip(); }
+  });
+});
+
+/* --- part dividers: collapse every section in that part --- */
+document.querySelectorAll(".part").forEach(part=>{
+  const bar=part.querySelector(".bar");
+  bar.appendChild(makeToggle(true));
+  bar.setAttribute("role","button");
+  bar.setAttribute("tabindex","0");
+
+  const members=[];
+  let n=part.nextElementSibling;
+  while(n && !n.classList.contains("part")){
+    if(n.classList.contains("sec")) members.push(n);
+    n=n.nextElementSibling;
+  }
+
+  const flip=()=>{
+    const closed=part.classList.toggle("collapsed");
+    bar.querySelector(".toggle").textContent=SIGN(!closed);
+    members.forEach(s=>setSection(s, !closed));
+  };
+  bar.addEventListener("click",flip);
+  bar.addEventListener("keydown",e=>{
+    if(e.key==="Enter"||e.key===" "){ e.preventDefault(); flip(); }
+  });
+});
+
+/* --- helpers + global controls --- */
+function setSection(sec, open){
+  sec.classList.toggle("collapsed", !open);
+  const t=sec.querySelector(".sec-head .toggle");
+  if(t) t.textContent=SIGN(open);
+  const h=sec.querySelector(".sec-head");
+  if(h) h.setAttribute("aria-expanded",String(open));
+}
+
+function setAll(open){
+  document.querySelectorAll(".sec").forEach(s=>setSection(s, open));
+  document.querySelectorAll(".part").forEach(p=>{
+    p.classList.toggle("collapsed", !open);
+    const t=p.querySelector(".bar .toggle"); if(t) t.textContent=SIGN(open);
+  });
+  document.querySelectorAll(".codeblock").forEach(c=>{
+    c.classList.toggle("collapsed", !open);
+    const m=c.querySelector(".mini"); if(m) m.textContent=SIGN(open);
+  });
+  document.querySelectorAll(".ascii, .tablewrap").forEach(el=>{
+    el.classList.toggle("collapsed", !open);
+    const t=el.querySelector(".toggle"); if(t) t.textContent=SIGN(open);
+  });
+  document.querySelectorAll("details.recall").forEach(d=>{ if(!open) d.open=false; });
+}
+document.getElementById("expandAll").addEventListener("click",()=>setAll(true));
+document.getElementById("collapseAll").addEventListener("click",()=>{
+  setAll(false);
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+
+/* --- clicking a nav chip reopens a collapsed section --- */
+document.querySelectorAll("#nav a").forEach(a=>{
+  a.addEventListener("click",()=>{
+    const target=document.querySelector(a.getAttribute("href"));
+    if(!target) return;
+    if(target.classList.contains("sec")) setSection(target, true);
+    let p=target.previousElementSibling;
+    while(p && !p.classList.contains("part")) p=p.previousElementSibling;
+    if(p){ p.classList.remove("collapsed"); const t=p.querySelector(".bar .toggle"); if(t) t.textContent="–"; }
+  });
+});
+
+/* ================= SCROLL UI ================= */
+const bar=document.getElementById("scrollbar");
+window.addEventListener("scroll",()=>{
+  const h=document.documentElement;
+  bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+"%";
+},{passive:true});
+
+const links=[...document.querySelectorAll("#nav a")];
+const secs=links.map(a=>document.querySelector(a.getAttribute("href"))).filter(Boolean);
+const spy=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){
+    links.forEach(l=>l.classList.toggle("on",l.getAttribute("href")==="#"+e.target.id));
+    const on=document.querySelector("#nav a.on");
+    if(on) on.scrollIntoView({block:"nearest",inline:"center"});
+  }});
+},{rootMargin:"-45% 0px -50% 0px"});
+secs.forEach(s=>spy.observe(s));
+
+const rev=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){e.target.classList.add("in"); rev.unobserve(e.target);} });
+},{threshold:.05});
+document.querySelectorAll(".reveal").forEach(el=>rev.observe(el));
+</script>
+</body>
+</html>
