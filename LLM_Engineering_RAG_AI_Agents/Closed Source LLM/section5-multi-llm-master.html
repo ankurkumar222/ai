@@ -109,10 +109,11 @@ strong{color:#f0f4fc; font-weight:500}
 .note.warn{border-color:var(--amber); background:linear-gradient(90deg,rgba(255,166,61,.08),transparent)}
 .note.trap{border-color:var(--rose); background:linear-gradient(90deg,rgba(255,107,129,.08),transparent)}
 .note.good{border-color:var(--mint); background:linear-gradient(90deg,rgba(62,207,154,.08),transparent)}
+.note.phi{border-color:var(--violet); background:linear-gradient(90deg,rgba(192,123,255,.08),transparent)}
 .note p{margin:0 0 .6em; font-size:16px; max-width:80ch}
 .note p:last-child{margin:0}
 .note .lbl{font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--amber); display:block; margin-bottom:6px}
-.note .lbl.b{color:var(--beam)} .note .lbl.r{color:var(--rose)} .note .lbl.m{color:var(--mint)}
+.note .lbl.b{color:var(--beam)} .note .lbl.r{color:var(--rose)} .note .lbl.m{color:var(--mint)} .note .lbl.v{color:var(--violet)}
 
 /* tables */
 .tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:8px; margin:20px 0; background:var(--panel)}
@@ -350,7 +351,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <p class="eyebrow">Project 4</p>
     <h1>Compare the models. Call the models. <em>Build the page.</em></h1>
-    <p class="lede">Everything from the course in one place, in plain language. How to judge an AI model before you use it, how to wire up three providers, and how to describe a website in English and get working HTML back. Read this instead of rewatching.</p>
+    <p class="lede">How to judge an AI model before you use it, how to wire up three providers, and how to describe a website in English and get working HTML back — all in one place, in plain language.</p>
     <div class="readout">
       <div><div class="k">Providers</div><div class="v">3 <small>OpenAI · Google · Anthropic</small></div></div>
       <div><div class="k">Leaderboards</div><div class="v">2 <small>Vellum · LMArena</small></div></div>
@@ -373,7 +374,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">01</span><h2>The big picture</h2></div>
 
-    <p>The whole module is one simple experiment repeated carefully. You write <strong>one prompt</strong>. You send it to <strong>three different AI models</strong>. You save what each one gives you and compare.</p>
+    <p>The core idea is one simple experiment repeated carefully. You write <strong>one prompt</strong>. You send it to <strong>three different AI models</strong>. You save what each one gives you and compare.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 1 · What you are actually building</div>
@@ -417,6 +418,11 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
     <div class="note">
       <span class="lbl b">Why bother with three providers</span>
       <p><strong>Different models are good at different things.</strong> The one that writes the cleanest maths is often not the one that writes the nicest HTML. Also: one provider means one point of failure for outages, price hikes and rate limits. Wiring up a second one turns an emergency into a config change.</p>
+    </div>
+
+    <div class="note phi">
+      <span class="lbl v">Architect angle</span>
+      <p>The multi-provider pattern is the AI equivalent of not running a single database. The moment you have two providers wired and tested, you have <strong>options</strong>. Options are leverage — against outages, price hikes, and the inevitable deprecations that arrive on the vendor's schedule, not yours. A system that talks to exactly one provider is not an AI platform; it is a dependency with a chat interface.</p>
     </div>
 
     <details class="recall">
@@ -475,7 +481,12 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
 
     <div class="note warn">
       <span class="lbl">One word that matters</span>
-      <p><strong>"Open weights" is not "open source."</strong> Most open models publish only the trained numbers, under a licence the vendor wrote. The training data and training code usually stay private, and some licences restrict commercial use. So you can run it and fine-tune it — you generally can't rebuild it. In a bank or any regulated shop, read the licence before you read the benchmark scores.</p>
+      <p><strong>"Open weights" is not "open source."</strong> Most open models publish only the trained numbers, under a licence the vendor wrote. The training data and training code usually stay private, and some licences restrict commercial use. So you can run it and fine-tune it — you generally can't rebuild it. In a bank or any regulated shop, read the licence before you read the benchmark scores. Browse available open models at <a href="https://huggingface.co/models" target="_blank" rel="noopener">Hugging Face ↗</a>.</p>
+    </div>
+
+    <div class="note phi">
+      <span class="lbl v">AI Philosophy</span>
+      <p>The open-vs-closed decision is ultimately a <strong>sovereignty question</strong>: who controls your capability stack? Closed models hand that control to a vendor — frontier quality, zero ops, but capability changes, data policy, and pricing are all decided elsewhere. Open weights trade ops burden for independence. There is no universally correct answer; there is only your threat model, your compliance posture, and your team's ability to own the infrastructure that comes with the choice.</p>
     </div>
 
     <details class="recall">
@@ -589,7 +600,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
     <p>Leaderboard columns are acronyms. Each one is a specific exam with a specific blind spot. Know what the exam tests, or you're just being sold a number.</p>
 
     <div class="grid g2">
-      <div class="card"><span class="tag">Reasoning</span><h4>GPQA Diamond</h4><p><strong>"Google-proof" science questions</strong> in biology, physics and chemistry, at PhD level. Searching the web doesn't save you. Course snapshot: leaders around <strong>84–85%</strong> (Grok ≈ 84.6, Gemini 2.5 Pro ≈ 84).</p></div>
+      <div class="card"><span class="tag">Reasoning</span><h4>GPQA Diamond</h4><p><strong>"Google-proof" science questions</strong> in biology, physics and chemistry, at PhD level. Searching the web doesn't save you. Leaders around <strong>84–85%</strong> (Grok ≈ 84.6, Gemini 2.5 Pro ≈ 84).</p></div>
       <div class="card"><span class="tag">Maths</span><h4>AIME / MATH-500</h4><p><strong>Competition-level maths.</strong> Not arithmetic — multi-step problems. Leaders reached the <strong>low 90s</strong> (o4-mini ≈ 93.4%). Remember these same models were terrible at maths in 2022.</p></div>
       <div class="card"><span class="tag">Coding</span><h4>SWE-bench</h4><p><strong>Real GitHub bugs.</strong> The model must write a patch that makes the test suite pass. Closest public proxy for <em>agentic</em> coding, not snippet writing. Claude 3.7 Sonnet led at <strong>≈ 70.3%</strong>.</p></div>
       <div class="card"><span class="tag">The ceiling</span><h4>Humanity's Last Exam</h4><p><strong>~2,500 brutally hard expert questions</strong>, designed so nobody aces them soon. Scores were still low (o3 ≈ 20.3%), which is exactly why it's useful — it still has room to grow.</p></div>
@@ -618,6 +629,11 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
       <p>Use leaderboards to build a <strong>shortlist of 3</strong>. Never to declare a winner.</p>
     </div>
 
+    <div class="note phi">
+      <span class="lbl v">Architect angle</span>
+      <p>The dangerous leader is one who picks a vendor based on a benchmark headline. The dangerous architecture is one that assumes today's leader stays the leader. <strong>Benchmarks measure models as they were trained; your private eval set measures models as they perform for you.</strong> Treating a public leaderboard as a procurement decision is outsourcing your judgment to whoever designed the exam — and to whoever leaked questions into the training data. A 20-prompt eval set built from real tasks is worth more than any published score because it is about your problem and yours alone.</p>
+    </div>
+
     <details class="recall">
       <summary>Two models are 1.2 points apart on a benchmark where the leader scores 93%. What do you conclude?</summary>
       <div class="ans">
@@ -632,7 +648,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">05</span><h2>Vellum Leaderboard — the spec-sheet view</h2></div>
 
-    <p>Vellum collects published benchmark scores for models released after April 2024, <strong>plus the operational numbers most benchmark sites skip</strong>: latency, speed, price, context, cutoff.</p>
+    <p><a href="https://www.vellum.ai/llm-leaderboard" target="_blank" rel="noopener">Vellum LLM Leaderboard ↗</a> collects published benchmark scores for models released after April 2024, <strong>plus the operational numbers most benchmark sites skip</strong>: latency, speed, price, context, cutoff.</p>
 
     <h3>How to actually use it</h3>
     <ol class="tight">
@@ -645,7 +661,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
 
     <div class="note warn">
       <span class="lbl">Expect blank cells</span>
-      <p>Not every vendor publishes every score — in the course walkthrough, Gemini's maths row was simply empty. A blank is <strong>not a zero</strong>. It means "not reported." Never rank on a column full of holes without saying so out loud.</p>
+      <p>Not every vendor publishes every score — Gemini's maths row, for instance, was simply empty in one snapshot. A blank is <strong>not a zero</strong>. It means "not reported." Never rank on a column full of holes without saying so out loud.</p>
     </div>
 
     <details class="recall">
@@ -662,7 +678,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">06</span><h2>Chatbot Arena — the human view</h2></div>
 
-    <p>Benchmarks check if an answer is <em>correct</em>. They don't check if a human <em>likes</em> it. Chatbot Arena (LMArena), built by UC Berkeley researchers, fills that gap with blind voting — over a million votes by the time of the course.</p>
+    <p>Benchmarks check if an answer is <em>correct</em>. They don't check if a human <em>likes</em> it. <a href="https://lmarena.ai" target="_blank" rel="noopener">Chatbot Arena (LMArena) ↗</a>, built by UC Berkeley researchers, fills that gap with blind voting — over a million votes and growing.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 7 · How a blind battle works</div>
@@ -723,6 +739,11 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
       <p>Read Arena as <em>"which model do people enjoy reading"</em> and Vellum as <em>"which model gets it right."</em> You need both.</p>
     </div>
 
+    <div class="note phi">
+      <span class="lbl v">AI Philosophy</span>
+      <p>The Pareto frontier idea generalises beyond model selection — it is the right mental frame for any technology procurement. <strong>Every option that sits below-and-right of the frontier is dominated</strong>: something exists that is both better quality and cheaper. You don't need to justify ignoring dominated options; the burden of proof falls on anyone who argues for them. Learn to draw this chart mentally for any vendor or build-vs-buy decision, not just AI. The CTO who can point to the frontier and explain why a given choice sits on it — or doesn't — is doing strategy. Everyone else is doing preference.</p>
+    </div>
+
     <details class="recall">
       <summary>Vellum ranks A above B. The Arena ranks B above A. Who's wrong?</summary>
       <div class="ans">
@@ -738,7 +759,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">07</span><h2>The bench — read two models against each other</h2></div>
 
-    <p>The course exercise was Gemini 2.5 Pro vs DeepSeek R1. Here it is, live, using the numbers observed in the walkthrough. Pick any two and watch which axes actually separate them.</p>
+    <p>A worked pairing — Gemini 2.5 Pro vs DeepSeek R1 — using observed benchmark numbers as a reference point. Pick any two and watch which axes actually separate them.</p>
 
     <div class="bench">
       <div class="bench-top">
@@ -757,7 +778,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
 
     <div class="note warn">
       <span class="lbl">Snapshot, not scripture</span>
-      <p>These are <strong>point-in-time numbers from the course</strong>. New models ship weekly and prices change. Use them to learn the <em>shape</em> of a comparison — pull live values before any real decision.</p>
+      <p>These are <strong>point-in-time snapshot numbers</strong>. New models ship weekly and prices change. Use them to learn the <em>shape</em> of a comparison — pull live values from <a href="https://www.vellum.ai/llm-leaderboard" target="_blank" rel="noopener">Vellum ↗</a> before any real decision.</p>
     </div>
 
     <h3>What this pairing teaches</h3>
@@ -803,6 +824,11 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
 </pre>
     </div>
 
+    <div class="note phi">
+      <span class="lbl v">Architect angle</span>
+      <p><strong>Routing is the central pattern of an AI platform.</strong> Everything else — evaluation pipelines, SDK abstraction layers, cost dashboards — exists in service of routing well. A system that sends every request to the same model regardless of task, urgency, or cost constraint isn't an AI platform; it's a chatbot with a billing account. The decision tree above is the seed of your AI layer's intelligence: when you can articulate why each task goes where it does, you have an architecture, not just an integration.</p>
+    </div>
+
     <details class="recall">
       <summary>You must summarise 400-page regulatory PDFs overnight, in bulk. Which axes decide it? Which are noise?</summary>
       <div class="ans">
@@ -826,7 +852,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">08</span><h2>Keys, .env, and not getting a shock bill</h2></div>
 
-    <p>Three providers, three consoles, three keys. Each one is generated once in a developer console and usually shown only once. Copy it straight into your <code>.env</code> file.</p>
+    <p>Three providers, three consoles, three keys. Each one is generated once in a developer console and usually shown only once. Copy it straight into your <code>.env</code> file. Consoles: <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI ↗</a> · <a href="https://aistudio.google.com" target="_blank" rel="noopener">Google AI Studio ↗</a> · <a href="https://console.anthropic.com" target="_blank" rel="noopener">Anthropic ↗</a>.</p>
 
     <div class="codeblock">
       <div class="codehead"><span>.env — never commit this</span><button class="copy">Copy</button></div>
@@ -991,6 +1017,11 @@ r = client.messages.create(
         <span class="c-kw">return</span> r.content[<span class="c-num">0</span>].text
 
     <span class="c-kw">raise</span> ValueError(f<span class="c-str">"unknown provider: {provider}"</span>)</pre>
+    </div>
+
+    <div class="note phi">
+      <span class="lbl v">AI Philosophy</span>
+      <p>The abstraction layer you write on day one is what makes <strong>vendor switching possible on day one hundred</strong>. If every callsite in your codebase knows it's talking to OpenAI, switching requires touching every callsite. If every callsite knows only <code>ask(provider, prompt)</code>, switching is a config change. This is the dependency-inversion principle applied to foundation models — not an AI-specific idea, but one where the payoff arrives unusually fast, because providers rename models, reprice APIs, and deprecate endpoints on timescales of months, not years. Build the seam early.</p>
     </div>
 
     <details class="recall">
@@ -1172,7 +1203,7 @@ r = client.messages.create(
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">12</span><h2>Variables + the live prompt builder</h2></div>
 
-    <p>Key trick from the course: <strong>don't hard-code the startup into the prompt.</strong> Keep the name and concept as separate variables and drop them in with an f-string. Then changing the whole project is a two-line edit, not a rewrite.</p>
+    <p>Key pattern: <strong>don't hard-code the startup into the prompt.</strong> Keep the name and concept as separate variables and drop them in with an f-string. Then changing the whole project is a two-line edit, not a rewrite.</p>
 
     <div class="codeblock">
       <div class="codehead"><span>Variables first, prompt second</span><button class="copy">Copy</button></div>
@@ -1215,6 +1246,11 @@ Rules:
     <div class="note good">
       <span class="lbl m">Why this matters more than it looks</span>
       <p>Once the prompt is a template with slots, it becomes <strong>reusable infrastructure</strong>. Same template, hundreds of startups. Same template, A/B tested against three models. Same template, checked into git and versioned. This is the difference between playing with an AI and building with one.</p>
+    </div>
+
+    <div class="note phi">
+      <span class="lbl v">Architect angle</span>
+      <p>Treat prompts the way you treat database queries: <strong>parameterise them, version them, test them.</strong> A prompt hard-coded into a notebook is technical debt with a natural-language interface. A prompt as a versioned template in your repo is infrastructure. The question "which model gave the best output?" is only answerable if the prompt is held constant — which means it needs to be a controlled artefact you can check in, diff, and roll back, not a string retyped from memory. In larger systems, prompt versioning becomes as important as schema versioning.</p>
     </div>
 
     <h3>Build your own prompt right here</h3>
@@ -1359,7 +1395,7 @@ display(pd.DataFrame(results))     <span class="c-com"># your own mini leaderboa
 
     <div class="note">
       <span class="lbl b">Small upgrade, big payoff</span>
-      <p>The course runs each provider in a separate cell. Putting them in one loop that <strong>records seconds and output size</strong> turns a demo into a measurement. After three or four startups you'll have real data on which model is fastest and most verbose for <em>your</em> prompts — which is worth more than any public leaderboard.</p>
+      <p>Running each provider in a separate cell is the natural first step. Putting them in one loop that <strong>records seconds and output size</strong> turns a demo into a measurement. After three or four startups you'll have real data on which model is fastest and most verbose for <em>your</em> prompts — which is worth more than any public leaderboard.</p>
     </div>
 
     <details class="recall">
@@ -1376,11 +1412,11 @@ display(pd.DataFrame(results))     <span class="c-com"># your own mini leaderboa
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">14</span><h2>What each model actually produced</h2></div>
 
-    <p>Same prompt, three very different pages. This is the payoff of the whole module — the differences are obvious the moment you open them side by side.</p>
+    <p>Same prompt, three very different pages. The differences are obvious the moment you open them side by side — and each difference is a data point about the model, not the task.</p>
 
     <div class="tablewrap">
       <table>
-        <thead><tr><th>Model</th><th>What the page looked like</th><th>Verdict in the course</th></tr></thead>
+        <thead><tr><th>Model</th><th>What the page looked like</th><th>Verdict</th></tr></thead>
         <tbody>
           <tr><td class="n">GPT-4o</td><td>All the requested sections present, but plain and a bit messy. Layout not well composed.</td><td>Weakest of the three</td></tr>
           <tr><td class="n">GPT-4o-mini</td><td>Slightly cleaner than full 4o on the same prompt — a genuine surprise.</td><td>Small ≠ worse</td></tr>
@@ -1392,7 +1428,12 @@ display(pd.DataFrame(results))     <span class="c-com"># your own mini leaderboa
 
     <div class="note good">
       <span class="lbl m">The lesson hiding in the mini result</span>
-      <p>GPT-4o-mini beating GPT-4o on this task is the most instructive moment in the module. <strong>The bigger, more expensive model is not automatically better for your specific task.</strong> If you'd picked purely on price tier or headline benchmark, you'd have chosen wrong — and paid more to do it. This is precisely why you test on your own prompts.</p>
+      <p>GPT-4o-mini beating GPT-4o on this task is the most instructive result here. <strong>The bigger, more expensive model is not automatically better for your specific task.</strong> If you'd picked purely on price tier or headline benchmark, you'd have chosen wrong — and paid more to do it. This is precisely why you test on your own prompts.</p>
+    </div>
+
+    <div class="note phi">
+      <span class="lbl v">AI Philosophy</span>
+      <p>There is <strong>no globally best model — only the best model for this task, this latency budget, this cost envelope, this user</strong>. Procurement based on headline benchmarks is optimising for someone else's task, measured by someone else's rubric. The leader who defaults to "we use the best model" without asking "best by what measure, for which job, at what cost?" has handed the architecture decision to a marketing team. The right question is always specific: what is the failure mode I care about, and which model fails there least?</p>
     </div>
 
     <h3>How to judge them properly, not just by eye</h3>
@@ -1441,7 +1482,7 @@ display(pd.DataFrame(results))     <span class="c-com"># your own mini leaderboa
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">15</span><h2>Iterating in plain English</h2></div>
 
-    <p>The final practice: add a contact/sign-up section and use attention-grabbing colours. You do this by <strong>editing one sentence</strong> in the prompt and re-running. No HTML knowledge involved.</p>
+    <p>The exercise: add a contact/sign-up section and use attention-grabbing colours. You do this by <strong>editing one sentence</strong> in the prompt and re-running. No HTML knowledge involved.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 15 · The design loop</div>
@@ -1463,6 +1504,11 @@ display(pd.DataFrame(results))     <span class="c-com"># your own mini leaderboa
    That is the actual superpower here - not the first draft,
    but how cheap the <i>tenth</i> draft is.
 </pre>
+    </div>
+
+    <div class="note phi">
+      <span class="lbl v">AI Philosophy</span>
+      <p>The real shift generative AI introduces isn't that the first draft is good — it's that <strong>the tenth draft costs the same as the first</strong>. In traditional software, iteration compounds: debugging, regression testing, stakeholder alignment all add friction with each cycle. In prompt-driven generation, each run is independent and costs cents. This fundamentally changes the economics of exploration — and of risk. The implication for teams: the bottleneck moves from "can we afford to try this?" to "do we have the judgment to know when we've found something worth stopping at?"</p>
     </div>
 
     <h3>Vague vs specific — the same request, two results</h3>
@@ -1646,7 +1692,7 @@ rows = []
 <section class="sec reveal" id="tasks">
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">✓</span><h2>Every practice task, in one list</h2></div>
-    <p>All the exercises from both parts. Tick them off as you go — the state resets when you reload, so treat it as a working session tracker.</p>
+    <p>All the practice tasks. Tick them off as you go — the state resets when you reload, so treat it as a working session tracker.</p>
     <div class="tasks" id="taskList"></div>
     <div class="taskbar">
       <span>Done <b id="taskDone">0</b> of <b id="taskTotal">0</b></span>
