@@ -407,7 +407,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <p class="eyebrow">Module notes · Open-source LLMs on Hugging Face</p>
     <h1>You can own the brain. <em>Now you own the problems too.</em></h1>
-    <p class="lede">Section 5 rented intelligence over an API. This one downloads it. That single change moves the hard part from prompt design to memory budgets, tokenizers, quantization and serving — and it turns you from an API consumer into someone who has to make architecture decisions. These notes cover the mechanics and, more importantly, the judgement.</p>
+    <p class="lede">In Section 5 you rented a model over an API. Here you download it and run it yourself. That one change moves the hard part from writing prompts to memory, tokenizers, quantization and serving. These notes cover how it works — and how to decide.</p>
     <div class="readout">
       <div><div class="k">Abstraction levels</div><div class="v">3 <small>pipeline · auto · raw</small></div></div>
       <div><div class="k">ASCII sketches</div><div class="v">14 <small>the mental models</small></div></div>
@@ -421,7 +421,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
 <div class="part reveal">
   <div class="wrap">
     <div class="bar"><span class="tag">Part one</span><h2>The open-weight decision</h2></div>
-    <p>Before any code: what actually changes when the model lives on your disk instead of someone else's server. This is a procurement and architecture decision disguised as a technical one.</p>
+    <p>Before any code: what changes when the model sits on your disk instead of someone else's server. This looks like a technical choice. It is really a business one.</p>
   </div>
 </div>
 
@@ -429,7 +429,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">01</span><h2>What changes when you own the weights</h2></div>
 
-    <p>In Section 5 you called GPT-4o, Gemini and Claude. You sent text over HTTPS and got text back. You never touched the model. Here, you <strong>download the model itself</strong> — billions of numbers — and run it on hardware you're responsible for.</p>
+    <p>In Section 5 you called GPT-4o, Gemini and Claude. You sent text, you got text back, and you never touched the model. Here you <strong>download the model itself</strong> — billions of numbers — and run it on hardware you look after.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 1 · What you're actually responsible for</div>
@@ -459,17 +459,17 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
 
     <h3>The five real reasons to self-host</h3>
     <div class="grid g2">
-      <div class="card"><span class="tag">01 · Data residency</span><h4>Nothing leaves the perimeter</h4><p>The decisive one in banking, healthcare and defence. If customer PII, KYC documents or trade data cannot legally cross into a third-party API, capability comparisons are irrelevant — self-hosting is the only compliant path.</p></div>
-      <div class="card"><span class="tag">02 · Unit economics at volume</span><h4>Fixed cost beats per-token</h4><p>API pricing is linear in usage. A GPU is a fixed cost. Below a certain volume the API always wins; above a crossover point, self-hosting wins. Know where your crossover is before arguing about it.</p></div>
-      <div class="card"><span class="tag">03 · Customisation</span><h4>Fine-tuning is only possible here</h4><p>You can continue training on your own domain data — your product catalogue, your regulatory language, your ticket history. No closed API gives you deep weight-level adaptation.</p></div>
-      <div class="card"><span class="tag">04 · Version stability</span><h4>The model doesn't change under you</h4><p>A downloaded checkpoint is frozen forever. Hosted models get silently updated and deprecated, which can break carefully tuned prompts overnight. For anything you must audit or reproduce, this matters enormously.</p></div>
-      <div class="card"><span class="tag">05 · Offline & edge</span><h4>Works with no internet</h4><p>Air-gapped environments, factory floors, on-device inference, disaster-recovery sites. Not possible with an API by definition.</p></div>
-      <div class="card"><span class="tag">Bonus · Transparency</span><h4>You can inspect it</h4><p>Architecture, layer counts, attention shapes are all visible. Useful for research, for security review, and for explaining behaviour to a regulator who asks "how does it work?"</p></div>
+      <div class="card"><span class="tag">01 · Data residency</span><h4>Nothing leaves the perimeter</h4><p>The big one in banking, healthcare and defence. If customer data or KYC documents are not allowed to leave your network, it does not matter which model scores higher. Running it yourself is the only legal option.</p></div>
+      <div class="card"><span class="tag">02 · Unit economics at volume</span><h4>Fixed cost beats per-token</h4><p>With an API you pay per use, so the bill grows with traffic. A GPU costs the same whether you use it or not. Below a certain volume the API is cheaper. Above it, your own GPU is. Find that line before you argue about it.</p></div>
+      <div class="card"><span class="tag">03 · Customisation</span><h4>Fine-tuning is only possible here</h4><p>You can keep training the model on your own data — your product catalogue, your regulatory wording, your support tickets. No closed API lets you change the model itself like this.</p></div>
+      <div class="card"><span class="tag">04 · Version stability</span><h4>The model doesn't change under you</h4><p>A model you downloaded never changes. Hosted models get updated or retired without warning, which can break prompts you spent weeks tuning. If you need to reproduce a result later, this matters a lot.</p></div>
+      <div class="card"><span class="tag">05 · Offline & edge</span><h4>Works with no internet</h4><p>Isolated networks, factory floors, phones, backup sites. An API simply cannot work here.</p></div>
+      <div class="card"><span class="tag">Bonus · Transparency</span><h4>You can inspect it</h4><p>You can see how the model is built. Useful for research, for security reviews, and for answering a regulator who asks how it works.</p></div>
     </div>
 
     <div class="note trap">
       <span class="lbl r">The honest counter-argument</span>
-      <p>Most teams that self-host underestimate the total cost. You are now paying for: GPU capacity that sits idle between requests, an inference server, model-update evaluation, monitoring, a security review of downloaded artefacts, and engineers who understand CUDA errors at 2am. <strong>A frontier API is often cheaper and better until you hit either a compliance wall or serious volume.</strong> "We should self-host to save money" is the most common wrong reason.</p>
+      <p>Most teams underestimate the real cost. You now pay for: a GPU sitting idle between requests, a server to run the model on, re-testing every time you change models, monitoring, a security review of what you downloaded, and engineers who can debug GPU errors at 2am. <strong>A top API is usually cheaper and better until you hit a legal wall or very high volume.</strong> "Let's self-host to save money" is the most common wrong reason.</p>
     </div>
 
     <div class="linkrow">
@@ -481,24 +481,24 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
     <details class="recall">
       <summary>Name the one reason to self-host that no amount of API improvement can ever overturn.</summary>
       <div class="ans">
-        <p><strong>Data residency / legal constraint.</strong> Cost, quality and latency arguments all shift as vendors improve and prices fall. But if the law or your contract says the data cannot leave your network, no API — however cheap or brilliant — becomes eligible. Every other reason is a moving target; this one is a hard boundary.</p>
+        <p><strong>The legal one — data cannot leave your network.</strong> Arguments about cost, quality and speed all change as vendors improve and prices drop. But if the law or your contract says the data must stay inside, no API becomes allowed, however cheap or good it gets. Every other reason moves. This one does not.</p>
       </div>
     </details>
 
     <details class="recall arch">
       <summary>Your CFO asks: "at what point does self-hosting actually become cheaper?" Sketch how you'd answer.</summary>
       <div class="ans">
-        <p>Set up a break-even, not an opinion. <strong>API cost</strong> = (tokens per request × requests per month) × blended price per token. <strong>Self-host cost</strong> = GPU instance hours per month + engineering time amortised + storage/egress. Then solve for the request volume where they cross.</p>
-        <p>Two things people forget. <strong>Utilisation:</strong> a GPU you rent 24×7 but use 6% of the time makes your effective per-token cost enormous — the API's elasticity is a real feature you're giving up. <strong>Quality per rupee:</strong> if the open model needs three retries to match one frontier-model answer, the token count in your comparison is wrong.</p>
-        <p>The honest answer usually is: "cheaper above roughly X million tokens a month at Y% GPU utilisation, and we're currently at 5% of X." Which reframes the conversation to the reason that actually applies — compliance or customisation.</p>
+        <p>Give them a number, not an opinion. <strong>API cost</strong> = tokens per request × requests per month × price per token. <strong>Self-host cost</strong> = GPU hours per month + engineering time + storage. Then find the traffic level where the two are equal.</p>
+        <p>Two things people forget. <strong>Idle time:</strong> a GPU you rent all day but use 6% of the time makes your real cost per answer huge. With an API you only pay when you use it, and that is worth something. <strong>Retries:</strong> if the open model needs three attempts to match one answer from a top model, your token count is wrong.</p>
+        <p>The honest answer is usually: "cheaper above roughly X million tokens a month if the GPU stays busy, and today we are at 5% of X." That moves the conversation to the reason that actually applies — rules or customisation.</p>
       </div>
     </details>
 
     <details class="recall think">
       <summary>Frozen weights are listed above as an advantage. When are they a serious liability?</summary>
       <div class="ans">
-        <p>The moment safety, accuracy or capability improves elsewhere and you don't get it. A frozen checkpoint keeps every bias, jailbreak and factual error it shipped with, forever. Hosted models get patched; yours doesn't unless you re-evaluate, re-download and re-test.</p>
-        <p>So "version stability" isn't free — it converts an implicit vendor responsibility into an explicit internal process. If you self-host and never revisit the model, you haven't chosen stability; you've chosen decay. The mature version is a <strong>deliberate upgrade cadence</strong>: pinned in production, evaluated quarterly against your own test set.</p>
+        <p>The moment everyone else's model gets better and yours does not. A frozen model keeps every bias, every security hole and every factual error it shipped with, forever. Hosted models get fixed for you. Yours does not, unless you download a new one and test it again.</p>
+        <p>So "stable version" is not free. It moves a job the vendor used to do onto your team. If you self-host and never look at the model again, you have not chosen stability — you have chosen slow decay. The grown-up version is a <strong>planned upgrade rhythm</strong>: fixed version in production, reviewed every quarter against your own test set.</p>
       </div>
     </details>
   </div>
@@ -508,7 +508,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">02</span><h2>The Hugging Face Hub, read like an engineer</h2></div>
 
-    <p>Hugging Face is the package registry for machine learning — npm or PyPI, but the packages are trained brains. Three things live there.</p>
+    <p>Hugging Face is an app store for machine learning. Like npm or PyPI, but the packages are trained brains. Three things live there.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 2 · The three floors of the Hub</div>
@@ -531,31 +531,31 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
     </div>
 
     <h3>How to read a model card in ninety seconds</h3>
-    <p>The model card is a README. Most people skim the benchmark table and stop. Here's the order an engineer should read it in:</p>
+    <p>The model card is the README of a model. Most people glance at the benchmark table and stop. Here is the order you should actually read it in:</p>
 
     <div class="tablewrap">
       <table>
         <thead><tr><th>Check</th><th>Question</th><th>Why it decides things</th></tr></thead>
         <tbody>
-          <tr><td class="n">Licence</td><td>Apache-2.0? MIT? Custom community licence?</td><td>Some restrict commercial use, redistribution, or use above a user threshold. This is a legal gate, not a footnote</td></tr>
-          <tr><td class="n">Gated?</td><td>Does it require accepting terms before download?</td><td>Llama models do. You must be logged in with a token, and CI/CD needs that token too</td></tr>
+          <tr><td class="n">Licence</td><td>Apache-2.0? MIT? Custom community licence?</td><td>Some block commercial use, or sharing, or use above a certain number of users. This is a legal gate, not a footnote</td></tr>
+          <tr><td class="n">Gated?</td><td>Does it require accepting terms before download?</td><td>Llama models are. You must be logged in with a token — and your build pipeline needs that token too</td></tr>
           <tr><td class="n">Parameter count</td><td>0.5B, 3B, 7B, 32B?</td><td>Directly sets your VRAM requirement — see section 05</td></tr>
-          <tr><td class="n">Base or Instruct?</td><td>Does the name end in <code>-instruct</code> / <code>-it</code> / <code>-chat</code>?</td><td>Base models complete text; they do <em>not</em> follow instructions. Picking base for a Q&amp;A app is a classic wasted afternoon</td></tr>
+          <tr><td class="n">Base or Instruct?</td><td>Does the name end in <code>-instruct</code> / <code>-it</code> / <code>-chat</code>?</td><td>Base models just continue text. They do <em>not</em> follow instructions. Picking a base model for a Q&amp;A app wastes an afternoon</td></tr>
           <tr><td class="n">Context length</td><td>4K? 32K? 128K?</td><td>Caps how much document you can feed per call. The <code>-4k-</code> in a name is a hard limit</td></tr>
           <tr><td class="n">Chat template</td><td>Which special tokens does it expect?</td><td>Get this wrong and output quality collapses — see section 12</td></tr>
-          <tr><td class="n">Training data notes</td><td>Languages, cutoff, known gaps</td><td>A model trained mostly on English web text will be weak on Hindi legal text, whatever its benchmark score</td></tr>
-          <tr><td class="n">Downloads / likes</td><td>Popular?</td><td>Weak signal. Useful for "is this maintained and battle-tested", useless for "is this good at my task"</td></tr>
+          <tr><td class="n">Training data notes</td><td>Languages, cutoff, known gaps</td><td>A model trained mostly on English web pages will be weak on Hindi legal text, whatever its score says</td></tr>
+          <tr><td class="n">Downloads / likes</td><td>Popular?</td><td>A weak signal. Tells you the model is maintained and widely used. Tells you nothing about your task</td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="note warn">
       <span class="lbl">Downloads are a lagging, biased metric</span>
-      <p>In the course walkthrough, the most-downloaded text-generation model was a small older model with ~35M downloads while Llama 3.1 had ~5.4M. That does <strong>not</strong> mean the small model is better. Download counts reward: models small enough to be pulled repeatedly in CI, models used as tokenizer-only dependencies, tutorial defaults, and models that have simply existed longer. <strong>Popularity measures friction, not quality.</strong></p>
+      <p>In the course, the most-downloaded text model was a small older one with about 35M downloads, while Llama 3.1 had 5.4M. That does <strong>not</strong> mean the small one is better. Downloads go up when a model is small enough to be re-downloaded constantly by build servers, when it is used only for its tokenizer, when it is the default in tutorials, and when it has simply been around longer. <strong>Downloads measure how easy a model is to grab, not how good it is.</strong></p>
     </div>
 
     <h3>Use Spaces as a free trial</h3>
-    <p>Before you download tens of gigabytes onto a GPU you're paying for, find the model's Space (or the inference widget on the model card) and give it three of your <em>own</em> domain prompts. Five minutes there routinely saves an hour of downloading.</p>
+    <p>Before you download tens of gigabytes onto a GPU you are paying for, open the model's Space (or the little test box on the model card) and give it three prompts from your <em>own</em> work. Five minutes here often saves an hour of downloading.</p>
 
     <div class="linkrow">
       <a href="https://huggingface.co/models" target="_blank" rel="noopener">Browse models</a>
@@ -567,7 +567,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
     <details class="recall">
       <summary>You load a model and it rambles instead of answering your question. What's the first thing to check?</summary>
       <div class="ans">
-        <p>Whether you grabbed the <strong>base</strong> model rather than the <strong>instruct</strong> variant. Base models are trained purely to continue text — asked "What is the capital of France?" they may cheerfully generate five more exam questions. Instruction-tuned versions (<code>-instruct</code>, <code>-it</code>, <code>-chat</code>) have been further trained to treat your input as a request.</p>
+        <p>Whether you downloaded the <strong>base</strong> model instead of the <strong>instruct</strong> one. Base models only know how to continue text. Ask one "What is the capital of France?" and it may happily write five more exam questions instead of answering. The instruct versions (<code>-instruct</code>, <code>-it</code>, <code>-chat</code>) have been trained to treat your input as a request.</p>
         <p>Second thing to check: whether you applied the model's chat template. Right model, wrong formatting produces the same symptom.</p>
       </div>
     </details>
@@ -575,20 +575,20 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
     <details class="recall think">
       <summary>Why is "1.6 million models available" a problem as much as a feature?</summary>
       <div class="ans">
-        <p>Because selection cost becomes the bottleneck, and most of those checkpoints are unmaintained forks, experiments and abandoned fine-tunes. An open registry with no gatekeeping gives you both extraordinary choice and no quality signal.</p>
-        <p>The practical response is to narrow hard before you browse: filter by task, then by organisation you'd trust to still exist next year (Meta, Google, Microsoft, Alibaba, Mistral, DeepSeek), then by licence, then by size that fits your hardware. That takes 1.6 million down to about a dozen. <strong>Treat model selection like dependency selection</strong> — you would not install a random npm package with four stars into a payments system, and a fine-tune is a far larger trust surface than a package.</p>
+        <p>Because now choosing is the hard part. Most of those models are half-finished experiments and abandoned copies. Anyone can upload, so you get huge choice and no quality signal at all.</p>
+        <p>The fix is to narrow down hard before you browse. Filter by task, then by an organisation you trust to still exist next year (Meta, Google, Microsoft, Alibaba, Mistral, DeepSeek), then by licence, then by a size that fits your GPU. That turns 1.6 million into about a dozen. <strong>Pick models the way you pick libraries.</strong> You would not drop a random package with four stars into a payments system, and a model is a much bigger act of trust than a package.</p>
       </div>
     </details>
 
     <details class="recall arch">
       <summary>What is the supply-chain security question nobody in the tutorial asks?</summary>
       <div class="ans">
-        <p>You are downloading executable-adjacent artefacts from a public registry and loading them into a process with GPU and filesystem access. The questions a security review will ask:</p>
-        <p><strong>Format:</strong> is it <code>safetensors</code> or legacy pickle? Pickle files can execute arbitrary code on load. Prefer safetensors, always.<br>
-        <strong>Remote code:</strong> does it require <code>trust_remote_code=True</code>? That flag means "run Python from this repo on my machine" — see section 09.<br>
-        <strong>Provenance:</strong> is the repo the official org, or a lookalike? Typosquatting exists here too.<br>
-        <strong>Pinning:</strong> are you pulling <code>main</code>, or a specific commit revision? Unpinned means the artefact can change under you.<br>
-        <strong>Mirroring:</strong> in a regulated shop, models should be pulled once, scanned, and served from an internal registry — never fetched from the internet at container start.</p>
+        <p>You are downloading files from a public site and loading them into a program that can reach your GPU and your disk. A security review will ask:</p>
+        <p><strong>File format:</strong> is it <code>safetensors</code> or the old pickle format? Pickle files can run code when you open them. Always prefer safetensors.<br>
+        <strong>Custom code:</strong> does it need <code>trust_remote_code=True</code>? That means "run this repo's Python on my machine" — see section 09.<br>
+        <strong>Who published it:</strong> is this the official account or a copycat with a similar name? Fake lookalikes exist here too.<br>
+        <strong>Version:</strong> are you pulling the latest, or a fixed version? If you do not fix it, the file can change under you.<br>
+        <strong>Copy it once:</strong> in a regulated company, download the model once, scan it, and serve it from your own internal store — never pull it from the internet every time a container starts.</p>
       </div>
     </details>
   </div>
@@ -598,7 +598,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">03</span><h2>Decoding a model name</h2></div>
 
-    <p>Model names are dense with information. Learn to read them and you can filter a candidate list without opening a single page.</p>
+    <p>Model names are packed with information. Once you can read them, you can shortlist models without opening a single page.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 3 · The anatomy of a model ID</div>
@@ -629,22 +629,22 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
 
     <div class="note good">
       <span class="lbl m">The parameter-count intuition</span>
-      <p><strong>B = billions of weights.</strong> Qwen3-32B has 32 billion numbers in it. This single figure predicts your GPU bill, your latency and roughly your capability — which is why it's in the name. A useful ladder: <strong>0.5–3B</strong> runs on a laptop or a free Colab GPU and handles extraction, classification and simple Q&amp;A. <strong>7–14B</strong> is the sweet spot for most self-hosted production work. <strong>30B+</strong> needs serious hardware and starts approaching frontier quality on narrow tasks.</p>
+      <p><strong>B = billions of weights.</strong> Qwen3-32B holds 32 billion numbers. This one figure tells you your GPU cost, your speed and roughly how capable it is — which is why it is in the name. A simple ladder: <strong>0.5–3B</strong> runs on a laptop or a free Colab GPU and handles extraction, sorting and simple Q&amp;A. <strong>7–14B</strong> is the sweet spot for most real self-hosted work. <strong>30B+</strong> needs serious hardware and starts to feel like a top model on narrow tasks.</p>
     </div>
 
     <details class="recall">
       <summary>Two candidates: <code>Phi-3-mini-4k-instruct</code> and <code>Phi-3-mini-128k-instruct</code>. Same family, same size. When does the 4k version still win?</summary>
       <div class="ans">
-        <p>When your inputs are short. Longer context isn't free — it costs VRAM for the KV cache (section 06), it costs latency, and long-context variants are sometimes slightly weaker on short-input tasks because capacity was spent on length. If you're classifying support tickets of 200 tokens, buying a 128k window is paying for a warehouse to store a envelope.</p>
-        <p>The 128k version wins the moment a single document genuinely can't be split without losing meaning.</p>
+        <p>When your inputs are short. A longer context is not free. It uses more GPU memory (section 06), it is slower, and long-context versions are sometimes slightly weaker on short inputs. If you are sorting 200-token support tickets, a 128k window is renting a warehouse to store one envelope.</p>
+        <p>The 128k version wins the moment a document genuinely cannot be split up without losing its meaning.</p>
       </div>
     </details>
 
     <details class="recall think">
       <summary>You see <code>-GGUF</code> and <code>-AWQ</code> variants of a model you like. What does their existence tell you about the model's real-world usage?</summary>
       <div class="ans">
-        <p>That people are actually deploying it on constrained hardware — those are community quantization formats produced because there's demand. Their presence is a decent proxy for "this model has an ecosystem": tooling support, inference-engine compatibility, people who've hit and documented the bugs.</p>
-        <p>It also tells you something about your own next step. If a well-maintained quantized build already exists, you may not need to quantize at load time yourself — you can pull a pre-quantized artefact that someone has already validated, which is faster to load and often better tuned than a naive on-the-fly conversion.</p>
+        <p>That real people are running it on small hardware. Those are community-made compressed versions, and they only exist because someone wanted them. So their presence is a good sign that the model has a healthy community: tools that support it, and people who have already hit the bugs and written them down.</p>
+        <p>It also saves you work. If a good compressed version already exists, you may not need to compress the model yourself when loading. You can download one someone has already tested, which loads faster and is often better tuned than doing it on the fly.</p>
       </div>
     </details>
   </div>
@@ -654,7 +654,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
 <div class="part reveal">
   <div class="wrap">
     <div class="bar"><span class="tag">Part two</span><h2>Hardware is the real constraint</h2></div>
-    <p>With APIs, capability was the constraint. Here, memory is. This part is the difference between "the model I want" and "the model I can actually run" — and it's where most self-hosting projects die.</p>
+    <p>With APIs, the limit was how smart the model is. Here the limit is memory. This part is the gap between the model you want and the model you can actually run. Most self-hosting projects fail right here.</p>
   </div>
 </div>
 
@@ -662,7 +662,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">04</span><h2>Why a GPU, and which one</h2></div>
 
-    <p>Running an LLM is, mechanically, an enormous pile of matrix multiplications. Every generated token requires passing a vector through billions of weights. CPUs execute a few operations at a time, very fast. GPUs execute thousands simultaneously, somewhat slower each. For this workload, width beats speed by orders of magnitude.</p>
+    <p>Running an LLM is basically a huge pile of multiplication. Every word it produces means pushing numbers through billions of weights. A CPU does a few of these at a time, very fast. A GPU does thousands at once, each a bit slower. For this kind of work, doing many at once wins by a mile.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 4 · Why width beats speed here</div>
@@ -688,7 +688,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
 
     <div class="note warn">
       <span class="lbl">VRAM matters more than speed</span>
-      <p>Notice the trap: people compare GPUs on <em>throughput</em>, but the thing that stops you is <em>capacity</em>. A slow GPU with enough VRAM runs your model; a fast GPU without enough VRAM throws <code>CUDA out of memory</code> and runs nothing. When choosing hardware for inference, <strong>check that the model fits first, then optimise for speed.</strong></p>
+      <p>Watch out for this trap. People compare GPUs on <em>speed</em>, but the thing that actually blocks you is <em>space</em>. A slow GPU with enough memory will run your model. A fast GPU without enough memory throws <code>CUDA out of memory</code> and runs nothing at all. <strong>Check that the model fits first. Worry about speed second.</strong></p>
     </div>
 
     <p>In Colab: <strong>Runtime → Change runtime type → Hardware accelerator</strong>. Then verify from code rather than trusting the menu:</p>
@@ -708,16 +708,16 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
     <details class="recall">
       <summary>Your notebook idles for twenty minutes, then every cell fails with "torch is not defined". What happened?</summary>
       <div class="ans">
-        <p>Colab reclaimed your runtime. The VM was recycled, so every import, variable, downloaded model and logged-in session is gone. You have to re-run from the top — install, import, log in, reload the model (which re-downloads gigabytes).</p>
-        <p>The engineering lesson beyond the annoyance: <strong>your notebook state is not durable infrastructure.</strong> Anything that takes five minutes to rebuild and lives only in RAM is a demo, not a system. Real deployments load the model once into a long-lived process precisely to avoid this cost.</p>
+        <p>Colab took your machine back. Everything is gone: imports, variables, the downloaded model, your login. You have to run from the top again — install, import, log in, reload the model, which downloads gigabytes all over again.</p>
+        <p>The lesson underneath the annoyance: <strong>a notebook is not real infrastructure.</strong> Anything that takes five minutes to rebuild and only lives in memory is a demo, not a system. Real deployments load the model once into a long-running service exactly to avoid this.</p>
       </div>
     </details>
 
     <details class="recall arch">
       <summary>Why would a production team accept a <em>slower</em> GPU than the one their benchmark says is fastest?</summary>
       <div class="ans">
-        <p>Because inference cost is dominated by utilisation, not peak speed. A cheaper GPU that stays 70% busy beats an A100 at 8% busy on cost-per-query, every time. Add availability (top-tier GPUs are frequently unobtainable in your region), quota limits, and the fact that a bigger card only helps if your model and batch actually fill it.</p>
-        <p>The real question is never "which GPU is fastest?" but <strong>"what is my cost per thousand queries at realistic traffic, including idle time?"</strong> That reframing usually points at smaller cards, aggressive batching, and autoscaling to zero — or, honestly, back at the API.</p>
+        <p>Because what drives cost is how busy the GPU is, not how fast it is. A cheap GPU that is busy 70% of the time beats an expensive one that is busy 8% of the time, every time. On top of that, the best GPUs are often simply unavailable in your region, and a bigger card only helps if your model actually fills it.</p>
+        <p>The real question is never "which GPU is fastest?" It is <strong>"what does a thousand answers cost me at real traffic, counting idle time?"</strong> Asked that way, the answer is usually a smaller card, better batching, and scaling down to zero when nobody is using it — or, honestly, going back to the API.</p>
       </div>
     </details>
   </div>
@@ -727,7 +727,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">05</span><h2>Precision and quantization</h2></div>
 
-    <p>Every weight is a number, and you choose how many bits to store it in. That choice is the single biggest lever you have over whether a model fits on your hardware.</p>
+    <p>Every weight is a number, and you choose how many bits to store it in. That one choice decides more than anything else whether the model fits on your hardware.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 5 · The precision ladder</div>
@@ -807,7 +807,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
 
     <div class="note warn">
       <span class="lbl">Read this as an order of magnitude, not a guarantee</span>
-      <p>The estimate uses weights + a rough KV-cache and activation allowance. Real usage varies with architecture (grouped-query attention shrinks the KV cache a lot), batch size, and framework overhead. <strong>Use it to answer "is this plausible?" not "will this exactly fit?"</strong> — and always leave 10–15% headroom, because a GPU at 99% will OOM on the first unusual request.</p>
+      <p>The estimate adds the weights plus a rough allowance for the cache and working memory. Real numbers vary with the model design, the batch size and the library. <strong>Use it to answer "is this realistic?", not "will this exactly fit?"</strong> Always leave 10–15% spare, because a GPU running at 99% will crash on the first unusual request.</p>
     </div>
 
     <h3>How you actually ask for it</h3>
@@ -832,33 +832,33 @@ model = AutoModelForCausalLM.from_pretrained(
 
     <div class="note good">
       <span class="lbl m">The subtlety worth understanding</span>
-      <p><strong>Storage precision and compute precision are different things.</strong> Weights sit in memory at 4 bits, but they're dequantized to fp16 to do the actual matrix multiply. That's why <code>bnb_4bit_compute_dtype</code> exists. It also explains why 4-bit saves enormous memory but doesn't make inference proportionally faster — you've reduced what you store, not the arithmetic you perform. Quantization is a <strong>memory optimisation that buys you access, not a speed optimisation.</strong></p>
+      <p><strong>How you store a number and how you calculate with it are two different things.</strong> The weights sit in memory at 4 bits, but they are expanded back to 16 bits to do the actual maths. That is what <code>bnb_4bit_compute_dtype</code> is for. It also explains something people find odd: 4-bit saves a huge amount of memory but does not make the model much faster. You shrank what you store, not the work you do. Quantization <strong>buys you the ability to run the model at all — not speed.</strong></p>
     </div>
 
     <details class="recall">
       <summary>You quantize to 4-bit and quality drops noticeably on your task. What are your options, in order of cost?</summary>
       <div class="ans">
-        <p><strong>1. Step up to 8-bit.</strong> Roughly doubles memory but usually recovers most of the loss. Cheapest fix if it fits.</p>
-        <p><strong>2. Try a better quantization scheme.</strong> NF4 with double quantization, or a community AWQ/GPTQ build that was calibrated properly, often beats a naive conversion at the same bit width.</p>
-        <p><strong>3. Drop to a smaller model at higher precision.</strong> A 3B at fp16 frequently beats a 7B crushed to 4-bit — same memory, better behaviour. This trade is underused.</p>
-        <p><strong>4. Rent a bigger GPU.</strong> The honest last resort, and sometimes the right one.</p>
+        <p><strong>1. Move up to 8-bit.</strong> Uses about twice the memory, but usually gets most of the quality back. Cheapest fix if it fits.</p>
+        <p><strong>2. Use a better compression method.</strong> NF4 with double quantization, or a community-made AWQ/GPTQ version that was tuned properly, usually beats a quick conversion at the same size.</p>
+        <p><strong>3. Use a smaller model at higher precision.</strong> A 3B model at 16-bit often beats a 7B squashed to 4-bit — same memory, better answers. People forget this option.</p>
+        <p><strong>4. Rent a bigger GPU.</strong> The honest last resort, and sometimes the right answer.</p>
       </div>
     </details>
 
     <details class="recall think">
       <summary>Quantization is lossy. Why doesn't it destroy the model the way lossy compression destroys a spreadsheet?</summary>
       <div class="ans">
-        <p>Because neural networks are massively redundant and inherently noise-tolerant. No single weight carries decisive information; the behaviour emerges from patterns across billions of them. Small rounding errors distributed across all weights largely cancel rather than compound — the network was trained with noise (dropout, stochastic gradients) and is robust to more of it.</p>
-        <p>A spreadsheet is the opposite: every cell is load-bearing, and one wrong digit is one wrong answer. <strong>Redundancy is what makes compression survivable</strong>, and it's why the same trick doesn't transfer to systems where each value matters individually.</p>
-        <p>Follow-on worth sitting with: this is also why quantization damage isn't uniform. It tends to show up first in the rarest, most precise behaviours — long arithmetic, exact recall of obscure facts, low-resource languages — while fluent conversation stays intact. So a quantized model can feel fine in casual testing and fail on exactly the edge cases you care about.</p>
+        <p>Because a neural network has enormous overlap built in, and it is used to noise. No single weight decides anything. The behaviour comes from patterns across billions of them. Tiny rounding errors spread across all of them mostly cancel each other out, and the model was trained with random noise anyway, so it copes with a bit more.</p>
+        <p>A spreadsheet is the opposite. Every cell matters on its own, and one wrong digit is one wrong answer. <strong>That overlap is what makes squashing a model survivable</strong>, and it is why the same trick fails anywhere each value stands alone.</p>
+        <p>Worth sitting with: the damage is not spread evenly. It shows up first in the rarest and most exact skills — long arithmetic, obscure facts, less common languages — while normal conversation still sounds fine. So a squashed model can pass casual testing and then fail on exactly the cases you care about.</p>
       </div>
     </details>
 
     <details class="recall arch">
       <summary>When is running a quantized model actively the wrong call, even though it fits?</summary>
       <div class="ans">
-        <p>When the failure mode is silent and the stakes are high. Quantization degrades precision-sensitive behaviour first — numerical reasoning, exact figure extraction, rare-token handling. In a financial-document pipeline that pulls numbers out of filings, a 4-bit model that transposes a digit produces a plausible, fluent, wrong answer that no error handler catches.</p>
-        <p>The test isn't "does it still sound good." It's <strong>"does it still get the numbers right, measured on my own labelled set."</strong> If you haven't measured that specifically, you don't know what quantization cost you — you only know it loads.</p>
+        <p>When failures are silent and the stakes are high. Compression hurts exact work first — maths, pulling out precise figures, rare words. In a system that reads numbers out of financial filings, a 4-bit model that swaps two digits gives you a fluent, confident, wrong answer that no error check will catch.</p>
+        <p>The test is not "does it still sound good." It is <strong>"does it still get the numbers right on my own list of known answers."</strong> If you have not measured that, you do not know what the compression cost you. You only know the model loads.</p>
       </div>
     </details>
   </div>
@@ -868,7 +868,7 @@ model = AutoModelForCausalLM.from_pretrained(
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">06</span><h2>The memory budget nobody warns you about</h2></div>
 
-    <p>Weights are the number everyone quotes. They're not the only thing in VRAM, and the other components are the ones that make your app fail in production but work in testing.</p>
+    <p>Everyone quotes the weight size. But weights are not the only thing in GPU memory, and the other pieces are exactly what make an app work in testing and fail in production.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 6 · What's actually sitting in your GPU</div>
@@ -901,26 +901,26 @@ model = AutoModelForCausalLM.from_pretrained(
 
     <div class="note">
       <span class="lbl b">Why this changes your API design</span>
-      <p>Because memory scales with context length and concurrency, a self-hosted LLM service must enforce an <strong>input token limit at the edge</strong> — before the request reaches the model. Rejecting a 200K-token request with a clean 413 is infinitely better than accepting it and crashing the worker for every other user in flight. Same discipline as a max upload size on a file endpoint.</p>
+      <p>Memory grows with how long the input is and how many people are using it at once. So a self-hosted model service must <strong>cap the input size at the front door</strong>, before the request reaches the model. Politely rejecting a huge request is far better than accepting it and crashing the server for everyone else. It is the same rule as a maximum file upload size.</p>
     </div>
 
     <details class="recall">
       <summary>Model weights fit in 4GB of a 15GB GPU. Why can you still run out of memory?</summary>
       <div class="ans">
-        <p>Because weights are the floor, not the ceiling. The KV cache grows with sequence length and with the number of concurrent requests, and activations spike during the forward pass. Long inputs, big batches, or several users at once can consume many times the weight footprint.</p>
-        <p>It's the classic capacity-planning error: sizing for the static component and forgetting the one that scales with load.</p>
+        <p>Because the weights are the floor, not the ceiling. The cache grows with the length of the input and the number of people using it at once, and there is extra working memory during each pass. Long documents, big batches or a few users together can use several times the weight size.</p>
+        <p>It is the classic planning mistake: you size for the fixed part and forget the part that grows with traffic.</p>
       </div>
     </details>
 
     <details class="recall arch">
       <summary>Design question: your Q&amp;A service must serve 50 concurrent users on one GPU. What levers do you have?</summary>
       <div class="ans">
-        <p><strong>Cap input length</strong> at the API gateway — the single most effective lever, since KV cache is linear in tokens.<br>
-        <strong>Use a real inference server</strong> (vLLM, TGI) rather than a loop over <code>pipeline()</code>. These implement paged attention and continuous batching, which is the difference between 3 concurrent users and 50 on identical hardware.<br>
-        <strong>Choose a model with grouped-query attention</strong> — it shrinks the KV cache substantially for the same quality.<br>
-        <strong>Quantize the KV cache</strong>, not just the weights.<br>
-        <strong>Queue and admission-control</strong>: bound the in-flight requests and make the 51st user wait rather than making all 50 fail.</p>
-        <p>The meta-point: the notebook in this module can serve exactly one user at a time, and nothing about it degrades gracefully. Concurrency is not a tuning parameter you add later — it's an architectural property of the serving layer you chose.</p>
+        <p><strong>Cap the input size</strong> at the front door. This is the biggest single win, because cache use grows directly with input length.<br>
+        <strong>Use a proper model server</strong> (vLLM, TGI) instead of calling <code>pipeline()</code> in a loop. These pack requests together cleverly, which is the difference between 3 users and 50 on the same hardware.<br>
+        <strong>Pick a model designed with a smaller cache</strong> (grouped-query attention) — same quality, much less memory.<br>
+        <strong>Compress the cache too</strong>, not only the weights.<br>
+        <strong>Add a queue</strong>: limit how many requests run at once and make the 51st person wait, instead of letting all 50 fail.</p>
+        <p>The bigger point: the notebook in this module serves exactly one person at a time, and it fails hard rather than slowing down. Handling many users is not a setting you turn on later. It comes from the serving layer you picked at the start.</p>
       </div>
     </details>
   </div>
@@ -930,7 +930,7 @@ model = AutoModelForCausalLM.from_pretrained(
 <div class="part reveal">
   <div class="wrap">
     <div class="bar"><span class="tag">Part three</span><h2>Transformers: three levels of control</h2></div>
-    <p>The library gives you the same capability at three altitudes. Knowing which altitude to fly at — and what each one hides — is most of the skill.</p>
+    <p>The library lets you work at three levels. Knowing which level to use, and what each one hides from you, is most of the skill.</p>
   </div>
 </div>
 
@@ -938,7 +938,7 @@ model = AutoModelForCausalLM.from_pretrained(
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">07</span><h2>Pipeline — the easy door</h2></div>
 
-    <p>A <span class="term">pipeline</span> is a ready-made application: it downloads the model and tokenizer, handles preprocessing, runs inference, and converts raw scores back into human-readable output.</p>
+    <p>A <span class="term">pipeline</span> is a ready-made mini app. It downloads the model and tokenizer, prepares your text, runs the model, and turns the raw numbers back into readable output.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 7 · What the pipeline is hiding</div>
@@ -979,7 +979,7 @@ clf = pipeline(<span class="c-str">"text-classification"</span>, model=<span cla
 
     <div class="note good">
       <span class="lbl m">Why the neutral result is the interesting one</span>
-      <p>A naive keyword classifier sees "earnings report" and guesses positive. FinBERT correctly identifies a scheduling announcement as carrying no sentiment. <strong>That distinction — between an event and a judgement about an event — is exactly what domain fine-tuning buys you</strong>, and it's why a 110M-parameter specialist can beat a general-purpose giant on a narrow task while costing a thousandth as much to run.</p>
+      <p>A simple keyword checker sees "earnings report" and guesses positive. FinBERT correctly sees that announcing a date carries no opinion at all. <strong>Telling the difference between an event and an opinion about an event is exactly what training on one domain buys you.</strong> It is why a tiny specialist model can beat a giant general one on a narrow job while costing a thousandth as much to run.</p>
     </div>
 
     <p>Other task strings worth knowing: <code>text-generation</code>, <code>summarization</code>, <code>translation</code>, <code>question-answering</code>, <code>zero-shot-classification</code>, <code>image-classification</code>, <code>automatic-speech-recognition</code>.</p>
@@ -987,19 +987,19 @@ clf = pipeline(<span class="c-str">"text-classification"</span>, model=<span cla
     <details class="recall">
       <summary>When should you stop using <code>pipeline()</code> and drop a level?</summary>
       <div class="ans">
-        <p>When you need control over something it abstracts away: quantization config at load time, custom device placement, batching strategy, access to logits or attention weights, streaming output token by token, or reusing one loaded model across several different tasks without loading it twice.</p>
-        <p>Note the useful middle path this module actually uses: load the tokenizer and model yourself with full control, <em>then</em> wrap them in a pipeline. You get the configuration you need and the convenience you want.</p>
+        <p>When you need control over something it hides: how the model is compressed when loading, where it is placed, how requests are batched, seeing the raw scores, streaming the answer word by word, or using one loaded model for several jobs without loading it twice.</p>
+        <p>Notice the middle path this module actually takes: load the tokenizer and model yourself, with full control, <em>then</em> wrap them in a pipeline. You get the settings you need and the convenience you want.</p>
       </div>
     </details>
 
     <details class="recall think">
       <summary>Abstractions that hide five steps also hide five failure modes. Which ones does <code>pipeline()</code> hide?</summary>
       <div class="ans">
-        <p><strong>Silent truncation.</strong> Input longer than the model's window gets cut, usually without a loud error. Your model answers confidently about a document whose second half it never saw.</p>
-        <p><strong>Default model selection.</strong> <code>pipeline("sentiment-analysis")</code> with no model argument silently picks a small English default — fine in a tutorial, wrong the moment your text is Hindi or financial.</p>
-        <p><strong>Label semantics.</strong> "POSITIVE"/"LABEL_1"/"positive" vary by model; code that string-matches one breaks on another.</p>
-        <p><strong>Device placement and dtype</strong>, chosen for you — which is how you end up running on CPU without noticing.</p>
-        <p>The general principle: <strong>convenience abstractions make the happy path shorter and the failure path more mysterious.</strong> Use them, but know exactly what you'd have written by hand.</p>
+        <p><strong>Quiet cutting.</strong> Input longer than the model's limit gets chopped, usually with no clear warning. Your model then answers confidently about a document whose second half it never saw.</p>
+        <p><strong>Hidden default model.</strong> <code>pipeline("sentiment-analysis")</code> with no model named quietly picks a small English one. Fine in a tutorial, wrong the moment your text is Hindi or financial.</p>
+        <p><strong>Label names.</strong> One model says "POSITIVE", another says "LABEL_1", another says "positive". Code that checks for one breaks on the next.</p>
+        <p><strong>Where it runs</strong> is chosen for you — which is how you end up on the CPU without noticing.</p>
+        <p>The general rule: <strong>shortcuts make the working path shorter and the broken path harder to understand.</strong> Use them, but know what you would have written by hand.</p>
       </div>
     </details>
   </div>
@@ -1009,7 +1009,7 @@ clf = pipeline(<span class="c-str">"text-classification"</span>, model=<span cla
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">08</span><h2>AutoTokenizer — the model's private language</h2></div>
 
-    <p>Models don't read text. They read integers. The tokenizer is the dictionary that converts between the two — and <strong>every model family has its own dictionary.</strong></p>
+    <p>Models do not read text. They read numbers. The tokenizer is the dictionary that converts between the two — and <strong>every model family has its own dictionary.</strong></p>
 
     <div class="ascii">
       <div class="cap">Sketch 8 · Same sentence, two tokenizers, two different languages</div>
@@ -1050,15 +1050,15 @@ text = <span class="c-str">"AI is transforming industries and the future of work
 
     <div class="note trap">
       <span class="lbl r">The rule you must not break</span>
-      <p><strong>The tokenizer must come from the same checkpoint as the model.</strong> Always <code>AutoTokenizer.from_pretrained(model_id)</code> with the <em>identical</em> ID you passed to the model. Mismatching them doesn't crash — it silently produces garbage, which is far worse than crashing, because it looks like the model is just bad.</p>
+      <p><strong>The tokenizer must come from the same model as the weights.</strong> Always use <code>AutoTokenizer.from_pretrained(model_id)</code> with the <em>exact same</em> ID you gave the model. Mixing them does not crash. It quietly produces nonsense, which is much worse than crashing, because it just looks like a bad model.</p>
     </div>
 
     <h3>Why tokenization is a business concern, not a detail</h3>
     <ul class="tight">
       <li><strong>It's your billing unit.</strong> API pricing and context limits are in tokens, not words.</li>
-      <li><strong>It's unfair across languages.</strong> Most tokenizers were fitted on English-heavy corpora. The same sentence in Hindi, Tamil or Arabic often costs 2–3× more tokens than in English — meaning higher cost, and less content fitting in the same window. If you're building for Indian users, measure this before you size anything.</li>
-      <li><strong>It explains "dumb" failures.</strong> Character-counting and spelling tasks fail because the model never sees characters. Arithmetic is shaky partly because numbers split into arbitrary chunks.</li>
-      <li><strong>It bounds retrieval design.</strong> Chunk sizes for RAG are token budgets, so you need the tokenizer to plan them honestly.</li>
+      <li><strong>It is unfair across languages.</strong> Most tokenizers were built mainly from English text. The same sentence in Hindi, Tamil or Arabic often uses 2–3 times more tokens than English — so it costs more, and less of it fits in the same window. If you are building for Indian users, measure this before you size anything.</li>
+      <li><strong>It explains silly-looking failures.</strong> Counting letters and spelling go wrong because the model never sees letters. Maths is shaky partly because numbers get split into odd chunks.</li>
+      <li><strong>It shapes how you split documents.</strong> Chunk sizes are measured in tokens, so you need the tokenizer to plan them properly.</li>
     </ul>
 
     <div class="linkrow">
@@ -1070,17 +1070,17 @@ text = <span class="c-str">"AI is transforming industries and the future of work
     <details class="recall">
       <summary>Why does mismatching a tokenizer produce fluent nonsense rather than an error?</summary>
       <div class="ans">
-        <p>Because the model receives a perfectly valid sequence of integers. It has no way to know those integers were produced by a different dictionary — they're all inside its vocabulary range, so nothing is out of bounds. It does exactly what it always does: predicts a plausible continuation of the token sequence it was given.</p>
-        <p>This is a general and important category of bug: <strong>a type error that the type system can't see.</strong> Both sides agree the payload is "a list of ints"; they disagree on what the ints mean. The same shape hides the same class of bug in currency codes, unit systems and enum mappings.</p>
+        <p>Because the model gets a perfectly valid list of numbers. It has no way to know they came from a different dictionary — they are all inside its own range, so nothing looks wrong. It does what it always does: predicts a sensible continuation of the numbers it was given.</p>
+        <p>This is an important type of bug: <strong>both sides agree on the format and disagree on the meaning.</strong> Everyone agrees it is "a list of numbers". Nobody checks what the numbers stand for. The same trap hides in currency codes, units of measurement and status codes.</p>
       </div>
     </details>
 
     <details class="recall think">
       <summary>Your Hindi-language support bot costs 2.5× more per conversation than the English one, on the same model. Explain it to your finance team, then fix it.</summary>
       <div class="ans">
-        <p><strong>The explanation:</strong> billing is per token, and tokenizers are fitted to their training corpus. A vocabulary learned mostly from English represents common English words as single tokens but shatters Devanagari into many small pieces. Same meaning, more tokens, more cost — and less conversation fitting in the context window before truncation.</p>
-        <p><strong>The fixes, in order:</strong> pick a model whose tokenizer was trained multilingually (several Qwen and Gemma builds handle Indic scripts far more efficiently); measure tokens-per-message empirically across your actual traffic rather than assuming; shorten system prompts, which you pay for on every single turn; and consider summarising conversation history rather than resending it.</p>
-        <p>The wider point for anyone building for Indian users: <strong>tokenizer efficiency is a first-class model selection criterion here, and it never appears on a leaderboard.</strong></p>
+        <p><strong>The explanation:</strong> you pay per token, and the tokenizer was built from the text it was trained on. A dictionary learned mostly from English stores common English words as one token each, but breaks Devanagari into many small pieces. Same meaning, more tokens, higher bill — and less conversation fits before it gets cut off.</p>
+        <p><strong>The fixes, in order:</strong> choose a model whose tokenizer was trained on many languages (several Qwen and Gemma versions handle Indian scripts far better); measure tokens per message on your real traffic instead of guessing; shorten your system prompt, since you pay for it on every single turn; and summarise old conversation instead of resending all of it.</p>
+        <p>The wider point if you build for Indian users: <strong>how efficiently a tokenizer handles your language is a real selection criterion — and it never shows up on any leaderboard.</strong></p>
       </div>
     </details>
   </div>
@@ -1090,7 +1090,7 @@ text = <span class="c-str">"AI is transforming industries and the future of work
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">09</span><h2>AutoModelForCausalLM — loading the brain</h2></div>
 
-    <p><strong>Causal</strong> means left-to-right: the model predicts the next token given everything before it, and can never look ahead. That's the architecture behind every generative chat model.</p>
+    <p><strong>Causal</strong> just means left to right. The model predicts the next word from everything before it, and can never look ahead. That is how every chat model works.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 9 · Causal generation is a loop, not a function</div>
@@ -1160,25 +1160,25 @@ model = AutoModelForCausalLM.from_pretrained(
 
     <div class="note trap">
       <span class="lbl r">trust_remote_code=True deserves a pause</span>
-      <p>It means: <em>download Python from this repository and execute it in my process.</em> Some genuinely new architectures need it, because the modelling code isn't in the installed library version yet. But the tutorial framing — "just set it to true, it's fine" — is exactly how supply-chain compromises happen.</p>
-      <p>The right posture: prefer models supported natively by your <code>transformers</code> version so the flag isn't needed. If it is needed, pin a specific <code>revision</code>, read the custom modelling file, and treat it as a dependency that goes through review — because that's what it is.</p>
+      <p>It means: <em>download Python from this repository and run it inside my program.</em> Some genuinely new models need it, because the code for them is not in your installed library yet. But the tutorial's framing — "just set it to true, it's fine" — is exactly how attacks through downloaded packages happen.</p>
+      <p>The right habit: prefer models your <code>transformers</code> version already supports, so you never need the flag. If you do need it, fix the exact version, read the code file, and put it through review like any other dependency — because that is what it is.</p>
     </div>
 
     <details class="recall">
       <summary>Loading succeeded and the GPU is barely used, but generation takes 90 seconds per answer. Diagnose it.</summary>
       <div class="ans">
-        <p><code>device_map="auto"</code> almost certainly offloaded part of the model to CPU or disk because it didn't fit in VRAM. Layers living in system RAM mean every forward pass shuffles weights across the PCIe bus, which is orders of magnitude slower than on-GPU memory.</p>
-        <p>Verify with <code>print(model.hf_device_map)</code>. If you see <code>cpu</code> or <code>disk</code> entries, fix the fit: quantize harder, choose a smaller model, or get a bigger card. <strong>"It loaded" and "it's on the GPU" are different claims</strong>, and only one of them is fast.</p>
+        <p><code>device_map="auto"</code> almost certainly pushed part of the model onto the CPU or the disk, because it did not fit in GPU memory. Any layer sitting in normal RAM has to be shuttled back and forth on every pass, which is hundreds of times slower.</p>
+        <p>Check with <code>print(model.hf_device_map)</code>. If you see <code>cpu</code> or <code>disk</code> in there, make it fit: compress more, pick a smaller model, or get a bigger card. <strong>"It loaded" and "it is on the GPU" are two different statements</strong>, and only one of them is fast.</p>
       </div>
     </details>
 
     <details class="recall arch">
       <summary>Your security team asks whether downloading models from Hugging Face is different from installing a Python package. Answer them.</summary>
       <div class="ans">
-        <p>It's the same category of risk with a larger and less inspectable payload. A pip package is code you can read; a model is gigabytes of opaque tensors <em>plus</em>, sometimes, code you can read.</p>
-        <p><strong>Comparable risks:</strong> arbitrary code execution on load (pickle-format checkpoints, <code>trust_remote_code</code>), typosquatted repositories, unpinned versions changing under you.</p>
-        <p><strong>Risks with no packaging analogue:</strong> the weights themselves can be backdoored — trained to behave normally except on a trigger phrase — and no static scan will find that. You cannot diff a tensor for intent.</p>
-        <p><strong>Therefore the controls are:</strong> safetensors only; pin revisions; mirror into an internal registry after scanning; treat any model touching a sensitive path as requiring behavioural evaluation, not just a file scan. And be honest that the last control is imperfect — which is itself an argument for preferring a small number of models from major labs over a long tail of community fine-tunes.</p>
+        <p>It is the same kind of risk, but bigger and harder to inspect. A pip package is code you can read. A model is gigabytes of numbers you cannot read, <em>plus</em> sometimes code you can.</p>
+        <p><strong>Same risks as packages:</strong> code that runs when you load the file, fake lookalike repositories, and versions changing under you because you did not pin them.</p>
+        <p><strong>Risks packages do not have:</strong> the weights themselves can be poisoned — trained to behave normally except when they see a secret trigger phrase. No file scan will ever find that. You cannot read intent out of a pile of numbers.</p>
+        <p><strong>So the controls are:</strong> safetensors only; pin exact versions; copy models into your own internal store after scanning; and test the behaviour, not just the file, for anything touching sensitive data. Be honest that this last check is imperfect — which is itself a good reason to stick to a few models from major labs rather than a long tail of community versions.</p>
       </div>
     </details>
   </div>
@@ -1188,7 +1188,7 @@ model = AutoModelForCausalLM.from_pretrained(
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">10</span><h2>Generating text: the knobs that matter</h2></div>
 
-    <p>Two ways to run inference once you have a model and tokenizer. Both appear in the course; one is for understanding, one is for using.</p>
+    <p>Two ways to run the model once you have the weights and the tokenizer. Both appear in the course. One is for understanding, one is for daily use.</p>
 
     <div class="codeblock">
       <div class="codehead"><span>Method 1 — manual, so you can see the machinery</span><button class="copy">Copy</button></div>
@@ -1229,24 +1229,24 @@ out = pipe(prompt, max_new_tokens=<span class="c-num">500</span>, do_sample=<spa
 
     <div class="note good">
       <span class="lbl m">The reasoning behind temperature 0.2 here</span>
-      <p>In Section 5 you wanted variety — a poem, a landing page, several plausible designs. Here you want <strong>the opposite</strong>: the answer that is actually in the document, reproducibly. High temperature in a grounded Q&amp;A system doesn't make it creative, it makes it <em>wrong more often</em> — and in a financial context, a confidently-worded invented number is the single most dangerous output your system can produce.</p>
+      <p>In Section 5 you wanted variety — a poem, a landing page, a few different designs. Here you want <strong>the opposite</strong>: the answer that is actually in the document, the same way every time. A high temperature in a document Q&amp;A system does not make it creative. It makes it <em>wrong more often</em>. And in finance, a made-up number written with confidence is the most dangerous thing your system can produce.</p>
       <p>Match temperature to consequence: creative tasks tolerate variance, extraction tasks do not.</p>
     </div>
 
     <details class="recall">
       <summary>Same prompt, same model, different answer each run. Is that a bug?</summary>
       <div class="ans">
-        <p>Not by itself — it's <code>do_sample=True</code> doing exactly what it's told. Set <code>do_sample=False</code> (greedy decoding) and you get near-determinism for the same input.</p>
-        <p>But "near". Even greedy decoding can vary slightly across runs due to floating-point non-determinism in GPU kernels and batching effects. <strong>If your system requires byte-identical reproducibility — an audit trail, a regression test — you cannot get it from the model alone.</strong> You cache the output and audit the cache. That's a real architectural constraint people discover late.</p>
+        <p>Not by itself. That is <code>do_sample=True</code> doing exactly what you asked. Set <code>do_sample=False</code> and the same input gives almost the same answer every time.</p>
+        <p>Note "almost". Even then, small differences in GPU maths can change the result slightly. <strong>If you need the exact same text every time — for an audit trail or a test — the model alone cannot give you that.</strong> You save the answer and audit the saved copy. This is a real design limit that teams usually discover late.</p>
       </div>
     </details>
 
     <details class="recall think">
       <summary>Latency is proportional to output length, not input length. Why, and what does that imply for your UX?</summary>
       <div class="ans">
-        <p>The prompt is processed in a single parallel forward pass (prefill), but every output token requires its own sequential pass. 500 output tokens means 500 round trips through the network, one after another, that cannot be parallelised.</p>
-        <p><strong>UX implications:</strong> stream tokens as they're produced, so perceived latency is time-to-first-token rather than total time. Ask for concise answers in the prompt — brevity is a latency optimisation, not just a style preference. And cap <code>max_new_tokens</code> to what you'll actually display; generating text nobody reads costs real seconds and real VRAM.</p>
-        <p>It also explains a counterintuitive result: feeding a much longer document often costs less added time than asking for a slightly longer answer.</p>
+        <p>The whole prompt is read in one go. But every word of the answer needs its own separate pass through the model. 500 words out means 500 passes, one after another, which cannot be done in parallel.</p>
+        <p><strong>What that means for your app:</strong> stream the words as they appear, so the user feels the wait as "time until it starts" rather than "time until it finishes". Ask for short answers in the prompt — being brief is a speed setting, not just a style choice. And set <code>max_new_tokens</code> to what you will actually show; generating text nobody reads costs real seconds and real memory.</p>
+        <p>It also explains something surprising: feeding in a much longer document usually adds less time than asking for a slightly longer answer.</p>
       </div>
     </details>
   </div>
@@ -1256,7 +1256,7 @@ out = pipe(prompt, max_new_tokens=<span class="c-num">500</span>, do_sample=<spa
 <div class="part reveal">
   <div class="wrap">
     <div class="bar"><span class="tag">Part four</span><h2>The document Q&amp;A system</h2></div>
-    <p>Now the project: upload an earnings transcript, ask questions, get grounded answers. The code is short. The design decisions inside it are where the real learning is — including one that quietly defines the whole architecture.</p>
+    <p>Now the project: load an earnings transcript, ask questions, get answers taken from the document. The code is short. The decisions hidden inside it are the real lesson — including one that quietly shapes everything.</p>
   </div>
 </div>
 
@@ -1264,7 +1264,7 @@ out = pipe(prompt, max_new_tokens=<span class="c-num">500</span>, do_sample=<spa
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">11</span><h2>PDFs: extraction is lossy</h2></div>
 
-    <p>Reading a PDF with <code>pypdf</code> is four lines. Understanding what you lost in those four lines takes longer and matters more.</p>
+    <p>Reading a PDF with <code>pypdf</code> takes four lines. Understanding what those four lines threw away takes longer and matters more.</p>
 
     <div class="codeblock">
       <div class="codehead"><span>Extract text from every page</span><button class="copy">Copy</button></div>
@@ -1313,16 +1313,16 @@ pdf_text = <span class="c-str">"\n\n"</span>.join(pages)
 
     <div class="note trap">
       <span class="lbl r">The failure that costs a week</span>
-      <p>A financial Q&amp;A system whose PDF extraction silently scrambles table columns will answer with <strong>real-looking numbers attached to the wrong labels</strong>. There is no error, no exception, no warning. The model faithfully reports what it was given, and it was given nonsense.</p>
-      <p>Which is why the sanity check above prints both the first 1,000 and the last 500 characters. Checking only the beginning is how you ship a pipeline that dropped the final eight pages.</p>
+      <p>If your PDF reader quietly mixes up table columns, your financial Q&amp;A system will give you <strong>real-looking numbers attached to the wrong labels</strong>. No error, no warning, nothing. The model honestly reports what it was given — and what it was given was scrambled.</p>
+      <p>That is why the check above prints both the first 1,000 and the last 500 characters. Checking only the start is how you ship something that silently dropped the last eight pages.</p>
     </div>
 
     <h3>When pypdf isn't enough</h3>
     <ul class="tight">
-      <li><strong>Scanned documents</strong> → you need OCR (Tesseract, or a vision model). <code>extract_text()</code> returns empty strings and you must detect that, not ignore it.</li>
-      <li><strong>Tables that matter</strong> → dedicated table extraction (camelot, pdfplumber) or a layout-aware model. Never trust flattened table text for figures.</li>
-      <li><strong>Complex layouts</strong> → layout-aware parsers that preserve reading order and hierarchy.</li>
-      <li><strong>Any of the above at scale</strong> → an ingestion pipeline with per-document quality checks, not a for-loop.</li>
+      <li><strong>Scanned documents</strong> → you need OCR (text recognition from images). <code>extract_text()</code> just returns empty strings, and you must notice that rather than ignore it.</li>
+      <li><strong>Tables that matter</strong> → use a proper table tool (camelot, pdfplumber) or a model that understands page layout. Never trust flattened table text for numbers.</li>
+      <li><strong>Complicated layouts</strong> → use a reader that keeps the reading order and structure.</li>
+      <li><strong>Any of the above at scale</strong> → build a real loading pipeline with quality checks per document, not a for-loop.</li>
     </ul>
 
     <div class="linkrow">
@@ -1332,18 +1332,18 @@ pdf_text = <span class="c-str">"\n\n"</span>.join(pages)
     <details class="recall">
       <summary>Write three automated checks your ingestion step should run on every extracted document.</summary>
       <div class="ans">
-        <p><strong>1. Non-empty and plausible density.</strong> Characters-per-page below some floor almost certainly means a scanned or image-based page — flag for OCR rather than passing an empty string downstream.</p>
-        <p><strong>2. Page-count reconciliation.</strong> Number of extracted page-strings equals <code>len(reader.pages)</code>, and no page is silently empty in the middle of a run.</p>
-        <p><strong>3. Encoding and content sanity.</strong> Check for a reasonable ratio of alphabetic characters — a wall of replacement characters or ligature artefacts means the font mapping failed.</p>
-        <p>A fourth, if figures matter: verify that a known anchor string (a heading, a date, a total you expect) is present. Cheap, and it catches the scrambled-column case that the other three miss.</p>
+        <p><strong>1. Is there enough text per page?</strong> Very few characters on a page almost always means it is a scan. Flag it for OCR instead of passing an empty string down the line.</p>
+        <p><strong>2. Do the page counts match?</strong> The number of extracted pages should equal the number of pages in the file, and no page should be quietly empty in the middle.</p>
+        <p><strong>3. Does the text look like text?</strong> Check that a sensible share of characters are letters. A wall of strange symbols means the font mapping failed.</p>
+        <p>And a fourth if numbers matter: check that something you know should be there — a heading, a date, a total — actually appears. Cheap, and it catches the scrambled-table case the other three miss.</p>
       </div>
     </details>
 
     <details class="recall arch">
       <summary>Why is document ingestion, not the model, usually the biggest quality lever in a real RAG system?</summary>
       <div class="ans">
-        <p>Because everything downstream is bounded by it. A frontier model reasoning over scrambled text produces confident wrong answers; a modest model reasoning over cleanly parsed, well-chunked text produces good ones. You cannot prompt your way out of corrupted input.</p>
-        <p>Teams consistently misallocate here — they spend weeks comparing models and an afternoon on the parser, then wonder why accuracy plateaus. <strong>In most document-AI projects the ranking of effort should be: ingestion quality &gt; chunking and retrieval &gt; prompt design &gt; model choice.</strong> The last one gets all the attention because it's the most fun and the easiest to have opinions about.</p>
+        <p>Because everything after it is limited by it. The best model in the world reading scrambled text gives confident wrong answers. A modest model reading clean, well-split text gives good ones. No prompt can rescue broken input.</p>
+        <p>Teams get this backwards all the time — weeks comparing models, one afternoon on the PDF reader, then confusion about why accuracy stops improving. <strong>For most document AI projects the effort should go: clean input first, then retrieval, then the prompt, then the model.</strong> Model choice gets all the attention because it is the most fun to argue about.</p>
       </div>
     </details>
   </div>
@@ -1353,7 +1353,7 @@ pdf_text = <span class="c-str">"\n\n"</span>.join(pages)
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">12</span><h2>Chat templates and special tokens</h2></div>
 
-    <p>With OpenAI or Anthropic you pass <code>messages=[{"role": "user", ...}]</code> and the provider handles formatting. With open weights, <strong>you are the provider</strong>. The model was fine-tuned on a very specific text format, and you have to reproduce it exactly.</p>
+    <p>With OpenAI or Anthropic you pass <code>messages=[{"role": "user", ...}]</code> and they handle the formatting for you. With open weights, <strong>you are the one doing that job</strong>. The model was trained on one very specific text layout, and you have to reproduce it exactly.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 11 · Why special tokens exist</div>
@@ -1388,7 +1388,7 @@ pdf_text = <span class="c-str">"\n\n"</span>.join(pages)
 
     <div class="note good">
       <span class="lbl m">Do not hand-write these — ask the tokenizer</span>
-      <p>Every instruct model on the Hub ships its own template inside the tokenizer. Use it, and switching models becomes a one-line change instead of a formatting rewrite.</p>
+      <p>Every instruct model on the Hub carries its own template inside the tokenizer. Use it, and switching models becomes a one-line change instead of rewriting your formatting code.</p>
     </div>
 
     <div class="codeblock">
@@ -1420,42 +1420,42 @@ out = pipe(prompt, max_new_tokens=<span class="c-num">400</span>, temperature=<s
       <table>
         <thead><tr><th>Clause</th><th>What it's defending against</th></tr></thead>
         <tbody>
-          <tr><td class="n">"Answer ONLY from the document text"</td><td>The model happily answering from training data instead of your document</td></tr>
-          <tr><td class="n">"If not in the document, reply exactly: ..."</td><td>Gives it a licensed way to fail. Without an explicit escape hatch, models invent rather than decline</td></tr>
-          <tr><td class="n">A fixed refusal string</td><td>Lets your code detect "no answer" reliably instead of parsing prose</td></tr>
-          <tr><td class="n">"Do not use prior knowledge"</td><td>Blocks the subtlest failure: a correct-sounding answer that isn't in the source and therefore can't be cited</td></tr>
+          <tr><td class="n">"Answer ONLY from the document text"</td><td>Stops the model answering from what it already knows instead of your document</td></tr>
+          <tr><td class="n">"If not in the document, reply exactly: ..."</td><td>Gives it permission to say no. Without a clear way out, models make something up instead of declining</td></tr>
+          <tr><td class="n">A fixed refusal string</td><td>Lets your code spot "no answer" reliably instead of reading the sentence</td></tr>
+          <tr><td class="n">"Do not use prior knowledge"</td><td>Blocks the sneakiest failure: an answer that sounds right but is not in the document, so nobody can check it</td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="note warn">
       <span class="lbl">An instruction is a request, not a constraint</span>
-      <p>None of this is enforced. The model can and sometimes will answer from training data anyway, especially about famous companies whose earnings it has memorised. <strong>If groundedness matters, you must verify it in code</strong> — check that the answer's key claims appear in the retrieved context, and return citations so a human can check. Prompting reduces the failure rate; only verification detects it.</p>
+      <p>None of this is enforced. The model can still answer from what it already knows, especially about famous companies whose results it has memorised. <strong>If it matters that answers come from the document, you have to check it in code</strong> — confirm the key facts actually appear in the text you supplied, and show page references so a person can verify. A good prompt makes this happen less often. Only checking tells you when it happened.</p>
     </div>
 
     <details class="recall">
       <summary>Your model answers a question correctly, but the answer is nowhere in the uploaded document. Bug or feature?</summary>
       <div class="ans">
-        <p>Bug — and a dangerous one, because correctness masks it. The system's contract is "answer from this document." An answer sourced from training data is unverifiable, uncitable, possibly outdated, and will be confidently wrong the day the document contradicts what the model memorised.</p>
-        <p>Worse, it makes your testing misleading. You test on Google's earnings call, the model already knows Google's numbers, everything looks excellent. Then you deploy on your own internal documents that the model has never seen, and accuracy falls off a cliff. <strong>Always include documents the model cannot have memorised in your evaluation set</strong> — ideally, ones with facts that contradict common knowledge.</p>
+        <p>A bug — and a dangerous one, because being right hides it. The promise of your system is "answers come from this document". An answer from training data cannot be checked, cannot be cited, may be out of date, and will be confidently wrong the day your document disagrees with what the model memorised.</p>
+        <p>Worse, it makes your testing lie to you. You test on Google's earnings call, the model already knows Google's numbers, everything looks great. Then you point it at your own internal documents, which it has never seen, and accuracy collapses. <strong>Always include documents the model cannot possibly have memorised in your test set</strong> — ideally ones containing facts that go against common knowledge.</p>
       </div>
     </details>
 
     <details class="recall think">
       <summary>Why does giving the model an explicit way to say "I don't know" improve accuracy more than telling it not to hallucinate?</summary>
       <div class="ans">
-        <p>Because the model is fundamentally a next-token predictor optimised to produce a plausible continuation. "Don't hallucinate" is a negative instruction with no alternative behaviour attached — the model still has to emit something, and something plausible is exactly what hallucination is.</p>
-        <p>Giving it a specific, high-probability output for the not-found case ("The document does not contain information on that topic") supplies a concrete continuation that competes with invention. You've turned an abstract prohibition into a concrete choice between two available paths.</p>
-        <p>This generalises well beyond LLMs: <strong>specifying the desired fallback behaviour beats prohibiting the undesired one.</strong> Same reason error handling works better than "don't crash."</p>
+        <p>Because the model's whole job is to produce a believable next word. "Don't make things up" tells it what not to do but gives it nothing to do instead. It still has to write something, and something believable is exactly what making things up looks like.</p>
+        <p>Giving it one specific sentence to use when the answer is missing gives it a real alternative to compete with invention. You have turned a vague ban into a simple choice between two paths.</p>
+        <p>This holds far beyond AI: <strong>saying what to do instead works better than saying what not to do.</strong> Same reason proper error handling beats telling a program "don't crash".</p>
       </div>
     </details>
 
     <details class="recall arch">
       <summary>You support four models behind a dropdown. Where does the chat-template logic belong in your codebase?</summary>
       <div class="ans">
-        <p>Nowhere in your codebase — that's the point. Templates belong to the model, so <code>tokenizer.apply_chat_template()</code> is the abstraction boundary. Adding a fifth model becomes a config entry, not a code change.</p>
-        <p>If you hand-write templates instead, you've created a lookup table that must be updated for every new model, silently rots when a vendor revises their format, and produces degraded quality rather than a loud error when it's wrong. That's the worst failure signature possible: <strong>a config bug that manifests as "the model seems dumber than the benchmarks said."</strong></p>
-        <p>Generalisable rule: when a vendor ships metadata describing how to talk to their artefact, consume the metadata rather than re-encoding your interpretation of it.</p>
+        <p>Nowhere in your code — that is the point. The template belongs to the model, so <code>tokenizer.apply_chat_template()</code> is the right dividing line. Adding a fifth model becomes a config entry, not a code change.</p>
+        <p>If you write the templates by hand, you have built a table that must be updated for every new model, goes stale the moment a vendor changes their format, and gives you worse answers instead of a clear error when it is wrong. That is the worst kind of failure: <strong>a config bug that looks like "this model seems dumber than the reviews said".</strong></p>
+        <p>General rule: when a vendor ships instructions for how to talk to their thing, use their instructions instead of writing down your own copy.</p>
       </div>
     </details>
   </div>
@@ -1476,7 +1476,7 @@ out = pipe(prompt, max_new_tokens=<span class="c-num">400</span>, temperature=<s
                                                  <span class="c-com">#     the other 58,000 are GONE.</span></pre>
     </div>
 
-    <p>The transcript is ~64,000 characters. You are feeding the model <strong>the first 9% of the document</strong> and asking questions about all of it. The practice exercise even acknowledges this: "don't ask about things later in the document, because the model will say it doesn't know."</p>
+    <p>The transcript is about 64,000 characters. You are giving the model <strong>the first 9% of the document</strong> and asking questions about all of it. The practice exercise even admits it: "don't ask about things later in the document, because the model will say it doesn't know."</p>
 
     <div class="ascii">
       <div class="cap">Sketch 12 · Truncation vs retrieval — the fork in the road</div>
@@ -1521,45 +1521,45 @@ out = pipe(prompt, max_new_tokens=<span class="c-num">400</span>, temperature=<s
 
     <div class="note">
       <span class="lbl b">Why the tutorial is still right to truncate</span>
-      <p>Adding embeddings, a vector store and a retrieval step would triple the length of the module and bury the lesson it's actually teaching — how to load and drive an open-weight model. Truncation is a legitimate <strong>teaching simplification</strong>.</p>
-      <p>The mistake is not making it. The mistake is <em>not noticing you made it</em>, and carrying the pattern into something real. Recognising that <code>[:6000]</code> is a placeholder for a retrieval system is the single most valuable thing to take from this section.</p>
+      <p>Adding search and a vector database would triple the length of the module and bury the actual lesson, which is how to load and run an open model. Cutting the document short is a fair <strong>teaching shortcut</strong>.</p>
+      <p>Taking the shortcut is not the mistake. The mistake is <em>not noticing you took it</em>, and carrying the same pattern into something real. Seeing that <code>[:6000]</code> is really a placeholder for a search step is the most valuable thing in this section.</p>
     </div>
 
     <h3>Even without a vector database, you can do better</h3>
     <ul class="tight">
-      <li><strong>Chunk and score by keyword overlap.</strong> Split into ~1,000-character chunks, rank them by term overlap with the question (BM25 is a short function), send the top 5. No embeddings, no new infrastructure, dramatically better coverage.</li>
-      <li><strong>Truncate in the middle, not the end.</strong> Documents front-load context and back-load conclusions; keeping the head and tail beats keeping only the head.</li>
-      <li><strong>Map-reduce for summaries.</strong> Summarise each chunk, then summarise the summaries. Slower, but it actually reads the whole document.</li>
+      <li><strong>Split it up and pick by matching words.</strong> Cut the document into ~1,000-character pieces, rank them by how many words they share with the question, and send the best 5. No new tools, no database, and far more of the document becomes answerable.</li>
+      <li><strong>Cut from the middle, not the end.</strong> Documents usually set the scene at the start and put conclusions at the end, so keeping both ends beats keeping only the start.</li>
+      <li><strong>Summarise in two passes.</strong> Summarise each piece, then summarise those summaries. Slower, but it actually reads the whole document.</li>
       <li><strong>Tell the user what you did.</strong> "Answering from pages 1–3 of 21" is honest. Silent truncation is not.</li>
     </ul>
 
     <details class="recall">
       <summary>Why is truncating by <em>characters</em> rather than tokens a second, separate bug?</summary>
       <div class="ans">
-        <p>Because the model's limit is in tokens, and the characters-to-tokens ratio varies by content and language. 6,000 characters of English prose is roughly 1,500 tokens; 6,000 characters of dense tables, code, or Devanagari can be two to three times that. You've set a limit in a unit that doesn't correspond to the constraint you're managing.</p>
-        <p>Consequence: your safety margin is illusory. It holds for the document you tested and silently blows through the context window on a different one — which then gets truncated again, invisibly, inside the tokenizer. <strong>Measure in the unit the system actually enforces.</strong></p>
+        <p>Because the model's limit is counted in tokens, and characters convert to tokens at different rates depending on the content and the language. 6,000 characters of English prose is about 1,500 tokens. The same 6,000 characters of tables, code or Hindi can be two or three times that. You have set your limit in the wrong unit.</p>
+        <p>The result: your safety margin is fake. It holds for the document you tested and quietly bursts through the limit on a different one — which then gets cut again, invisibly, inside the tokenizer. <strong>Always measure in the unit the system actually enforces.</strong></p>
       </div>
     </details>
 
     <details class="recall arch">
       <summary>Your team wants document Q&amp;A over 10,000 internal PDFs. Sketch the architecture, and name the parts this notebook doesn't have.</summary>
       <div class="ans">
-        <p><strong>Ingestion:</strong> a pipeline that parses (with OCR fallback), validates quality, extracts metadata (source, page, date, access level), chunks with overlap, and is re-runnable when the parser improves.</p>
-        <p><strong>Indexing:</strong> an embedding model, a vector store, and — importantly — hybrid search, because pure semantic retrieval is poor at exact identifiers like invoice numbers and ticker symbols.</p>
-        <p><strong>Retrieval:</strong> top-k with a reranker, plus <em>permission filtering applied at query time</em>. This is the one most prototypes get catastrophically wrong: if retrieval ignores access control, your Q&amp;A bot becomes a data-exfiltration tool that cheerfully summarises documents the user was never allowed to open.</p>
-        <p><strong>Generation:</strong> the model, with mandatory citations back to chunk and page.</p>
-        <p><strong>Evaluation:</strong> a labelled question set with known answers, measuring retrieval hit-rate and answer faithfulness separately — because when quality drops you must know which half broke.</p>
-        <p><strong>Operations:</strong> incremental re-indexing, cost per query, latency budget, an audit log of who asked what and which documents were surfaced.</p>
-        <p>This notebook has the generation step and nothing else. That's not a criticism of the notebook — it's a map of the work.</p>
+        <p><strong>Loading:</strong> a pipeline that reads each PDF (falling back to OCR for scans), checks the quality, records where it came from (file, page, date, who may see it), splits it into overlapping pieces, and can be re-run when your reader improves.</p>
+        <p><strong>Indexing:</strong> a model that turns text into vectors, a place to store them, and — important — keyword search alongside it, because vector search is poor at exact things like invoice numbers and ticker symbols.</p>
+        <p><strong>Search:</strong> fetch the best few pieces, re-rank them, and <em>filter by what this user is allowed to see, at search time</em>. Most prototypes get this badly wrong. If search ignores permissions, your helpful Q&amp;A bot happily summarises documents the user was never allowed to open.</p>
+        <p><strong>Answering:</strong> the model, with page references it must include.</p>
+        <p><strong>Testing:</strong> a list of questions with known answers, measuring two things separately — did search find the right piece, and did the answer stick to it. When quality drops you need to know which half broke.</p>
+        <p><strong>Running it:</strong> re-indexing new documents, cost per question, a speed budget, and a log of who asked what and which documents came back.</p>
+        <p>This notebook has the answering step and nothing else. That is not a criticism — it is a map of the work ahead.</p>
       </div>
     </details>
 
     <details class="recall think">
       <summary>RAG adds retrieval failure modes on top of generation failure modes. Name two, and say how you'd detect them.</summary>
       <div class="ans">
-        <p><strong>Retrieval miss:</strong> the correct chunk exists but wasn't retrieved, so the model correctly says "not in the document" — a false negative that looks like polite, well-behaved output. Detect by measuring <em>retrieval recall</em> separately against a labelled set: for each question, is the gold chunk in the top-k? An answer-only metric will never surface this.</p>
-        <p><strong>Distractor retrieval:</strong> chunks that are semantically similar but factually about a different quarter, entity or year get retrieved, and the model dutifully answers from the wrong one. This is worse than a miss because the output is confident and specific. Detect by requiring citations and auditing whether the cited chunk actually supports the claim — which is exactly why citations are a correctness mechanism, not a UI nicety.</p>
-        <p>The general lesson: <strong>in a multi-stage pipeline, end-to-end metrics tell you that something is broken and never which thing.</strong> Instrument each stage.</p>
+        <p><strong>Search missed it.</strong> The right piece is in the document but was not found, so the model correctly says "not in the document". The output looks polite and well-behaved, and it is wrong. Catch it by checking search on its own: for each test question, was the correct piece in the results? Looking only at answers will never show you this.</p>
+        <p><strong>Search found a lookalike.</strong> Pieces that read similarly but are about a different quarter, company or year get pulled in, and the model faithfully answers from the wrong one. This is worse than a miss, because the answer is confident and specific. Catch it by requiring page references and checking that the cited page really says what the answer claims — which is why citations are a correctness tool, not decoration.</p>
+        <p>The general lesson: <strong>when a system has several steps, an overall score tells you something broke and never which step.</strong> Measure each step.</p>
       </div>
     </details>
   </div>
@@ -1569,7 +1569,7 @@ out = pipe(prompt, max_new_tokens=<span class="c-num">400</span>, temperature=<s
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">14</span><h2>Getting the answer back out</h2></div>
 
-    <p>Text generation returns the prompt <em>plus</em> the continuation. The course extracts the answer by finding the string <code>"Answer:"</code> and slicing after it. It works in the demo and it is fragile.</p>
+    <p>Text generation gives you back the prompt <em>plus</em> the new text. The course pulls out the answer by searching for the word <code>"Answer:"</code> and taking everything after it. It works in the demo, and it breaks easily.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 13 · Why string-slicing the output is brittle</div>
@@ -1618,8 +1618,8 @@ answer = tokenizer.decode(new_tokens, skip_special_tokens=<span class="c-kw">Tru
     <details class="recall think">
       <summary>Both fixes replace string parsing with structural boundaries. Where else does that principle apply?</summary>
       <div class="ans">
-        <p>Everywhere the boundary is knowable without inspecting content. Token-count slicing works because the library <em>knows</em> how many tokens went in — you don't have to infer it from the text. String matching guesses at a boundary that content can imitate.</p>
-        <p>Same shape as: parsing HTML with a parser rather than regex; splitting CSV with a reader that understands quoting rather than <code>split(",")</code>; using length-prefixed frames rather than delimiter-scanning in a network protocol. In every case the failure mode is identical and nasty — <strong>it works until the data contains the thing you're searching for</strong>, at which point it fails silently on exactly the inputs that matter most.</p>
+        <p>Anywhere you can know the boundary without reading the content. Counting tokens works because the library already <em>knows</em> how many went in — you do not have to guess from the text. Searching for a word guesses at a boundary that the content itself can fake.</p>
+        <p>Same shape as: reading HTML with a proper parser instead of a regex; reading CSV with a reader that understands quotes instead of <code>split(",")</code>; sending the length of a message before the message instead of hunting for a separator. The failure is always the same and always nasty — <strong>it works until the data contains the thing you were searching for</strong>, and then it fails quietly on exactly the inputs you care about most.</p>
       </div>
     </details>
   </div>
@@ -1629,7 +1629,7 @@ answer = tokenizer.decode(new_tokens, skip_special_tokens=<span class="c-kw">Tru
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">15</span><h2>Gradio and hot-swapping models</h2></div>
 
-    <p>The final build wraps everything in a UI with a model dropdown. Selecting a different model unloads the current one and loads the new one — because 15GB of VRAM holds exactly one of these at a time.</p>
+    <p>The final build puts everything behind a small web page with a model dropdown. Picking a different model unloads the current one and loads the new one — because 15GB of GPU memory holds exactly one of these at a time.</p>
 
     <div class="ascii">
       <div class="cap">Sketch 14 · The app, and the memory dance underneath</div>
@@ -1693,12 +1693,12 @@ CURRENT = {<span class="c-str">"id"</span>: <span class="c-kw">None</span>, <spa
 
     <div class="note warn">
       <span class="lbl">Why <code>del</code> on its own does nothing</span>
-      <p>Python's <code>del</code> removes a name binding. The GPU memory is only released when the last reference is gone <em>and</em> the garbage collector runs <em>and</em> PyTorch's caching allocator returns the block. Miss any of the three and your "unloaded" model is still occupying VRAM — which is why the second model swap OOMs even though the first worked. This exact sequence is the fix.</p>
+      <p>In Python, <code>del</code> only removes the name. The GPU memory is freed only when the last reference is gone, <em>and</em> the cleanup runs, <em>and</em> PyTorch hands the block back. Miss any one of the three and your "unloaded" model is still sitting in memory — which is exactly why the second model switch runs out of memory even though the first one worked. The three lines above are the fix.</p>
     </div>
 
     <div class="note trap">
       <span class="lbl r">Also note: the dropdown label mapping is a real design choice</span>
-      <p>Mapping <code>"Llama 3.2 (3B)" → "meta-llama/Llama-3.2-3B-Instruct"</code> in a dictionary isn't cosmetic. It decouples the UI from the model registry, so swapping a checkpoint doesn't change what users see, and adding a model is a one-line config change. Small pattern, but it's the difference between a demo and something maintainable.</p>
+      <p>Mapping <code>"Llama 3.2 (3B)" → "meta-llama/Llama-3.2-3B-Instruct"</code> in a dictionary is not just for looks. It keeps the screen separate from the model list, so swapping the underlying model does not change what users see, and adding a model is one line of config. Small habit, but it is the difference between a demo and something you can maintain.</p>
     </div>
 
     <div class="linkrow">
@@ -1708,24 +1708,24 @@ CURRENT = {<span class="c-str">"id"</span>: <span class="c-kw">None</span>, <spa
     <details class="recall">
       <summary>Two users hit this Gradio app at once and one switches models. What happens?</summary>
       <div class="ans">
-        <p>Chaos. <code>CURRENT</code> is process-global with no locking. User A's question can be answered by user B's model, or by a half-loaded one; worse, a swap triggered mid-generation frees memory a running forward pass is still using.</p>
-        <p>This isn't a Gradio flaw — it's an architecture that assumes a single user, made explicit. The fix isn't a mutex bolted on; it's recognising that <strong>model lifecycle and request handling belong in different layers</strong>. Real systems load models into dedicated long-lived workers and route requests to them; they never load a model in response to a UI event.</p>
+        <p>Chaos. <code>CURRENT</code> is one shared variable with no protection. User A's question can get answered by user B's model, or by one that is only half loaded. Worse, a switch that happens mid-answer frees memory that a running request is still using.</p>
+        <p>This is not a Gradio problem. It is a design that assumes one user, now showing itself. The fix is not a lock bolted on afterwards. It is realising that <strong>loading models and handling requests belong in different layers.</strong> Real systems load models into long-running workers and send requests to them. They never load a model because someone clicked a dropdown.</p>
       </div>
     </details>
 
     <details class="recall arch">
       <summary>Your demo works. Someone asks "can we put this in front of customers next month?" What do you say?</summary>
       <div class="ans">
-        <p>Say yes to the idea and be precise about the gap. Missing pieces, roughly in order of how badly they bite:</p>
-        <p><strong>Concurrency</strong> — one global model, no queue, no locking. Two users break it.<br>
-        <strong>Cold starts</strong> — a model swap takes minutes and downloads gigabytes. No customer waits.<br>
-        <strong>Coverage</strong> — 6,000 characters of a 64,000-character document. Retrieval is not optional.<br>
-        <strong>Groundedness</strong> — no citations, no verification that answers came from the source.<br>
-        <strong>Access control</strong> — no notion of who may see which document.<br>
-        <strong>Evaluation</strong> — no labelled question set, so no way to detect regression when anything changes.<br>
-        <strong>Observability</strong> — no logging of questions, retrieved context, latency or cost per query.<br>
-        <strong>Failure behaviour</strong> — an OOM takes down the whole app for everyone.</p>
-        <p>The framing that lands with leadership: <strong>the notebook proved feasibility, which was the risky unknown. What remains is engineering with known solutions and a knowable cost.</strong> That's a good position to be in — just not a one-month one.</p>
+        <p>Say yes to the idea, and be specific about the gap. What is missing, roughly worst first:</p>
+        <p><strong>Multiple users</strong> — one shared model, no queue, no protection. Two people at once breaks it.<br>
+        <strong>Startup time</strong> — switching models takes minutes and downloads gigabytes. No customer waits that long.<br>
+        <strong>Coverage</strong> — 6,000 characters of a 64,000-character document. Search is not optional.<br>
+        <strong>Trustworthy answers</strong> — no page references, no check that the answer came from the document.<br>
+        <strong>Permissions</strong> — no idea who is allowed to see which document.<br>
+        <strong>Testing</strong> — no set of known questions and answers, so no way to tell when a change makes things worse.<br>
+        <strong>Visibility</strong> — nothing logged: not the questions, not the sources used, not the speed or the cost.<br>
+        <strong>Failure</strong> — one out-of-memory error takes the whole app down for everyone.</p>
+        <p>The way to put it to leadership: <strong>the notebook proved it can work, which was the real unknown. What is left is normal engineering with known solutions and a cost you can estimate.</strong> That is a good place to be — just not a one-month one.</p>
       </div>
     </details>
   </div>
@@ -1757,7 +1757,7 @@ CURRENT = {<span class="c-str">"id"</span>: <span class="c-kw">None</span>, <spa
 
     <div class="note good">
       <span class="lbl m">How to use this table well</span>
-      <p>Not as a criticism of the course — as a checklist. Every row is a real decision someone has to make, and knowing the row exists is most of the value. <strong>The engineers who ship AI systems successfully aren't the ones who know the most about models; they're the ones who know which of these rows they've quietly skipped.</strong></p>
+      <p>Not as criticism of the course — as a checklist. Every row is a real decision someone has to make, and simply knowing the row exists is most of the value. <strong>The engineers who ship AI systems well are not the ones who know the most about models. They are the ones who know which of these rows they have quietly skipped.</strong></p>
     </div>
 
     <div class="linkrow">
@@ -1768,9 +1768,9 @@ CURRENT = {<span class="c-str">"id"</span>: <span class="c-kw">None</span>, <spa
     <details class="recall arch">
       <summary>Pick the single row above that most often kills these projects after launch. Defend your choice.</summary>
       <div class="ans">
-        <p>Reasonable people differ, but the strongest case is <strong>evaluation</strong>. Without a labelled set you cannot tell whether a change helped. Every subsequent decision — new model, new chunk size, new prompt, quantization level — becomes a matter of opinion and vibes, and the system drifts. Teams then can't answer the one question leadership always asks: "is it getting better?"</p>
-        <p>The runner-up is <strong>access control in retrieval</strong>, because it fails differently: it doesn't degrade quality, it creates an incident. A Q&amp;A system that retrieves across documents a user can't open is a data breach with a friendly chat interface — and it will pass every quality test you wrote.</p>
-        <p>Worth noticing the pattern: the rows that kill projects are the ones with <em>no visible symptom during development</em>. Concurrency and cold starts announce themselves loudly. Evaluation and access control stay silent until they're expensive.</p>
+        <p>People differ, but the strongest case is <strong>testing</strong>. Without a set of known questions and answers, you cannot tell whether a change helped. Every decision after that — new model, new chunk size, new prompt, more compression — becomes a matter of opinion, and the system slowly drifts. Then nobody can answer the one question leadership always asks: "is it getting better?"</p>
+        <p>Close second is <strong>permissions in search</strong>, because it fails differently. It does not make quality worse. It creates an incident. A Q&amp;A system that searches documents a user is not allowed to open is a data leak with a friendly chat box — and it will pass every quality test you wrote.</p>
+        <p>Notice the pattern: the rows that kill projects are the ones with <em>no visible symptom while you are building</em>. Multiple users and slow startup announce themselves loudly. Testing and permissions stay quiet until they are expensive.</p>
       </div>
     </details>
   </div>
@@ -1780,7 +1780,7 @@ CURRENT = {<span class="c-str">"id"</span>: <span class="c-kw">None</span>, <spa
   <div class="wrap">
     <div class="sec-head"><span class="sec-num">17</span><h2>The whole thing, in one script</h2></div>
 
-    <p>The tutorial's project with the improvements from these notes folded in: chat templates instead of hand-written tokens, keyword-ranked chunks instead of blind truncation, token-based extraction instead of string slicing.</p>
+    <p>The tutorial's project with the improvements from these notes built in: proper chat templates instead of hand-written tokens, word-matched chunks instead of blindly cutting the document, and token counting instead of searching for a word.</p>
 
     <div class="codeblock">
       <div class="codehead"><span>pdf_qa.py — runnable end to end</span><button class="copy">Copy</button></div>
@@ -1889,10 +1889,10 @@ demo.launch(debug=<span class="c-kw">True</span>)</pre>
 
     <div class="note">
       <span class="lbl b">Four changes from the tutorial, and why</span>
-      <p><strong>1.</strong> <code>apply_chat_template</code> instead of hand-written <code>&lt;|system|&gt;</code> tokens — so all four models work without per-model formatting code.<br>
-      <strong>2.</strong> <code>best_chunks</code> instead of <code>[:6000]</code> — the whole document becomes answerable with no new infrastructure.<br>
-      <strong>3.</strong> <code>return_full_text=False</code> instead of splitting on <code>"Answer:"</code> — a structural boundary rather than a content guess.<br>
-      <strong>4.</strong> Page numbers in the context and a citation instruction — so answers can be checked.</p>
+      <p><strong>1.</strong> <code>apply_chat_template</code> instead of hand-written <code>&lt;|system|&gt;</code> tokens — so all four models work without any per-model formatting code.<br>
+      <strong>2.</strong> <code>best_chunks</code> instead of <code>[:6000]</code> — the whole document becomes answerable, with no new tools needed.<br>
+      <strong>3.</strong> <code>return_full_text=False</code> instead of searching for <code>"Answer:"</code> — a real boundary instead of a guess based on content.<br>
+      <strong>4.</strong> Page numbers in the text and an instruction to cite them — so answers can be checked.</p>
     </div>
   </div>
 </section>
