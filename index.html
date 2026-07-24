@@ -243,7 +243,7 @@
     /* ── Stats ─────────────────────────────────── */
     .stats {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 0.875rem;
       margin-bottom: 3rem;
       animation: fade-up 0.5s 0.3s ease both;
@@ -469,6 +469,26 @@
     .note-card.n2:hover { box-shadow: 0 18px 50px rgba(6,182,212,0.16);  }
     .note-card.n3:hover { box-shadow: 0 18px 50px rgba(16,185,129,0.16); }
 
+    .note-card.n4 { --card-glow: linear-gradient(135deg, rgba(245,158,11,0.06), rgba(251,146,60,0.03)); }
+    .note-card.n5 { --card-glow: linear-gradient(135deg, rgba(244,63,94,0.06),  rgba(236,72,153,0.03)); }
+
+    .note-card.n4:hover { box-shadow: 0 18px 50px rgba(245,158,11,0.16); }
+    .note-card.n5:hover { box-shadow: 0 18px 50px rgba(244,63,94,0.16); }
+
+    .n-icon.n4 { background: linear-gradient(135deg,#f59e0b,#fb923c); box-shadow: 0 5px 18px rgba(245,158,11,0.35); }
+    .n-icon.n5 { background: linear-gradient(135deg,#f43f5e,#ec4899); box-shadow: 0 5px 18px rgba(244,63,94,0.35); }
+
+    /* ── Prompt Engineering project accent ─────── */
+    .project.pe { animation-delay: 0.5s; }
+    .project.pe .project-head { background: linear-gradient(135deg, rgba(245,158,11,0.07) 0%, rgba(251,146,60,0.03) 100%); }
+    .project.pe .p-icon { background: linear-gradient(135deg,#f59e0b,#f43f5e); box-shadow: 0 0 30px rgba(245,158,11,0.35); }
+    .project.pe .p-eyebrow { color: var(--amber); }
+    .project.pe .badge { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.18); color: #fcd34d; }
+    .project.pe .sec-dot { background: radial-gradient(circle,var(--amber),rgba(245,158,11,0.3)); box-shadow: 0 0 8px rgba(245,158,11,0.28); }
+    .project.pe .sec-title { color: var(--amber); }
+    .project.pe .open-btn { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.18); color: #fcd34d; }
+    .project.pe .note-card:hover .open-btn { background: rgba(245,158,11,0.18); border-color: rgba(245,158,11,0.45); box-shadow: 0 0 14px rgba(245,158,11,0.2); }
+
     .note-top {
       display: flex;
       align-items: flex-start;
@@ -693,23 +713,18 @@
     <div class="stats">
       <div class="s-card">
         <div class="s-emoji">🗂️</div>
-        <span class="s-num" data-target="1">0</span>
-        <div class="s-label">Project</div>
+        <span class="s-num" data-target="2">0</span>
+        <div class="s-label">Projects</div>
       </div>
       <div class="s-card">
         <div class="s-emoji">📁</div>
-        <span class="s-num" data-target="3">0</span>
+        <span class="s-num" data-target="4">0</span>
         <div class="s-label">Sections</div>
       </div>
       <div class="s-card">
         <div class="s-emoji">📄</div>
-        <span class="s-num" data-target="8">0</span>
+        <span class="s-num" data-target="14">0</span>
         <div class="s-label">Notes</div>
-      </div>
-      <div class="s-card">
-        <div class="s-emoji">✏️</div>
-        <span class="s-num" data-target="11815">0</span>
-        <div class="s-label">Lines Written</div>
       </div>
     </div>
 
@@ -738,7 +753,6 @@
         <div class="p-badges">
           <span class="badge">3 sections</span>
           <span class="badge">8 notes</span>
-          <span class="badge">11,815 lines</span>
         </div>
       </div>
 
@@ -776,7 +790,7 @@
                 <div class="depth-bar">
                   <div class="depth-fill" style="width:100%; --da:#6366f1; --db:#8b5cf6;"></div>
                 </div>
-                <div class="depth-text">641 lines · most detailed</div>
+                <div class="depth-text">Most detailed</div>
               </div>
               <div class="open-btn">Open →</div>
             </div>
@@ -805,7 +819,7 @@
                 <div class="depth-bar">
                   <div class="depth-fill" style="width:67%; --da:#06b6d4; --db:#0ea5e9;"></div>
                 </div>
-                <div class="depth-text">425 lines · concise</div>
+                <div class="depth-text">Concise</div>
               </div>
               <div class="open-btn">Open →</div>
             </div>
@@ -835,7 +849,7 @@
                 <div class="depth-bar">
                   <div class="depth-fill" style="width:83%; --da:#10b981; --db:#059669;"></div>
                 </div>
-                <div class="depth-text">525 lines · thorough</div>
+                <div class="depth-text">Thorough</div>
               </div>
               <div class="open-btn">Open →</div>
             </div>
@@ -865,7 +879,7 @@
                 <div class="depth-bar">
                   <div class="depth-fill" style="width:79%; --da:#6366f1; --db:#8b5cf6;"></div>
                 </div>
-                <div class="depth-text">505 lines · thorough</div>
+                <div class="depth-text">Thorough</div>
               </div>
               <div class="open-btn">Open →</div>
             </div>
@@ -896,7 +910,7 @@
                 <div class="depth-bar">
                   <div class="depth-fill" style="width:100%; --da:#06b6d4; --db:#0ea5e9;"></div>
                 </div>
-                <div class="depth-text">2,227 lines · most detailed</div>
+                <div class="depth-text">Most detailed</div>
               </div>
               <div class="open-btn">Open →</div>
             </div>
@@ -940,7 +954,7 @@
                 <div class="depth-bar">
                   <div class="depth-fill" style="width:100%; --da:#10b981; --db:#059669;"></div>
                 </div>
-                <div class="depth-text">2,509 lines · most detailed</div>
+                <div class="depth-text">Most detailed</div>
               </div>
               <div class="open-btn">Open →</div>
             </div>
@@ -984,7 +998,7 @@
                 <div class="depth-bar">
                   <div class="depth-fill" style="width:100%; --da:#6366f1; --db:#8b5cf6;"></div>
                 </div>
-                <div class="depth-text">2,493 lines · most detailed</div>
+                <div class="depth-text">Most detailed</div>
               </div>
               <div class="open-btn">Open →</div>
             </div>
@@ -1015,7 +1029,229 @@
                 <div class="depth-bar">
                   <div class="depth-fill" style="width:99%; --da:#06b6d4; --db:#0ea5e9;"></div>
                 </div>
-                <div class="depth-text">2,481 lines · most detailed</div>
+                <div class="depth-text">Most detailed</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+        </div><!-- /notes-grid -->
+      </div><!-- /section -->
+    </article>
+
+    <!-- ── Project: Prompt Engineering ───────────── -->
+    <article class="project pe" id="proj-pe">
+
+      <div class="project-head">
+        <div class="p-icon">✍️</div>
+        <div class="p-meta">
+          <div class="p-eyebrow">Project · 02</div>
+          <div class="p-name">Prompt Engineering</div>
+          <div class="tags">
+            <span class="tag t-c">Prompting</span>
+            <span class="tag t-i">LLM Mechanics</span>
+            <span class="tag t-v">Chain-of-Thought</span>
+            <span class="tag t-e">Zero-Shot</span>
+            <span class="tag t-c">Few-Shot</span>
+          </div>
+        </div>
+        <div class="p-badges">
+          <span class="badge">1 section</span>
+          <span class="badge">6 notes</span>
+        </div>
+      </div>
+
+      <!-- Section: Prompt Engineering -->
+      <div class="section">
+        <div class="sec-header">
+          <span class="sec-dot"></span>
+          <span class="sec-title">Prompt Engineering</span>
+          <span class="sec-badge">6 notes</span>
+        </div>
+
+        <div class="notes-grid">
+
+          <!-- Note PE1: LLM Mechanics -->
+          <div class="note-card n4"
+               data-title="How LLMs Work Tokens Model Landscape Benchmarks"
+               data-topics="Token Prediction Attention Mechanics Model Landscape Benchmarks Context Window Closed vs Open"
+               data-file="Prompt_Engineering/llm-mechanics-tokens-landscape.html">
+            <div class="note-top">
+              <div class="n-icon n4">⚙️</div>
+              <div class="n-meta">
+                <div class="n-num">Note 01 · PE</div>
+                <div class="n-title">How LLMs Work — Tokens &amp; The Model Landscape</div>
+              </div>
+            </div>
+            <p class="n-desc">Understand token prediction, attention, and how the model landscape breaks down — closed vs open, capabilities vs cost, and the benchmarks that actually matter.</p>
+            <div class="topics">
+              <span class="tp">Token Prediction</span>
+              <span class="tp">Attention</span>
+              <span class="tp">Model Landscape</span>
+              <span class="tp">Benchmarks</span>
+              <span class="tp">Context Window</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:100%; --da:#f59e0b; --db:#fb923c;"></div>
+                </div>
+                <div class="depth-text">Most detailed</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note PE2: Foundations -->
+          <div class="note-card n5"
+               data-title="Prompt Engineering Foundations System Prompt Context Window Roles Temperature"
+               data-topics="System Prompt Context Window Instruction Structure Roles Temperature First Principles"
+               data-file="Prompt_Engineering/prompt-engineering-foundations.html">
+            <div class="note-top">
+              <div class="n-icon n5">🧱</div>
+              <div class="n-meta">
+                <div class="n-num">Note 02 · PE</div>
+                <div class="n-title">Prompt Engineering — Foundations</div>
+              </div>
+            </div>
+            <p class="n-desc">The context window is your only lever. Learn how system prompts, user turns, and instruction structure shape model behaviour from first principles.</p>
+            <div class="topics">
+              <span class="tp">System Prompt</span>
+              <span class="tp">Context Window</span>
+              <span class="tp">Instruction Structure</span>
+              <span class="tp">Temperature</span>
+              <span class="tp">Roles</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:97%; --da:#f43f5e; --db:#ec4899;"></div>
+                </div>
+                <div class="depth-text">Most detailed</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note PE3: Types & Techniques -->
+          <div class="note-card n4"
+               data-title="Prompt Engineering Types Zero-Shot Few-Shot Chain-of-Thought Tree-of-Thought ReAct"
+               data-topics="Zero-Shot Few-Shot Chain-of-Thought Tree-of-Thought ReAct Role Prompting Reasoning"
+               data-file="Prompt_Engineering/prompt-engineering-types.html">
+            <div class="note-top">
+              <div class="n-icon n4">🗂️</div>
+              <div class="n-meta">
+                <div class="n-num">Note 03 · PE</div>
+                <div class="n-title">Prompt Engineering — Types &amp; Techniques</div>
+              </div>
+            </div>
+            <p class="n-desc">Seven prompting types — zero-shot to tree-of-thought — mapped to three dials and one reasoning loop. Know when to reach for each and why it works.</p>
+            <div class="topics">
+              <span class="tp">Zero-Shot</span>
+              <span class="tp">Few-Shot</span>
+              <span class="tp">Chain-of-Thought</span>
+              <span class="tp">Tree-of-Thought</span>
+              <span class="tp">ReAct</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:78%; --da:#f59e0b; --db:#fb923c;"></div>
+                </div>
+                <div class="depth-text">Thorough</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note PE4: Crafting Effective Prompts -->
+          <div class="note-card n5"
+               data-title="Crafting Effective Prompts Specificity Format Constraints Iteration Output Control"
+               data-topics="Specificity Format Anchoring Constraints Iteration Output Control Prompt Construction"
+               data-file="Prompt_Engineering/crafting-effective-prompts.html">
+            <div class="note-top">
+              <div class="n-icon n5">🔨</div>
+              <div class="n-meta">
+                <div class="n-num">Note 04 · PE</div>
+                <div class="n-title">Crafting Effective Prompts</div>
+              </div>
+            </div>
+            <p class="n-desc">Practical prompt construction: specificity, format anchoring, constraint design, and iteration discipline — the craft layer on top of the theory.</p>
+            <div class="topics">
+              <span class="tp">Specificity</span>
+              <span class="tp">Format Anchoring</span>
+              <span class="tp">Constraints</span>
+              <span class="tp">Iteration</span>
+              <span class="tp">Output Control</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:61%; --da:#f43f5e; --db:#ec4899;"></div>
+                </div>
+                <div class="depth-text">Concise</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note PE5: Transformers & Attention -->
+          <div class="note-card n4"
+               data-title="Transformers Attention Why It Changes Your Prompts Architecture Self-Attention"
+               data-topics="Transformer Architecture Attention Self-Attention Positional Encoding Prompting Implications Encoder Decoder"
+               data-file="Prompt_Engineering/transformers-attention-prompting.html">
+            <div class="note-top">
+              <div class="n-icon n4">🔬</div>
+              <div class="n-meta">
+                <div class="n-num">Note 05 · PE</div>
+                <div class="n-title">Transformers &amp; Attention — Why It Changes Your Prompts</div>
+              </div>
+            </div>
+            <p class="n-desc">Half the transformer diagram isn't in the models you use. Learn what actually remains, how attention shapes what the model sees, and why that directly changes how you should prompt.</p>
+            <div class="topics">
+              <span class="tp">Transformer Architecture</span>
+              <span class="tp">Self-Attention</span>
+              <span class="tp">Positional Encoding</span>
+              <span class="tp">Encoder / Decoder</span>
+              <span class="tp">Prompting Implications</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:100%; --da:#f59e0b; --db:#fb923c;"></div>
+                </div>
+                <div class="depth-text">Most detailed</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note PE6: Prompt Tuning & Optimization -->
+          <div class="note-card n5"
+               data-title="Prompt Tuning Optimization Temperature Sampling Top-P Top-K Iteration"
+               data-topics="Temperature Sampling Top-P Top-K Sampler Control Optimization Iteration Output Quality"
+               data-file="Prompt_Engineering/prompt-tuning-and-optimization.html">
+            <div class="note-top">
+              <div class="n-icon n5">🎛️</div>
+              <div class="n-meta">
+                <div class="n-num">Note 06 · PE</div>
+                <div class="n-title">Prompt Tuning &amp; Optimization</div>
+              </div>
+            </div>
+            <p class="n-desc">Stop eyeballing outputs — start controlling the sampler. Covers temperature, top-p/top-k, and systematic iteration techniques to reliably improve prompt output quality.</p>
+            <div class="topics">
+              <span class="tp">Temperature</span>
+              <span class="tp">Top-P / Top-K</span>
+              <span class="tp">Sampler Control</span>
+              <span class="tp">Optimization</span>
+              <span class="tp">Iteration</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:71%; --da:#f43f5e; --db:#ec4899;"></div>
+                </div>
+                <div class="depth-text">Thorough</div>
               </div>
               <div class="open-btn">Open →</div>
             </div>
@@ -1029,7 +1265,7 @@
 
   <!-- ── Footer ───────────────────────────────── -->
   <footer class="z1">
-    <p>AI Knowledge Vault &mdash; <span class="hl">8 notes</span> across <span class="hl">1 project</span> &mdash; Updated <span class="hl">July 2026</span></p>
+    <p>AI Knowledge Vault &mdash; <span class="hl">14 notes</span> across <span class="hl">2 projects</span> &mdash; Updated <span class="hl">July 2026</span></p>
     <p style="margin-top:0.35rem;font-size:0.6rem;opacity:0.5">Press <span style="color:var(--primary)">/</span> to search · Click any card to open note · Neural network reacts to your cursor</p>
   </footer>
 
