@@ -352,7 +352,30 @@
       padding: 1.75rem 2rem;
       background: linear-gradient(135deg, rgba(99,102,241,0.07) 0%, rgba(6,182,212,0.03) 100%);
       border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
     }
+
+    .p-chevron {
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted);
+      transition: transform 0.3s ease, color 0.2s;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+
+    .project-head:hover .p-chevron { color: var(--text-dim); }
+    .project.collapsed .p-chevron { transform: rotate(-90deg); }
+
+    .project-body {
+      overflow: hidden;
+      max-height: 4000px;
+      transition: max-height 0.4s ease;
+    }
+
+    .project.collapsed .project-body { max-height: 0; }
+    .project.collapsed .project-head { border-bottom-color: transparent; }
 
     .p-icon {
       width: 58px; height: 58px;
@@ -812,7 +835,12 @@
           <span class="badge">3 sections</span>
           <span class="badge">8 notes</span>
         </div>
+        <div class="p-chevron">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
       </div>
+
+      <div class="project-body">
 
       <!-- Section: Closed Source LLM -->
       <div class="section">
@@ -1095,6 +1123,8 @@
 
         </div><!-- /notes-grid -->
       </div><!-- /section -->
+
+      </div><!-- /project-body -->
     </article>
 
     <!-- ── Project: Prompt Engineering ───────────── -->
@@ -1117,7 +1147,12 @@
           <span class="badge">1 section</span>
           <span class="badge">6 notes</span>
         </div>
+        <div class="p-chevron">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
       </div>
+
+      <div class="project-body">
 
       <!-- Section: Prompt Engineering -->
       <div class="section">
@@ -1317,6 +1352,8 @@
 
         </div><!-- /notes-grid -->
       </div><!-- /section -->
+
+      </div><!-- /project-body -->
     </article>
 
     <!-- ── Project: MCP ──────────────────────────── -->
@@ -1339,7 +1376,12 @@
           <span class="badge">1 section</span>
           <span class="badge">2 notes</span>
         </div>
+        <div class="p-chevron">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
       </div>
+
+      <div class="project-body">
 
       <!-- Section: MCP -->
       <div class="section">
@@ -1415,6 +1457,8 @@
 
         </div><!-- /notes-grid -->
       </div><!-- /section -->
+
+      </div><!-- /project-body -->
     </article>
 
   </div><!-- /wrap -->
@@ -1585,7 +1629,16 @@
     });
   })();
 
-  /* ─── 7. Project filter tabs ───────────────────── */
+  /* ─── 7. Project collapse ──────────────────────── */
+  (function () {
+    document.querySelectorAll('.project-head').forEach(head => {
+      head.addEventListener('click', () => {
+        head.closest('.project').classList.toggle('collapsed');
+      });
+    });
+  })();
+
+  /* ─── 9. Project filter tabs ───────────────────── */
   (function () {
     const btns = document.querySelectorAll('.f-btn');
     const projects = {
