@@ -179,7 +179,7 @@
 
     /* ── Hero ──────────────────────────────────── */
     .hero {
-      padding: 4.5rem 0 3rem;
+      padding: 2.5rem 0 1.75rem;
       text-align: center;
     }
 
@@ -212,7 +212,7 @@
 
     .hero-heading {
       font-family: var(--heading);
-      font-size: clamp(2.2rem, 5.5vw, 4rem);
+      font-size: clamp(1.8rem, 4vw, 3rem);
       font-weight: 700;
       line-height: 1.08;
       letter-spacing: -0.03em;
@@ -245,7 +245,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 0.875rem;
-      margin-bottom: 3rem;
+      margin-bottom: 1.5rem;
       animation: fade-up 0.5s 0.3s ease both;
     }
 
@@ -295,6 +295,40 @@
       letter-spacing: 0.1em;
       color: var(--text-muted);
       margin-top: 0.3rem;
+    }
+
+    /* ── Filter bar ────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      animation: fade-up 0.5s 0.35s ease both;
+    }
+
+    .f-btn {
+      padding: 0.38rem 1.1rem;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .f-btn:hover { border-color: var(--border-hover); color: var(--text); }
+
+    .f-btn.active {
+      background: rgba(99,102,241,0.12);
+      border-color: rgba(99,102,241,0.38);
+      color: #a5b4fc;
+    }
+
+    .f-btn[data-filter="proj-pe"].active {
+      background: rgba(245,158,11,0.12);
+      border-color: rgba(245,158,11,0.38);
+      color: #fcd34d;
     }
 
     /* ── Project card ──────────────────────────── */
@@ -726,6 +760,13 @@
         <span class="s-num" data-target="14">0</span>
         <div class="s-label">Notes</div>
       </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <button class="f-btn active" data-filter="all">All</button>
+      <button class="f-btn" data-filter="proj-llm">LLM Engineering</button>
+      <button class="f-btn" data-filter="proj-pe">Prompt Engineering</button>
     </div>
 
     <!-- Empty state -->
@@ -1429,7 +1470,32 @@
     });
   })();
 
-  /* ─── 7. 3-D tilt on note cards ────────────────── */
+  /* ─── 7. Project filter tabs ───────────────────── */
+  (function () {
+    const btns = document.querySelectorAll('.f-btn');
+    const projects = {
+      'proj-llm': document.getElementById('proj-llm'),
+      'proj-pe':  document.getElementById('proj-pe'),
+    };
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+        if (f === 'all') {
+          Object.values(projects).forEach(p => p.classList.remove('hidden'));
+        } else {
+          Object.entries(projects).forEach(([id, el]) => {
+            el.classList.toggle('hidden', id !== f);
+          });
+          projects[f].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  })();
+
+  /* ─── 8. 3-D tilt on note cards ──────────────────*/
   (function () {
     document.querySelectorAll('.note-card').forEach(card => {
       card.addEventListener('mousemove', e => {
