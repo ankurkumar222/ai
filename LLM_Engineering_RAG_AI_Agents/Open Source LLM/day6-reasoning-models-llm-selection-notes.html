@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Architects Lab — Reasoning Models &amp; Choosing the Right LLM</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#121821; --panel2:#161d28; --border:#22303f;
+    --text:#dbe4ee; --muted:#7d92a8; --accent:#39d3ac; --accent2:#f2b84b;
+    --danger:#ef6a6a; --code:#0d1319; --tag:#1c2a3a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    line-height:1.6; padding:0 0 80px 0;
+  }
+  header{
+    padding:36px 24px 24px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#0e141c,#0b0f14);
+  }
+  .eyebrow{color:var(--accent); font-size:12px; letter-spacing:2px; text-transform:uppercase; font-weight:600;}
+  h1{margin:8px 0 6px; font-size:28px; color:#f2f6fa;}
+  .sub{color:var(--muted); font-size:14px; max-width:780px;}
+  .toolbar{
+    display:flex; gap:10px; padding:16px 24px; position:sticky; top:0;
+    background:rgba(11,15,20,0.95); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--border); z-index:10; flex-wrap:wrap;
+  }
+  button.ctrl{
+    background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    padding:8px 14px; border-radius:6px; cursor:pointer; font-size:13px;
+  }
+  button.ctrl:hover{border-color:var(--accent); color:var(--accent);}
+  .wrap{max-width:920px; margin:0 auto; padding:24px;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    margin-bottom:16px; overflow:hidden;
+  }
+  .card-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 20px; cursor:pointer; user-select:none;
+  }
+  .card-head:hover{background:var(--panel2);}
+  .card-title{font-size:16px; font-weight:600; color:#f2f6fa; display:flex; align-items:center; gap:10px;}
+  .tag{
+    font-size:10px; text-transform:uppercase; letter-spacing:1px;
+    background:var(--tag); color:var(--accent); padding:3px 8px; border-radius:4px; font-weight:700;
+  }
+  .tag.arch{color:var(--accent2);}
+  .tag.risk{color:var(--danger);}
+  .chevron{color:var(--muted); transition:transform .2s;}
+  .card.open .chevron{transform:rotate(90deg);}
+  .card-body{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+    padding:0 20px;
+  }
+  .card.open .card-body{ max-height:4500px; padding:0 20px 20px; }
+  p{margin:8px 0;}
+  .questions{
+    background:var(--code); border-left:3px solid var(--accent);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .questions h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent);}
+  .questions ul{margin:0; padding-left:18px;}
+  .questions li{margin:6px 0; color:#c8d6e2;}
+  .archnote{
+    background:var(--code); border-left:3px solid var(--accent2);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .archnote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent2);}
+  .risknote{
+    background:var(--code); border-left:3px solid var(--danger);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .risknote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--danger);}
+  pre{
+    background:var(--code); border:1px solid var(--border); border-radius:8px;
+    padding:14px; overflow-x:auto; font-size:12.5px; color:#a9e6c9; line-height:1.5;
+  }
+  code{color:var(--accent2); font-family:'Cascadia Code',Consolas,monospace;}
+  .recall{
+    margin-top:12px; border:1px dashed var(--border); border-radius:6px; padding:10px 14px;
+    cursor:pointer; background:#0e1620;
+  }
+  .recall .q{color:var(--accent2); font-weight:600; font-size:13.5px;}
+  .recall .a{display:none; margin-top:8px; color:var(--muted); font-size:13.5px; border-top:1px solid var(--border); padding-top:8px;}
+  .recall.show .a{display:block;}
+  .recall .hint{font-size:11px; color:var(--muted); float:right;}
+  ul.plain li{margin:4px 0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
+  th{background:var(--panel2); color:var(--accent2);}
+  .foot{color:var(--muted); text-align:center; padding:30px; font-size:12px;}
+  .progress{font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Architects Lab · Reasoning Models Project</div>
+  <h1>Reasoning Models &amp; A Framework for Choosing the Right LLM</h1>
+  <div class="sub">Notes from a hands-on project — using DeepSeek's reasoning model to classify financial
+  news with transparent chain-of-thought explanations, followed by a structured five-step framework for
+  picking the right model type, size, and sourcing option for a business use case, plus a tour of
+  Hugging Face's leaderboards. Structured for a Senior Engineering Manager who will likely use the
+  framework section directly in real vendor/model evaluation conversations.</div>
+</header>
+
+<div class="toolbar">
+  <button class="ctrl" onclick="expandAll()">▾ Expand All</button>
+  <button class="ctrl" onclick="collapseAll()">▸ Collapse All</button>
+  <button class="ctrl" onclick="revealAllRecall()">💡 Reveal All Recall Answers</button>
+  <span class="progress" id="progressLabel"></span>
+</div>
+
+<div class="wrap">
+
+  <!-- SECTION 1 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Framing</span> What Makes a "Reasoning Model" Different</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Project goal: classify financial news headlines as positive/negative/neutral <em>with visible
+      reasoning</em> — not just a label, but the model's actual chain-of-thought explaining why it reached
+      that conclusion, plus a topical tag. Model used: DeepSeek (open-weight, downloadable) — notable for
+      reportedly costing ~$5–6M to train vs. GPT-4's reported ~$100M, while showing strong reasoning and
+      instruction-following.</p>
+      <p>The differentiator versus a general-purpose chat model: a reasoning model exposes its internal
+      "thinking" as text before producing a final answer — described as being able to "open the brain and
+      see the train of thought," directly improving transparency and explainability.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>Visible chain-of-thought is the single most production-relevant feature here — for any
+        classification decision that has downstream consequences (risk flags, compliance triage, customer
+        communications), being able to show <em>why</em> a model reached a conclusion is often as important
+        as the conclusion itself, especially in an audited, regulated environment. This is the same
+        transparency value proposition the RAG project delivered via citations — reasoning models deliver it
+        via exposed thought process instead. Worth treating both as complementary transparency mechanisms,
+        not competing ones.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What's the core structural difference between a reasoning model's output and a standard chat model's output for this task? <span class="hint">tap to reveal</span></div>
+        <div class="a">A reasoning model produces an explicit "thinking" section — its step-by-step internal reasoning as visible text — before generating the final structured answer (sentiment + tag). A standard general-purpose chat model tends to answer more conversationally and doesn't reliably separate or expose that reasoning process in a consistent, parseable format.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Data</span> Loading Financial News from Hugging Face</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Dataset: ~5,000 financial news rows (id, main_domain/source like CNBC, title, description,
+      created_at) — deliberately small (~1.6MB) so it runs comfortably on Colab's free-tier GPUs. Explored
+      first via Hugging Face's <strong>Data Studio</strong>, including a natural-language "AI query" feature
+      (e.g. "filter to CNBC news only") for quick exploratory filtering before writing any code.</p>
+      <p>Title and description are combined into one <code>full_text</code> field via a small mapping
+      function — this combined text is what actually gets fed to the model, since a headline alone is often
+      too thin a signal for reliable sentiment classification.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why combine title and description into a single "full_text" field instead of feeding the title alone? <span class="hint">tap to reveal</span></div>
+        <div class="a">A headline alone often lacks enough context for reliable sentiment classification — combining it with the fuller description gives the model more signal to reason from, producing more accurate and better-justified sentiment judgments.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Model Loading</span> Downloading DeepSeek — Quantization and Pipeline Setup</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,                 # DeepSeek 1.5B parameters
+    torch_dtype="auto",       # picks best precision (float16/32) for your hardware
+    load_in_4bit=True,        # quantization — same memory-saving technique
+                               # used in the fine-tuning project
+    device_map="auto",        # auto-assigns GPU if available, else CPU
+    trust_remote_code=True    # allows the model's custom code to run
+)
+tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
+pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
+      </pre>
+      <p>Same quantization technique (4-bit) as the earlier LoRA fine-tuning project reappears here — this
+      time purely for inference, not training, but for the same reason: making a capable model runnable on
+      a free-tier GPU.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why is 4-bit quantization used here even though this project only does inference, not any training/fine-tuning? <span class="hint">tap to reveal</span></div>
+        <div class="a">To reduce the model's memory footprint so it fits and runs efficiently on limited hardware (a free-tier Colab GPU) — quantization saves memory regardless of whether you're doing inference or training, since it reduces how many bits are used to store each weight.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Prompting</span> Speaking DeepSeek's Native Format — Special Tokens for Reasoning</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+&lt;IAM_START&gt;user
+[your question here]&lt;IAM_END&gt;
+&lt;IAM_START&gt;assistant
+&lt;think&gt;
+      </pre>
+      <p>The trailing <code>&lt;think&gt;</code> tag is the key mechanism — it explicitly cues the model to
+      generate its internal reasoning before the final answer. This is the same "speak the model's native
+      chat-template language" pattern seen with Gemma/DeepSeek formatting in the fine-tuning project, applied
+      here specifically to unlock visible reasoning rather than just correct turn structure.</p>
+      <p>Generation parameters used: <code>max_new_tokens=4000</code> (reasoning traces can be long),
+      <code>do_sample=True</code> (adds controlled randomness instead of always picking the single
+      highest-probability next token), <code>temperature</code> (0 = deterministic/factual, up to 2 =
+      increasingly erratic), <code>top_p=0.9</code> (nucleus sampling — sample only from the smallest set of
+      tokens whose cumulative probability reaches 90%, keeping output on-topic while still allowing variety).</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The explicit <code>&lt;think&gt;</code> token as a reasoning trigger is worth remembering as a
+        concrete prompt-engineering lever, not model-specific trivia — many reasoning-capable models expose
+        a similar mechanism (explicit or implicit) to separate deliberation from the final answer. If your
+        multi-LLM bootcamp work or Optimus prompt templates ever need a model to "show its work" before
+        answering, checking whether the target model has an equivalent trigger is the first thing to verify,
+        since it directly affects both output quality and how much you need to parse afterward.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What does top_p=0.9 (nucleus sampling) actually restrict, and why does it help keep output "on topic"? <span class="hint">tap to reveal</span></div>
+        <div class="a">It restricts the model to sampling the next token only from the smallest set of candidate tokens whose combined probability reaches 90% — rather than considering every possible token or only the single most likely one. This keeps generation focused on plausible, contextually relevant words while still allowing some variety, avoiding both rigid repetition (top_p too low) and incoherent output (no restriction at all).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Parsing</span> Separating "Thinking" from the Final Answer</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Raw model output interleaves the reasoning trace and the final answer inside special tokens —
+      not directly usable in a UI. A small parsing function locates the <code>&lt;think&gt;</code> /
+      end-of-think markers using string search (<code>output.find(...)</code>) and splits the text into two
+      pieces: the reasoning block and the final answer block, so each can be displayed separately.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is a direct, hands-on illustration of why structured/parseable output matters for anything
+        beyond a demo — raw model text is not an API contract. Any production use of this pattern would want
+        a more robust extraction than string search on hardcoded tokens (e.g. explicit structured-output
+        formatting, or a schema the model is instructed to follow, similar to the Pydantic pattern from the
+        Vercel course's healthcare app) — fragile string parsing on model-specific special tokens is a
+        maintenance risk if the underlying model or its token format ever changes.</p>
+      </div>
+
+      <div class="questions">
+        <h4>Question worth sitting with</h4>
+        <ul>
+          <li>If this reasoning/answer-splitting logic were ever productionized for an Optimus tool, would
+          you push for structured output (JSON schema, function calling) instead of string-searching for
+          special tokens — and what would that trade off in terms of the reasoning trace's readability?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Validation</span> Testing Reasoning on Math and Finance Problems</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Two validation tests beyond news sentiment, deliberately chosen to probe genuine multi-step
+      reasoning rather than pattern-matching:</p>
+      <ul class="plain">
+        <li><strong>Simple arithmetic word problem</strong> ("5 apples, gave away 2+2, how many left?") — correctly reasoned through subtraction step-by-step and answered "1."</li>
+        <li><strong>CAPM finance problem</strong> (beta 1.2, expected return 10.5%, risk-free rate 3%, market return 9% — is the stock under/overvalued?) — the model correctly recalled the Capital Asset Pricing Model formula, substituted the given numbers, computed the CAPM-expected return (~10.2%), compared it to the actual expected return (10.5%), and correctly concluded the stock is <strong>undervalued</strong>.</li>
+      </ul>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The CAPM test is the more interesting validation of the two — it required the model to recall a
+        specific domain formula unprompted, correctly substitute given variables, and interpret the numeric
+        comparison correctly, all visible in the reasoning trace. That's a genuinely useful capability check
+        for any finance-adjacent internal tool: not "can it sound confident," but "can you watch it show its
+        work and verify the formula and substitution were actually correct" — which is exactly the kind of
+        due diligence a domain expert (you, given your wealth/demat background) would want before trusting
+        such a model's output on a real financial calculation.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: In the CAPM test, what specific values did the model need to correctly reason through to reach the right conclusion? <span class="hint">tap to reveal</span></div>
+        <div class="a">It needed to recall the CAPM formula itself, correctly substitute the given beta (1.2), risk-free rate (3%), and market return (9%) into that formula to compute the CAPM-expected return (~10.2%), and then correctly compare that to the stock's actual expected return (10.5%) to conclude the stock is undervalued (actual return exceeds what CAPM predicts for its risk level).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Comparison</span> Reasoning Models vs. General Chat Models — Why It Matters for Classification</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Explicit contrast drawn: a general-purpose chat model might answer a sentiment question
+      conversationally ("I think this sounds negative because...") but tends to struggle with consistently
+      following a strict, structured output format (separate reasoning / sentiment / tag fields) across many
+      requests. A reasoning model with strong instruction adherence reliably produces predictable, delimited
+      output — essential when the output needs to be parsed programmatically at scale, not just read by a human.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why does structured-output reliability matter more for a classification pipeline than for a one-off conversational answer? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because a classification pipeline needs to programmatically parse the output (extract sentiment, tag, reasoning) across potentially thousands of requests reliably and consistently — a model that answers conversationally and inconsistently formats its output breaks automated parsing, whereas a one-off human-read answer doesn't need that structural consistency.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag arch">Framework</span> A Five-Step Framework for Choosing the Right LLM</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+1. Define your needs
+   - Core task: summarization? classification? search? generation?
+   - Expected input/output, data privacy requirements, latency needs,
+     time-to-market, build cost, inference cost
+
+2. Choose the model TYPE
+   - Not every problem needs an LLM at all — classification, NER,
+     and retrieval can often be solved WITHOUT a generative LLM
+   - LLM genuinely needed for: summarization, generation, translation,
+     conversational chat, and REASONING (this project's use case)
+
+3. Choose the right model SIZE
+   - Small/medium (&lt;50B params) vs. large/extra-large (&gt;50B params)
+   - Trade-offs: performance, inference cost, latency, knowledge depth,
+     reasoning quality, environmental impact, deployment complexity
+   - Small models can be boosted via fine-tuning OR RAG rather than
+     simply defaulting to "bigger model"
+
+4. Choose the SOURCING option
+   - Build from scratch (rarely justified — GPT-3 cost ~$100M to train)
+   - Open-source pretrained (Hugging Face) — low/no license cost,
+     but higher deployment expertise cost (estimated 50-100% higher
+     effective cost once expertise + GPU time are counted)
+   - Proprietary via cloud API (OpenAI, AWS, etc.) — faster
+     time-to-market, less data transparency, ongoing usage fees
+
+5. Decide how the solution SCALES
+   - Data residency requirements (some jurisdictions require local
+     storage/processing)
+   - Expected volume/traffic vs. API rate limits
+   - Skills needed (prompt engineering through full model training)
+   - End-to-end cost across build vs. RAG vs. fine-tune approaches
+   - Operational capability: can you actually run and maintain this?
+      </pre>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is the most directly reusable artifact in the whole project — a genuinely solid checklist
+        for evaluating any proposed AI tool inside Optimus, structured almost identically to how you'd
+        evaluate a build-vs-buy decision for any enterprise software component. Step 2 in particular ("do you
+        even need an LLM?") is worth institutionalizing as the very first question in any Optimus intake
+        process — it's the cheapest possible filter against over-engineering a classical classification or
+        retrieval problem with an unnecessarily expensive generative model.</p>
+      </div>
+
+      <div class="questions">
+        <h4>Questions worth sitting with</h4>
+        <ul>
+          <li>Does your current Optimus intake/prompt-template process already ask "does this actually need
+          an LLM, or would a classical model / rules engine / simple retrieval solve it" as an explicit early
+          gate — or does every request default straight to an LLM-based solution?</li>
+          <li>For step 4 (sourcing), the "50-100% higher effective cost" estimate for open-source deployment
+          due to expertise overhead is a striking number — does that match your own intuition from the AWS
+          Day 5 experience (IAM, Docker, App Runner setup friction) about how much real engineering effort
+          sits underneath "it's free and open source"?</li>
+        </ul>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: According to the framework, what should be the very first question asked before choosing between LLM options at all? <span class="hint">tap to reveal</span></div>
+        <div class="a">Whether the problem actually requires a generative LLM in the first place — many tasks like classification, named entity recognition, or simple retrieval can often be solved effectively (and much more cheaply) with classical machine learning models or simpler retrieval-based systems, without needing an LLM at all.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Sourcing</span> Open-Source vs. Proprietary — The Real Trade-offs</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th></th><th>Open-Source (Hugging Face)</th><th>Proprietary (OpenAI/AWS/etc.)</th></tr>
+        <tr><td>License cost</td><td>Free/low</td><td>Subscription/usage fees</td></tr>
+        <tr><td>Real deployment cost</td><td>Est. 50-100% higher once expertise + GPU time are counted</td><td>Bundled into the API price</td></tr>
+        <tr><td>Time to market</td><td>High — requires integration expertise</td><td>Low — pre-built, tailored offerings</td></tr>
+        <tr><td>Data provenance/transparency</td><td>Often unclear what data trained the model</td><td>Rigorous compliance checks, generally better documented</td></tr>
+        <tr><td>Support</td><td>Community-based, irregular</td><td>Professional support/onboarding available</td></tr>
+      </table>
+
+      <div class="questions">
+        <h4>Question worth sitting with</h4>
+        <ul>
+          <li>Given your bank's regulatory environment, does the "open-source models often lack transparency
+          into training data provenance" row carry more weight for IDFC specifically than it would for a
+          non-regulated business — is that potentially a hard blocker rather than just a cost trade-off?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 10 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Benchmarks</span> Old vs. New Leaderboards — Benchmarks Get Beaten Fast</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Notable finding: the "old" common benchmarks (DROP, HellaSwag, MMLU, ARC, TruthfulQA, WinoGrande,
+      HumanEval, MT-Bench) went from being considered genuinely hard to being scored above 80-85% across the
+      board by most models within about a year and a half — effectively saturated. This forced Hugging Face
+      to introduce much harder new benchmarks.</p>
+
+      <table>
+        <tr><th>New Benchmark</th><th>Tests</th></tr>
+        <tr><td>Humanity's Last Exam</td><td>2,500 extremely hard, hand-crafted questions — best models score only ~35%</td></tr>
+        <tr><td>GPQA (Google-Proof Q&amp;A)</td><td>PhD-level chemistry/biology/physics — designed to resist being solved via lookup</td></tr>
+        <tr><td>MuSR</td><td>Multi-step soft reasoning over long text</td></tr>
+        <tr><td>BBH (Big-Bench Hard)</td><td>Challenging tasks across language, math reasoning</td></tr>
+        <tr><td>IFEval</td><td>Instruction-following fidelity</td></tr>
+        <tr><td>MATH</td><td>Competition-level (not trivial) mathematics</td></tr>
+        <tr><td>AgentBench / WebArena / ToolBench</td><td>Agentic capability — tool use, multi-step task execution, memory</td></tr>
+        <tr><td>CO2 cost</td><td>Environmental/energy footprint of running the model</td></tr>
+      </table>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The "benchmarks get saturated within 1-2 years" pattern is itself the most important takeaway,
+        more than any specific score — any model evaluation done today needs to be treated as a snapshot with
+        a short shelf life. For real vendor/model selection decisions (relevant to your AI/ML job search
+        conversations too), it's worth explicitly checking benchmark dates and re-verifying scores close to
+        decision time rather than relying on remembered leaderboard positions from even six months prior.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why did Hugging Face need to retire its original leaderboard benchmarks and introduce a new, harder set? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because LLMs improved so quickly that most models were scoring above 80-85% on the original benchmarks within about a year and a half — the benchmarks became saturated and stopped meaningfully differentiating model quality, so a new set of substantially harder benchmarks (Humanity's Last Exam, GPQA, etc.) was introduced to restore meaningful comparison.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 11 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Practical Use</span> Filtering Leaderboards by What Actually Matters to You</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>The leaderboard UI supports filtering by parameter count, precision (4-bit vs. float16/bfloat16),
+      and fine-tuned vs. pre-trained — letting you sort specifically on the benchmark relevant to your use
+      case (e.g. sort by MATH score if building a finance/quant tool, by GPQA if building a scientific
+      research assistant). A separate <strong>LLM Performance leaderboard</strong> plots accuracy against
+      latency directly — visually surfacing the accuracy-vs-speed trade-off (e.g. Phi-3 shown as a strong
+      accuracy/latency balance point; larger models like Qwen scoring higher but at higher latency and
+      compute cost). Domain-specific leaderboards exist too (coding, medical) for even more targeted comparison.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The accuracy-vs-latency scatter plot is worth internalizing as a mental model even without looking
+        at the live leaderboard: model selection is rarely "pick the highest score," it's "pick the best
+        point on the accuracy/latency/cost frontier for your specific constraint." That framing maps directly
+        onto latency-sensitive fintech APIs (a quick eligibility check needs different latency tolerance than
+        an overnight batch reconciliation job) — the same model-selection logic, just with your own SLAs
+        substituted for benchmark latency.</p>
+      </div>
+
+      <div class="questions">
+        <h4>Question worth sitting with</h4>
+        <ul>
+          <li>If Optimus ever needs to select a specific model for a specific internal tool, would building
+          an internal, lightweight version of this accuracy/latency/cost frontier view — scoped to your
+          actual use cases rather than generic benchmarks — be worth the effort as a standing decision aid?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 12: WRAP-UP -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag arch">Wrap-up</span> Project Recap</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+1. Reasoning models (DeepSeek) expose visible chain-of-thought,
+   unlike typical general-purpose chat models
+2. Load quantized model + tokenizer; build a text-generation pipeline
+3. Speak the model's native chat-template format, including the
+   explicit &lt;think&gt; trigger to unlock reasoning output
+4. Parse the raw output into separate reasoning + answer sections
+5. Validate reasoning on math and domain-specific (CAPM finance)
+   problems — not just the target news-sentiment task
+6. Five-step framework: define needs → choose model type → choose
+   model size → choose sourcing → decide how it scales
+7. "Do you even need an LLM?" is the cheapest, most important
+   early filter in the whole framework
+8. Benchmarks saturate fast — always check recency before trusting
+   a leaderboard position
+9. Model selection = optimizing a position on the accuracy/latency/
+   cost frontier for YOUR constraint, not chasing the top score
+10. Wrapped in a Gradio interface for interactive sentiment +
+    reasoning + tag classification
+      </pre>
+
+      <div class="questions">
+        <h4>Questions worth carrying forward</h4>
+        <ul>
+          <li>Across all three recent AI projects studied (fine-tuning, RAG, reasoning models) — for a
+          realistic Optimus internal tool, which single technique would you reach for first, and under what
+          condition would you layer in a second or third?</li>
+          <li>Given the five-step framework's step 4 (sourcing) explicitly flags data provenance/transparency
+          as an open-source weakness — does that change your calculus on whether DeepSeek specifically (a
+          model whose training data and origin carry geopolitical visibility) would clear an internal risk
+          review for a regulated banking use case, versus a domestically-sourced or well-documented alternative?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">Architects Lab · Study Notes · Source: Reasoning Models &amp; LLM Selection Framework Udemy Project (DeepSeek Financial News Analysis)</div>
+
+<script>
+  function toggleCard(headEl){
+    const card = headEl.parentElement;
+    card.classList.toggle('open');
+    updateProgress();
+  }
+  function toggleRecall(el){
+    el.classList.toggle('show');
+  }
+  function expandAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('open'));
+    updateProgress();
+  }
+  function collapseAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.remove('open'));
+    updateProgress();
+  }
+  function revealAllRecall(){
+    document.querySelectorAll('.recall').forEach(r=>r.classList.add('show'));
+  }
+  function updateProgress(){
+    const total = document.querySelectorAll('.card').length;
+    const open = document.querySelectorAll('.card.open').length;
+    document.getElementById('progressLabel').textContent = open + ' / ' + total + ' sections expanded';
+  }
+  updateProgress();
+</script>
+
+</body>
+</html>

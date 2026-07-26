@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Architects Lab — RAG with LangChain: Ask 11 Madison Park</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#121821; --panel2:#161d28; --border:#22303f;
+    --text:#dbe4ee; --muted:#7d92a8; --accent:#39d3ac; --accent2:#f2b84b;
+    --danger:#ef6a6a; --code:#0d1319; --tag:#1c2a3a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    line-height:1.6; padding:0 0 80px 0;
+  }
+  header{
+    padding:36px 24px 24px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#0e141c,#0b0f14);
+  }
+  .eyebrow{color:var(--accent); font-size:12px; letter-spacing:2px; text-transform:uppercase; font-weight:600;}
+  h1{margin:8px 0 6px; font-size:28px; color:#f2f6fa;}
+  .sub{color:var(--muted); font-size:14px; max-width:780px;}
+  .toolbar{
+    display:flex; gap:10px; padding:16px 24px; position:sticky; top:0;
+    background:rgba(11,15,20,0.95); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--border); z-index:10; flex-wrap:wrap;
+  }
+  button.ctrl{
+    background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    padding:8px 14px; border-radius:6px; cursor:pointer; font-size:13px;
+  }
+  button.ctrl:hover{border-color:var(--accent); color:var(--accent);}
+  .wrap{max-width:920px; margin:0 auto; padding:24px;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    margin-bottom:16px; overflow:hidden;
+  }
+  .card-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 20px; cursor:pointer; user-select:none;
+  }
+  .card-head:hover{background:var(--panel2);}
+  .card-title{font-size:16px; font-weight:600; color:#f2f6fa; display:flex; align-items:center; gap:10px;}
+  .tag{
+    font-size:10px; text-transform:uppercase; letter-spacing:1px;
+    background:var(--tag); color:var(--accent); padding:3px 8px; border-radius:4px; font-weight:700;
+  }
+  .tag.arch{color:var(--accent2);}
+  .tag.risk{color:var(--danger);}
+  .chevron{color:var(--muted); transition:transform .2s;}
+  .card.open .chevron{transform:rotate(90deg);}
+  .card-body{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+    padding:0 20px;
+  }
+  .card.open .card-body{ max-height:4500px; padding:0 20px 20px; }
+  p{margin:8px 0;}
+  .questions{
+    background:var(--code); border-left:3px solid var(--accent);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .questions h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent);}
+  .questions ul{margin:0; padding-left:18px;}
+  .questions li{margin:6px 0; color:#c8d6e2;}
+  .archnote{
+    background:var(--code); border-left:3px solid var(--accent2);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .archnote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent2);}
+  .risknote{
+    background:var(--code); border-left:3px solid var(--danger);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .risknote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--danger);}
+  pre{
+    background:var(--code); border:1px solid var(--border); border-radius:8px;
+    padding:14px; overflow-x:auto; font-size:12.5px; color:#a9e6c9; line-height:1.5;
+  }
+  code{color:var(--accent2); font-family:'Cascadia Code',Consolas,monospace;}
+  .recall{
+    margin-top:12px; border:1px dashed var(--border); border-radius:6px; padding:10px 14px;
+    cursor:pointer; background:#0e1620;
+  }
+  .recall .q{color:var(--accent2); font-weight:600; font-size:13.5px;}
+  .recall .a{display:none; margin-top:8px; color:var(--muted); font-size:13.5px; border-top:1px solid var(--border); padding-top:8px;}
+  .recall.show .a{display:block;}
+  .recall .hint{font-size:11px; color:var(--muted); float:right;}
+  ul.plain li{margin:4px 0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
+  th{background:var(--panel2); color:var(--accent2);}
+  .foot{color:var(--muted); text-align:center; padding:30px; font-size:12px;}
+  .progress{font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Architects Lab · RAG &amp; LangChain Project</div>
+  <h1>Retrieval-Augmented Generation with LangChain: "Ask 11 Madison Park"</h1>
+  <div class="sub">Notes from a hands-on RAG project — grounding an LLM's answers in a restaurant's own
+  scraped data, using LangChain, OpenAI embeddings, and ChromaDB, with a Gradio front end and citation
+  support. Structured for a Senior Engineering Manager comparing this against the fine-tuning project
+  studied separately, and against your own multi-LLM bootcamp and spirituality-site knowledge-base work.</div>
+</header>
+
+<div class="toolbar">
+  <button class="ctrl" onclick="expandAll()">▾ Expand All</button>
+  <button class="ctrl" onclick="collapseAll()">▸ Collapse All</button>
+  <button class="ctrl" onclick="revealAllRecall()">💡 Reveal All Recall Answers</button>
+  <span class="progress" id="progressLabel"></span>
+</div>
+
+<div class="wrap">
+
+  <!-- SECTION 1 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Framing</span> What RAG Actually Is — Retrieve, Augment, Generate</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+User asks a question ("What kind of food does 11 Madison Park serve?")
+        ↓
+RETRIEVER searches a vector database of the restaurant's own data
+        ↓
+Relevant chunks are found and fetched
+        ↓
+AUGMENT: original question + retrieved context are combined into one prompt
+        ↓
+GENERATE: that combined prompt is sent to the LLM
+        ↓
+Answer is returned — grounded in the restaurant's actual data,
+not just whatever the LLM happened to learn during pre-training
+      </pre>
+      <p>The core motivation: asking a general-purpose LLM directly gives an answer based only on its
+      training data — which may be outdated, generic, or simply unaware of this specific restaurant. RAG
+      lets you ground responses in your own current data without touching the model's weights at all.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What does each letter in RAG stand for, mapped to what actually happens? <span class="hint">tap to reveal</span></div>
+        <div class="a">R = Retrieve: search an external knowledge source (vector database) for relevant information matching the query. A = Augment: add that retrieved content to the original prompt as extra context. G = Generate: send the augmented prompt to the LLM, which produces a response grounded in the retrieved data.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Comparison</span> RAG vs. Fine-Tuning — When to Reach for Which</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th></th><th>Fine-Tuning</th><th>RAG</th></tr>
+        <tr><td>What changes</td><td>Model weights themselves are updated</td><td>Nothing in the model changes — an external database is queried at request time</td></tr>
+        <tr><td>Best for</td><td>Deep, stable domain adaptation on well-structured, high-quality data</td><td>Frequently-changing or niche factual information, without retraining</td></tr>
+        <tr><td>Updating knowledge</td><td>Requires retraining/re-fine-tuning (GPU time, cost, iteration)</td><td>Just update the database — no model changes needed</td></tr>
+        <tr><td>Cost profile</td><td>Expensive, time-consuming, needs GPUs</td><td>Comparatively cheap and fast to maintain</td></tr>
+        <tr><td>Failure mode</td><td>Can lock the model into narrow behavior; overfitting risk</td><td>Only as good as the retrieval quality — poor indexing/chunking → poor answers</td></tr>
+        <tr><td>Transparency</td><td>Knowledge is baked into weights — no easy citation trail</td><td>Can cite exactly which document/chunk an answer came from</td></tr>
+      </table>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This maps directly onto the LoRA/PEFT fine-tuning project studied separately — that project's
+        big honest lesson was "fine-tuning is an expensive experiment with real failure modes (under-training,
+        overfitting)." RAG's core appeal here is sidestepping that entire risk category: for information that
+        changes often (a restaurant's menu, an internal policy doc, a squad's runbook), RAG is almost always
+        the more defensible default, with fine-tuning reserved for cases needing deep behavioral/stylistic
+        adaptation rather than factual grounding. Worth using this exact comparison table as a decision
+        framework the next time an internal AI tool's requirements are being scoped for Optimus.</p>
+      </div>
+
+      <div class="questions">
+        <h4>Question worth sitting with</h4>
+        <ul>
+          <li>For your own spirituality-site knowledge base or Architects Lab study notes — if you wanted
+          an AI assistant that answers questions grounded in your own accumulated notes, is that a RAG use
+          case (near-certainly yes) or could you see any argument for fine-tuning instead?</li>
+        </ul>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why is RAG generally easier to keep up to date than a fine-tuned model? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because updating a RAG system just means adding, removing, or editing documents in the vector database — no retraining is needed. A fine-tuned model's knowledge is baked into its weights, so keeping it current requires re-running the fine-tuning process on updated data, which costs GPU time and money.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Tooling</span> LangChain 101 — Why Use a Framework At All?</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>LangChain's value proposition: instead of a single prompt → single reply, it lets you chain
+      multiple steps together (search → summarize → translate, as one example given) and compose reusable
+      building blocks: prompts, memory, tools/plugins (calculators, code execution, search), agents (an
+      LLM deciding which tool to use and when), and — the focus of this project — retrieval/RAG.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>LangChain here plays the same role Next.js played in the Vercel course notes — an opinionated
+        "application framework" layered on top of lower-level primitives (raw OpenAI API calls), bundling
+        common patterns (chains, retrievers, memory) so you're not hand-assembling them yourself. Same
+        build-vs-batteries-included trade-off as always: faster to start, but worth knowing what's happening
+        underneath before treating any chain as a black box in a production setting.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Setup</span> Loading the Source Document</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Data source: a single scraped text file of 11 Madison Park's website content (menus, contact
+      info, chef bio, partnerships) — loaded with LangChain's <code>TextLoader</code> as one large
+      document object with UTF-8 encoding. A required system dependency is flagged: Microsoft Visual C++
+      14+ must be installed for LangChain to install/run correctly on Windows.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: At this stage, is the document already split into retrievable pieces? <span class="hint">tap to reveal</span></div>
+        <div class="a">No — TextLoader reads the entire file as one single large document object. Splitting into smaller, retrievable chunks is a separate, later step using a text splitter.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Chunking</span> Splitting the Document — Chunk Size and Overlap</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Large documents are hard for retrieval to work with directly — smaller chunks are easier to
+      embed, store, and retrieve precisely. Uses LangChain's <code>RecursiveCharacterTextSplitter</code>
+      with two key parameters:</p>
+      <ul class="plain">
+        <li><strong>chunk_size</strong> (set to 1000 characters): max characters per chunk</li>
+        <li><strong>chunk_overlap</strong> (set to 150 characters): characters shared between consecutive chunks, to preserve context across a chunk boundary</li>
+      </ul>
+      <p>Result: 38 chunks from the source document. Each chunk carries <strong>metadata</strong> pointing
+      back to its source file — this is what later enables citations in the final answer.</p>
+
+      <div class="risknote">
+        <h4>Risk Flag — Chunk Boundaries Can Cut Sentences in Half</h4>
+        <p>With zero overlap, a sentence or idea that happens to fall exactly on a chunk boundary gets
+        split across two chunks, losing coherence for retrieval. The overlap parameter exists specifically
+        to mitigate this by duplicating a bit of context at each boundary. Practice-opportunity experiments
+        confirmed: smaller chunk_size (500) roughly doubled the chunk count (79 vs. 38); changing overlap to
+        zero had a much smaller effect on chunk count but degraded context preservation at boundaries.</p>
+      </div>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>Chunk size/overlap tuning is a genuine engineering trade-off worth taking seriously, not a
+        throwaway parameter: too large and you waste context window / retrieve noisy irrelevant text; too
+        small and you fragment coherent ideas across chunk boundaries, hurting retrieval precision. Treat it
+        like any other tunable system parameter (cache TTL, batch size) — pick a sensible default, then tune
+        against actual retrieval quality on real queries, not gut feel.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why does each chunk carry metadata pointing back to the source document, and what does that enable later? <span class="hint">tap to reveal</span></div>
+        <div class="a">The metadata (source file name) links each chunk back to where it came from. This is what lets the final RAG chain report citations — telling the user which document an answer was grounded in, which improves transparency and lets users verify the answer's source.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Embeddings</span> Turning Text Into Vectors — And Storing Them in ChromaDB</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Embeddings represent the <em>meaning</em> of words/sentences/documents as dense numeric vectors —
+      illustrated with a semantic feature-space example (gender × age × "royalty" axes placing man/woman/
+      boy/girl/king/queen/prince/princess at intuitive relative positions). The real embeddings used are
+      far higher-dimensional (1,536 dimensions in this project, via OpenAI's embedding model) — far beyond
+      human visualization, but the same underlying idea: semantically similar text ends up numerically close.</p>
+
+      <p>Practical demo tool: the TensorFlow Embedding Projector, used to explore nearest-neighbor words to
+      "love" and "Italy" — visually confirming that semantically related words (France, Rome, Venice, Spain
+      for "Italy") cluster together in the embedding space, via a PCA-based 2D/3D projection of the
+      original high-dimensional space.</p>
+
+      <pre>
+Chroma.from_documents(documents=chunks, embedding=OpenAIEmbeddings(...))
+  → generates an embedding vector for each of the 38 chunks
+  → stores all vectors + original text + metadata in a ChromaDB vector store
+      </pre>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The embedding-space intuition (semantically similar concepts cluster numerically close) is worth
+        having solid, because it's the entire mechanism retrieval relies on — a retrieval failure is almost
+        always either a chunking problem (bad boundaries) or an embedding-similarity mismatch (the query's
+        phrasing doesn't land near the right chunks in vector space), and diagnosing which one it is starts
+        from this mental model.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What three things does ChromaDB store for each chunk, based on this project's setup? <span class="hint">tap to reveal</span></div>
+        <div class="a">The embedding vector (the numeric representation of the chunk's meaning), the original page content (human-readable text), and the metadata (including the source document it came from).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Testing</span> Verifying Retrieval Before Building the Full Chain</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Before wiring retrieval into a full RAG chain, the retrieval step is tested in isolation using
+      <code>vector_store.similarity_search(query, k=N)</code> — asking "what different menus are offered?"
+      and confirming the top-k retrieved chunks actually contain menu-related content. This deliberately
+      separates "can we find the right information?" from "can we generate a good answer from it?" —
+      testing one variable at a time.</p>
+      <p>Follow-up tests with different questions ("Who is Daniel Humm?", "Is there a dress code?", "Tell
+      me about the partnership with Magic Farms") and different <code>k</code> values (1, 2, 5) confirmed
+      retrieval quality and showed <code>k</code> directly controls how many chunks come back.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>Testing retrieval in isolation before adding generation on top is good debugging discipline —
+        directly analogous to testing a database query independently before wiring it into application logic
+        that also has to format and present the result. If a RAG system gives a bad final answer, this
+        separation tells you immediately whether the fault is in retrieval (wrong/no chunks found) or
+        generation (right chunks, but the LLM answered poorly) — two very different fixes.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why test similarity_search in isolation before building the full RAG chain? <span class="hint">tap to reveal</span></div>
+        <div class="a">To isolate and verify the retrieval component works correctly (finds relevant chunks) before adding the generation component on top — this way, if the eventual RAG chain gives a bad answer, you already know whether retrieval or generation is the likely cause, rather than debugging both at once.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Chain</span> Assembling the Full RAG Chain — RetrievalQAWithSourcesChain</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+llm = OpenAI(temperature=0)          # 0 = factual, minimal creativity
+
+chain = RetrievalQAWithSourcesChain.from_chain_type(
+    llm=llm,
+    chain_type="stuff",              # "stuff" all retrieved text
+                                      # directly into the prompt context
+    retriever=retriever,
+    return_source_documents=False,
+    verbose=False
+)
+
+result = chain.invoke(query)
+  → result["answer"]      : the generated, grounded response
+  → result["sources"]     : cited source document(s)
+  → result["source_documents"]  (if enabled): actual retrieved chunk text
+      </pre>
+      <p><strong>chain_type="stuff"</strong> means all retrieved chunks are inserted directly into the
+      prompt as-is — simplest strategy, but only works if retrieved content + question fits the model's
+      context window. (Other chain types exist for larger retrieval sets that don't fit directly — not
+      covered in depth here.)</p>
+      <p><strong>temperature=0</strong> is chosen deliberately for factual grounding — raising it to 1.3 in
+      a later experiment produced answers with the same grounded facts but noticeably different wording,
+      demonstrating temperature affects phrasing/creativity, not factual accuracy, when RAG is doing the
+      grounding.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The "stuff" chain_type's context-window limitation is worth flagging explicitly as a scaling
+        constraint: this works fine for a 3-chunk, small-restaurant knowledge base, but would break down for
+        a much larger corpus (e.g. a full IDFC policy/compliance document set) where the top-k retrieved
+        chunks alone could exceed context limits. Production RAG at scale typically needs either a
+        map-reduce/refine chain strategy or much tighter chunk/k tuning — worth remembering as the natural
+        next question if this pattern were ever proposed for an Optimus knowledge-base tool at real scale.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why is temperature set to 0 here, and what does raising it to 1.3 actually change (and NOT change) about the RAG answer? <span class="hint">tap to reveal</span></div>
+        <div class="a">Temperature=0 minimizes randomness/creativity, aiming for consistent, factual answers. Raising it to 1.3 introduced noticeably different wording/phrasing in the response, but the answer remained grounded in the same retrieved source data — temperature affects HOW the answer is phrased, not WHETHER it's still grounded in the retrieved facts, since the retrieval step (which supplies the facts) is unaffected by the LLM's temperature setting.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Interface</span> Gradio Front End — Questions, Citations, and Polish</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Final layer: a Gradio interface wrapping the chain — a question box, example questions users can
+      click ("Is there a dress code?", "Do I need a reservation for the bar?", "Can I buy gift cards?"),
+      a styled submit button ("Ask 11 Madison Park 🍽️"), and — critically — the answer displayed alongside
+      its cited source, directly surfacing the transparency benefit RAG offers over a plain LLM call.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>Citations-in-the-UI is the feature that turns a RAG demo into something a business could actually
+        trust enough to deploy — for any regulated or customer-facing context, "here's the answer, and here's
+        exactly which document it came from" is the difference between a plausible-sounding chatbot and an
+        auditable one. Worth treating as a non-negotiable feature, not a nice-to-have, for any internal
+        Optimus tool that answers questions from a document corpus (policies, runbooks, compliance docs).</p>
+      </div>
+
+      <div class="questions">
+        <h4>Question worth sitting with</h4>
+        <ul>
+          <li>If you built a RAG assistant over your own Architects Lab notes or Sankalp journal archive,
+          would citations back to the specific source note be equally valuable there — or is that mainly
+          a business-trust feature that matters less for a personal knowledge tool?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 10 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag arch">Wrap-up</span> Full Pipeline Recap</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+1. RAG concept: Retrieve → Augment → Generate, no model weights touched
+2. RAG vs. fine-tuning: RAG wins for frequently-changing/niche factual
+   grounding; fine-tuning wins for deep behavioral/stylistic adaptation
+3. LangChain: framework for chaining LLM steps, tools, memory, retrieval
+4. Load raw document (TextLoader) → one large document object
+5. Split into chunks (RecursiveCharacterTextSplitter: size=1000,
+   overlap=150) → 38 chunks, each carrying source metadata
+6. Embed chunks (OpenAI embeddings, 1536-dim) → store in ChromaDB
+7. Test retrieval in isolation (similarity_search) before building
+   the full chain — verify relevant chunks come back for real queries
+8. Assemble RetrievalQAWithSourcesChain (retriever + LLM,
+   chain_type="stuff") → grounded, cited answers
+9. Wrap in a Gradio UI with example questions and visible citations
+      </pre>
+
+      <div class="questions">
+        <h4>Questions worth carrying forward</h4>
+        <ul>
+          <li>Between this RAG project and the separately-studied LoRA fine-tuning project, which pattern
+          more directly matches a realistic Optimus/idfc-coder internal tool need — grounding answers in
+          IDFC's own docs (RAG) vs. adapting a model's behavior/style (fine-tuning) — and would a real
+          internal tool likely need both layered together?</li>
+          <li>The "stuff" chain_type's context-window ceiling is the clearest scaling limitation surfaced
+          here — for a document corpus far larger than one restaurant's website, what chunk/k tuning or
+          alternative chain strategy would you want to prototype first before committing to an architecture?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">Architects Lab · Study Notes · Source: RAG with LangChain Udemy Project ("Ask 11 Madison Park")</div>
+
+<script>
+  function toggleCard(headEl){
+    const card = headEl.parentElement;
+    card.classList.toggle('open');
+    updateProgress();
+  }
+  function toggleRecall(el){
+    el.classList.toggle('show');
+  }
+  function expandAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('open'));
+    updateProgress();
+  }
+  function collapseAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.remove('open'));
+    updateProgress();
+  }
+  function revealAllRecall(){
+    document.querySelectorAll('.recall').forEach(r=>r.classList.add('show'));
+  }
+  function updateProgress(){
+    const total = document.querySelectorAll('.card').length;
+    const open = document.querySelectorAll('.card.open').length;
+    document.getElementById('progressLabel').textContent = open + ' / ' + total + ' sections expanded';
+  }
+  updateProgress();
+</script>
+
+</body>
+</html>

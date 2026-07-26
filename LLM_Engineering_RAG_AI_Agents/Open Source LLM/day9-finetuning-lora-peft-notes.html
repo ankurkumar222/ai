@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Architects Lab — Fine-Tuning LLMs with LoRA &amp; PEFT</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#121821; --panel2:#161d28; --border:#22303f;
+    --text:#dbe4ee; --muted:#7d92a8; --accent:#39d3ac; --accent2:#f2b84b;
+    --danger:#ef6a6a; --code:#0d1319; --tag:#1c2a3a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    line-height:1.6; padding:0 0 80px 0;
+  }
+  header{
+    padding:36px 24px 24px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#0e141c,#0b0f14);
+  }
+  .eyebrow{color:var(--accent); font-size:12px; letter-spacing:2px; text-transform:uppercase; font-weight:600;}
+  h1{margin:8px 0 6px; font-size:28px; color:#f2f6fa;}
+  .sub{color:var(--muted); font-size:14px; max-width:780px;}
+  .toolbar{
+    display:flex; gap:10px; padding:16px 24px; position:sticky; top:0;
+    background:rgba(11,15,20,0.95); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--border); z-index:10; flex-wrap:wrap;
+  }
+  button.ctrl{
+    background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    padding:8px 14px; border-radius:6px; cursor:pointer; font-size:13px;
+  }
+  button.ctrl:hover{border-color:var(--accent); color:var(--accent);}
+  .wrap{max-width:920px; margin:0 auto; padding:24px;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    margin-bottom:16px; overflow:hidden;
+  }
+  .card-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 20px; cursor:pointer; user-select:none;
+  }
+  .card-head:hover{background:var(--panel2);}
+  .card-title{font-size:16px; font-weight:600; color:#f2f6fa; display:flex; align-items:center; gap:10px;}
+  .tag{
+    font-size:10px; text-transform:uppercase; letter-spacing:1px;
+    background:var(--tag); color:var(--accent); padding:3px 8px; border-radius:4px; font-weight:700;
+  }
+  .tag.arch{color:var(--accent2);}
+  .tag.risk{color:var(--danger);}
+  .chevron{color:var(--muted); transition:transform .2s;}
+  .card.open .chevron{transform:rotate(90deg);}
+  .card-body{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+    padding:0 20px;
+  }
+  .card.open .card-body{ max-height:4500px; padding:0 20px 20px; }
+  p{margin:8px 0;}
+  .questions{
+    background:var(--code); border-left:3px solid var(--accent);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .questions h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent);}
+  .questions ul{margin:0; padding-left:18px;}
+  .questions li{margin:6px 0; color:#c8d6e2;}
+  .archnote{
+    background:var(--code); border-left:3px solid var(--accent2);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .archnote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent2);}
+  .risknote{
+    background:var(--code); border-left:3px solid var(--danger);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .risknote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--danger);}
+  pre{
+    background:var(--code); border:1px solid var(--border); border-radius:8px;
+    padding:14px; overflow-x:auto; font-size:12.5px; color:#a9e6c9; line-height:1.5;
+  }
+  code{color:var(--accent2); font-family:'Cascadia Code',Consolas,monospace;}
+  .recall{
+    margin-top:12px; border:1px dashed var(--border); border-radius:6px; padding:10px 14px;
+    cursor:pointer; background:#0e1620;
+  }
+  .recall .q{color:var(--accent2); font-weight:600; font-size:13.5px;}
+  .recall .a{display:none; margin-top:8px; color:var(--muted); font-size:13.5px; border-top:1px solid var(--border); padding-top:8px;}
+  .recall.show .a{display:block;}
+  .recall .hint{font-size:11px; color:var(--muted); float:right;}
+  ul.plain li{margin:4px 0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
+  th{background:var(--panel2); color:var(--accent2);}
+  .foot{color:var(--muted); text-align:center; padding:30px; font-size:12px;}
+  .progress{font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Architects Lab · LLM Fine-Tuning Project</div>
+  <h1>Fine-Tuning Open-Source LLMs: PEFT, LoRA &amp; Financial Sentiment Classification</h1>
+  <div class="sub">Notes from a hands-on fine-tuning project — taking a small open-source model (Gemma
+  1B) from zero-shot baseline to a LoRA-fine-tuned sentiment classifier on financial news, using Hugging
+  Face Transformers, PEFT, and TRL's SFT Trainer. Structured for a Senior Engineering Manager building
+  parallel intuition to your multi-LLM bootcamp work — the emphasis is on what's reusable production
+  reasoning versus what's ML-research detail.</div>
+</header>
+
+<div class="toolbar">
+  <button class="ctrl" onclick="expandAll()">▾ Expand All</button>
+  <button class="ctrl" onclick="collapseAll()">▸ Collapse All</button>
+  <button class="ctrl" onclick="revealAllRecall()">💡 Reveal All Recall Answers</button>
+  <span class="progress" id="progressLabel"></span>
+</div>
+
+<div class="wrap">
+
+  <!-- SECTION 1 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Framing</span> Why Fine-Tune Instead of Training From Scratch?</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Core idea: take a pre-trained, general-purpose LLM (already trained on internet-scale data,
+      costing the original lab hundreds of millions of dollars) and adapt a <em>small subset</em> of its
+      parameters using a much smaller, task-specific dataset — turning a generalist into a specialist.</p>
+      <p>Illustrative example given: a base LLM asked about joint pain + skin sensitivity gives a vague
+      "could be an allergy" answer. The same base model, fine-tuned on medical reports and patient notes,
+      responds with a specific, clinically-relevant hypothesis ("could be lupus — see a rheumatologist").
+      Same architecture, same starting weights — the fine-tuning data reshapes what the model reaches for.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is the same "generalist platform, specialist configuration" pattern you already reason
+        about in fintech systems — a general-purpose rules engine or workflow platform tuned with
+        domain-specific config to behave like a specialist tool, without rebuilding the underlying engine.
+        Fine-tuning is that same idea applied to model weights instead of config files: the "engine" stays
+        the same 1B-parameter transformer; only a tiny, targeted slice of it gets adjusted.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What's the key difference between fine-tuning and training from scratch? <span class="hint">tap to reveal</span></div>
+        <div class="a">Training from scratch means learning all model weights from nothing, requiring massive data and compute. Fine-tuning starts from an already-trained model and adjusts a much smaller set of weights (or a small added set, as with LoRA) using a much smaller, task-specific dataset — reusing everything the base model already learned.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Tech Stack</span> The Toolchain — PEFT, TRL, Quantization, GPU</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th>Tool</th><th>Role</th></tr>
+        <tr><td>Hugging Face Transformers</td><td>Load pre-trained models and tokenizers (Gemma, DeepSeek, etc.)</td></tr>
+        <tr><td>PEFT (Parameter-Efficient Fine-Tuning)</td><td>Adapt large models by training only a small subset of parameters — makes fine-tuning affordable on consumer/free-tier GPUs</td></tr>
+        <tr><td>TRL (Transformer Reinforcement Learning)</td><td>Full training toolkit; here used for its SFT (Supervised Fine-Tuning) Trainer — also supports DPO, reward modeling, GRPO</td></tr>
+        <tr><td>bitsandbytes</td><td>4-bit quantization — stores weights in 4 bits instead of the usual 32, cutting memory dramatically with minimal quality loss</td></tr>
+        <tr><td>scikit-learn</td><td>Evaluation: accuracy, precision, recall, F1, confusion matrix</td></tr>
+      </table>
+      <p>Environment: Google Colab with a Tesla T4 GPU (paid tier used here for extended runs; free tier
+      T4 access is sufficient for this project's scale).</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>Quantization is the detail worth internalizing even outside ML work: storing weights in 4 bits
+        instead of 32 is an 8x memory reduction for "surprisingly little" quality loss — a classic
+        precision-vs-cost trade-off you'd recognize from database indexing or numeric storage decisions in
+        fintech systems. It's exactly the kind of cost lever worth knowing exists when someone on your team
+        proposes "we need a bigger GPU" — the real question is often "have we quantized yet?" before "do we
+        need more hardware?"</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why is a GPU absolutely required for fine-tuning, when it wasn't strictly required for running inference on the same model? <span class="hint">tap to reveal</span></div>
+        <div class="a">Fine-tuning requires backpropagation and gradient updates — computing prediction error against ground truth and adjusting weights accordingly, which is extremely matrix-multiplication-heavy. Inference on a pre-trained model is just a single forward pass with frozen weights (no gradient calculation), which is far less computationally expensive — a CPU can limp through inference but would take days for even simple fine-tuning.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Data</span> The Dataset — Financial News Sentiment, and the Imbalance Problem</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>~4,800 rows from a Hugging Face dataset, two columns: <code>text</code> (a news sentence) and
+      <code>sentiment</code> (positive / negative / neutral). Split 90/10 train/test with a fixed random
+      seed (42) for reproducibility, and shuffled first so the model doesn't learn spurious positional
+      patterns.</p>
+      <p>A count plot revealed <strong>class imbalance</strong>: roughly 1,300 positive samples vs. ~500
+      negative — the minority classes are underrepresented relative to positive.</p>
+
+      <div class="risknote">
+        <h4>Risk Flag</h4>
+        <p>With imbalanced data, a model can achieve deceptively high <em>accuracy</em> simply by leaning
+        toward the majority class while doing poorly on minority classes — the analogy given: a self-driving
+        car trained on 10 million cars but only 1,000 bikes will perform much worse recognizing bikes, even
+        if overall accuracy looks fine. This is why accuracy alone is flagged as insufficient here —
+        precision, recall, F1, and the confusion matrix are needed to see per-class performance clearly.</p>
+      </div>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is a direct analogue to fraud-detection or anomaly-detection problems in fintech — fraud
+        cases are always the minority class, and a model that's 99.9% "accurate" by predicting "not fraud"
+        every time is useless. The same discipline applies: never evaluate an imbalanced-class model on
+        accuracy alone, always look at per-class precision/recall and the confusion matrix, and consider
+        over/undersampling if the imbalance is severe.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why can accuracy alone be misleading on an imbalanced dataset? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because a model can score high accuracy simply by predicting the majority class most or all of the time, while performing poorly on minority classes — accuracy doesn't reveal that per-class weakness. Precision, recall, F1, and the confusion matrix expose it by showing performance broken down per class.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Formatting</span> Chat Templates — Speaking the Model's Native "Language"</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Raw text/sentiment pairs must be reformatted into the exact conversational structure each model
+      was originally trained on, using <code>tokenizer.apply_chat_template()</code>. Analogy used: it's like
+      a movie script — explicit turn markers for who's "speaking" (system instruction, user input, model
+      response).</p>
+      <pre>
+Gemma format:
+&lt;bos&gt;&lt;start_of_turn&gt;user
+Classify the sentiment... [sentence]&lt;end_of_turn&gt;
+&lt;start_of_turn&gt;model
+positive&lt;end_of_turn&gt;
+
+DeepSeek format (different special tokens entirely):
+&lt;special token&gt; beginning-of-sequence marker
+Classify the sentiment... [sentence]
+[model turn marker]
+positive [end-of-sequence marker]
+      </pre>
+      <p>Key parameter: <code>tokenize=False</code> keeps the output as readable text (for building the
+      training format); flipping it to <code>True</code> immediately converts it into token IDs — useful to
+      see directly why this setting matters.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The fact that Gemma and DeepSeek use entirely different special-token conventions is a concrete,
+        hands-on illustration of exactly the "same SDK shape, different provider internals" abstraction
+        problem flagged in your Vercel course notes (Day 1) — the OpenAI-style client interface hides this
+        completely, but underneath, every model family has its own trained-in formatting contract. If your
+        multi-LLM bootcamp work ever needs to fine-tune or closely control prompt structure across model
+        families, this chat-template layer is exactly where that portability breaks down and needs explicit handling per model.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why does the Dockerfile-style "same shape, different internals" problem from the Vercel course reappear here with Gemma vs. DeepSeek? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because each model family is trained on its own specific chat-template format with its own special tokens for marking turns, system prompts, and end-of-sequence — even though the same Hugging Face `apply_chat_template()` call interface works for both, the actual formatted output (and what the model expects) differs completely between Gemma and DeepSeek.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Baseline</span> Zero-Shot Evaluation — Measuring Before You Improve</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Before any fine-tuning, the base Gemma-1B model is run directly on the test set (zero-shot — no
+      examples given in the prompt, just an instruction) to establish a baseline. Result: <strong>~45–46%
+      accuracy</strong>, with notably weak recall (0.16) on the neutral class — expected from a small,
+      1-billion-parameter model with no task-specific adaptation.</p>
+      <p>212 out of ~480 test samples were misclassified (visualized via confusion matrix heatmap) —
+      establishing exactly the number fine-tuning is meant to improve on.</p>
+
+      <div class="risknote">
+        <h4>Prompt Sensitivity — A Real Finding, Not Just an Exercise</h4>
+        <p>A follow-up experiment simplified the zero-shot system prompt (removing the explicit list of
+        valid labels) and the model started producing "unknown" outputs — responses that didn't match any
+        of the three valid classes at all. Explicit conclusion: <strong>small models are especially
+        sensitive to prompt wording</strong> for zero-shot tasks — precise, explicit instructions materially
+        change reliability, not just quality.</p>
+      </div>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>"Establish a baseline before you optimize" is universal engineering discipline, not ML-specific —
+        the same rule you'd apply before optimizing a slow query or a service's latency. The prompt
+        sensitivity finding is worth carrying directly into your own Optimus/idfc-coder prompt template
+        work: if smaller or cheaper models are ever considered for cost reasons, expect them to need
+        noticeably more explicit, constrained prompting than a frontier model would — the tolerance for
+        vague instructions shrinks with model size.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What happened when the zero-shot system prompt was made more generic (no explicit label list), and what does that imply? <span class="hint">tap to reveal</span></div>
+        <div class="a">The model started producing "unknown" responses — outputs that didn't match any of the three valid sentiment labels. This implies smaller models are highly sensitive to exact prompt wording for zero-shot classification, and precise, explicit instructions are necessary for reliable structured output.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Core Concept</span> LoRA — The Math Behind "Fine-Tune 0.3% of the Model"</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>LoRA (Low-Rank Adaptation) avoids updating all of a model's billions of weights directly. Instead,
+      for a given weight matrix, it introduces two small trainable matrices (A and B) whose product
+      approximates the needed weight update — dramatically reducing the number of trainable parameters.</p>
+      <pre>
+Worked example from the lecture:
+  Original weight matrix:     10,000 × 20,000 = 200,000,000 parameters
+  LoRA with rank r = 8:
+    Matrix A: 10,000 × 8   =      80,000 parameters
+    Matrix B:      8 × 20,000 =  160,000 parameters
+    Total:                   =  240,000 parameters
+
+  Reduction: 200,000,000 → 240,000  ≈ 833× fewer trainable parameters
+      </pre>
+      <p>Real result on Gemma-1B in this project: of the model's ~1 billion total parameters, only
+      <strong>~3 million (0.29%)</strong> were made trainable after applying LoRA to the attention layers
+      (Q, K, V, O projections) — everything else stays frozen at its pre-trained values.</p>
+      <p>Higher rank (<code>r</code>) = more trainable parameters = more capacity to adapt, but also more
+      compute/memory cost — a tunable hyperparameter, not a fixed constant.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is a beautifully concrete example of a low-rank approximation reducing a large problem to a
+        tractable one — mathematically the same family of idea as dimensionality reduction techniques used
+        elsewhere in data engineering. For cost-conscious production reasoning: LoRA is precisely why
+        fine-tuning open-source models has become financially viable for teams without frontier-lab budgets
+        — a ~833x parameter reduction is the difference between "needs a datacenter" and "runs on a single
+        free-tier Colab GPU." Worth knowing as a talking point if AI/ML interview conversations (Sarvam AI,
+        PhonePe, Razorpay) ever probe cost-efficient customization strategies.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: In the worked example, why does LoRA with rank 8 reduce a 200-million-parameter matrix to only 240,000 trainable parameters? <span class="hint">tap to reveal</span></div>
+        <div class="a">Instead of directly updating the full 10,000×20,000 weight matrix, LoRA introduces two much smaller matrices — A (10,000×8) and B (8×20,000) — whose product approximates the needed weight change. Adding their parameter counts (80,000 + 160,000 = 240,000) is vastly smaller than the original 200 million, because the "rank" (8) constrains how much information the update matrices can carry, trading some adaptation capacity for a massive efficiency gain.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Training</span> Running the Fine-Tune — SFT Trainer and Hyperparameters</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+1. Load base model (already loaded, quantized)
+2. Wrap with LoraConfig (rank r, target attention modules, dropout)
+3. Get PEFT model = base model + LoRA adapters attached
+4. Set TrainingArguments: output dir, learning rate, epochs,
+   batch size, logging frequency (every 25 steps here)
+5. SFTTrainer(model, training_args, train_dataset, peft_config)
+6. trainer.train()
+7. Save the adapter (NOT a new full model — just the small
+   LoRA weight deltas, stored separately)
+      </pre>
+      <p>Training loss observed over one epoch: started ~3.5, dropped to ~2.0, then 1.7, 1.6, ticking back
+      up slightly to 1.4 by the end — explicitly flagged as expected/noisy behavior for a single epoch, not
+      a red flag on its own.</p>
+
+      <div class="risknote">
+        <h4>Risk Flag — Epoch Count Matters a Lot Here</h4>
+        <p>Only <strong>one epoch</strong> was run for the live demonstration ("to keep cost down"). The
+        instructor explicitly notes real improvement typically requires 4–5+ epochs, and that with too few
+        epochs, fine-tuned performance can come out <em>worse</em> than the zero-shot baseline — which is
+        exactly what happened in this project's live run (see next section). Overfitting is also flagged as
+        a risk at the other extreme — too many epochs without a validation-based early-stopping check can
+        cause the model to memorize training data and generalize worse.</p>
+      </div>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The "we ran one epoch for cost reasons and got a worse result than baseline" outcome is a
+        genuinely useful production lesson, not a course failure: fine-tuning has a real cost/quality curve,
+        and an under-trained fine-tune can be actively harmful compared to just using the base model
+        untouched. Worth remembering as a checkpoint before ever shipping a fine-tuned model: always compare
+        against the zero-shot/base-model baseline explicitly, and don't assume "we fine-tuned it" implies
+        "it's better."</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What does saving a LoRA "adapter" actually save, as opposed to saving a full fine-tuned model? <span class="hint">tap to reveal</span></div>
+        <div class="a">It saves only the small LoRA weight matrices (A and B, and any other trained adapter parameters) — not a full copy of the entire base model. The base model stays untouched and frozen; at inference time, the adapter is loaded and combined with the base model to produce the fine-tuned behavior, keeping the saved artifact tiny compared to the full model.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag risk">Result</span> The Fine-Tuned Model Performed Slightly WORSE — And That's the Real Lesson</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>After combining the base model with the trained adapter and re-running the same test-set
+      evaluation: accuracy <strong>dropped by about 0.04</strong> versus the zero-shot baseline. Precision
+      improved slightly on some classes, but recall worsened enough to drag overall accuracy down.
+      Misclassifications in the confusion matrix increased from 212 to 258.</p>
+      <p>Explicitly attributed to under-training: only one epoch was run for the live demo; the instructor
+      states that a longer run (4–5 epochs, done separately and provided as supplementary material) showed
+      a real improvement over baseline.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is arguably the single most valuable moment in the whole project for a production mindset:
+        a live, honest demonstration that fine-tuning is not automatically an improvement — it's an
+        experiment with its own failure modes (under-training here; overfitting is the opposite failure
+        mode). The discipline this implies: fine-tuning needs the same rigor as any other model-change
+        rollout — a held-out baseline comparison, and a go/no-go decision based on measured results, not
+        an assumption that "we did the fine-tuning step, therefore it's better."</p>
+      </div>
+
+      <div class="questions">
+        <h4>Question worth sitting with</h4>
+        <ul>
+          <li>If a squad proposed fine-tuning a smaller open-source model for an internal Optimus use case
+          to cut inference costs, what would your minimum bar be before approving it for production — a
+          specific accuracy delta over baseline, a minimum epoch count, or something else?</li>
+        </ul>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why did the fine-tuned model perform worse than the zero-shot baseline in this specific run? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because only one training epoch was run (deliberately, to keep the live demo's cost and runtime low), which was insufficient to meaningfully improve the model — under-training, not a flaw in the LoRA/fine-tuning approach itself. The instructor notes a longer run of 4–5 epochs did show real improvement over baseline.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag arch">Wrap-up</span> Project Recap — What Was Actually Learned</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+1. Fine-tuning rationale: generalist → specialist, using a small
+   task-specific dataset on top of a pre-trained base model
+2. Tech stack: Transformers, PEFT, TRL/SFT Trainer, bitsandbytes
+   (4-bit quantization), scikit-learn for evaluation
+3. Data prep: load, inspect, train/test split, check class balance
+4. Chat-template formatting: model-specific special tokens
+   (Gemma vs. DeepSeek shown as contrasting examples)
+5. Zero-shot baseline established BEFORE fine-tuning (~45-46% acc)
+6. LoRA theory: low-rank matrices A/B approximate weight updates,
+   reducing trainable parameters by orders of magnitude (here: 0.29%
+   of the full model)
+7. Training run via SFTTrainer, one epoch (demo-scale)
+8. Evaluation showed a WORSE result than baseline — an honest
+   lesson in under-training risk, not fine-tuning being ineffective
+      </pre>
+
+      <div class="questions">
+        <h4>Questions worth carrying forward</h4>
+        <ul>
+          <li>Given your multi-LLM bootcamp work is exploring several model providers side by side — would
+          a small, cheaply fine-tuned open-source classifier (like this Gemma-1B sentiment example) ever be
+          a more cost-effective choice than a general-purpose frontier-model API call for a narrow,
+          repeated internal classification task inside Optimus tooling?</li>
+          <li>The course explicitly separates "zero-shot inference" (cheap, immediate, no training needed)
+          from "fine-tuning" (requires GPU, data, and iteration) — for a given internal AI use case, what's
+          your own mental checklist for deciding which approach to reach for first?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">Architects Lab · Study Notes · Source: LLM Fine-Tuning with LoRA/PEFT Udemy Project (Financial News Sentiment Classification)</div>
+
+<script>
+  function toggleCard(headEl){
+    const card = headEl.parentElement;
+    card.classList.toggle('open');
+    updateProgress();
+  }
+  function toggleRecall(el){
+    el.classList.toggle('show');
+  }
+  function expandAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('open'));
+    updateProgress();
+  }
+  function collapseAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.remove('open'));
+    updateProgress();
+  }
+  function revealAllRecall(){
+    document.querySelectorAll('.recall').forEach(r=>r.classList.add('show'));
+  }
+  function updateProgress(){
+    const total = document.querySelectorAll('.card').length;
+    const open = document.querySelectorAll('.card.open').length;
+    document.getElementById('progressLabel').textContent = open + ' / ' + total + ' sections expanded';
+  }
+  updateProgress();
+</script>
+
+</body>
+</html>
