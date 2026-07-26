@@ -300,9 +300,11 @@
     /* ── Filter bar ────────────────────────────── */
     .filter-bar {
       display: flex;
+      flex-wrap: wrap;
       gap: 0.5rem;
       margin-bottom: 1.5rem;
       animation: fade-up 0.5s 0.35s ease both;
+      align-items: center;
     }
 
     .f-btn {
@@ -741,6 +743,79 @@
     /* ── Utility ────────────────────────────────── */
     .hidden { display: none !important; }
 
+    /* ── Project description (visible when collapsed) */
+    .p-desc {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 0.45rem;
+      line-height: 1.55;
+      max-width: 560px;
+    }
+
+    /* ── Expand / collapse all controls ──────────── */
+    .expand-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .xbtn {
+      padding: 0.32rem 0.85rem;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .xbtn:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
+      background: rgba(99,102,241,0.06);
+    }
+
+    /* ── Collapsed project hint ───────────────────── */
+    .project.collapsed .p-chevron {
+      color: var(--primary);
+      opacity: 0.7;
+    }
+
+    .project-head:hover {
+      background: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(6,182,212,0.05) 100%);
+    }
+
+    .project.pe .project-head:hover  { background: linear-gradient(135deg, rgba(245,158,11,0.10) 0%, rgba(251,146,60,0.05) 100%); }
+    .project.mcp .project-head:hover { background: linear-gradient(135deg, rgba(16,185,129,0.10) 0%, rgba(8,145,178,0.05) 100%); }
+    .project.rag .project-head:hover { background: linear-gradient(135deg, rgba(6,182,212,0.10) 0%, rgba(59,130,246,0.05) 100%); }
+    .project.deploy .project-head:hover { background: linear-gradient(135deg, rgba(249,115,22,0.10) 0%, rgba(225,29,72,0.05) 100%); }
+
+    /* ── Note count dot row in collapsed header ───── */
+    .p-note-dots {
+      display: flex;
+      gap: 0.25rem;
+      margin-top: 0.55rem;
+      align-items: center;
+    }
+
+    .p-note-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(99,102,241,0.3);
+      border: 1px solid rgba(99,102,241,0.2);
+    }
+
+    .p-note-dot.filled { background: var(--primary); border-color: transparent; }
+
+    .project.pe .p-note-dot.filled   { background: var(--amber); }
+    .project.mcp .p-note-dot.filled  { background: var(--emerald); }
+    .project.rag .p-note-dot.filled  { background: var(--cyan); }
+    .project.deploy .p-note-dot.filled { background: #f97316; }
+
     /* ── Deploy project accent ──────────────────────── */
     .note-card.n8 { --card-glow: linear-gradient(135deg, rgba(249,115,22,0.07), rgba(225,29,72,0.03)); }
     .note-card.n8:hover { box-shadow: 0 18px 50px rgba(249,115,22,0.18); }
@@ -951,16 +1026,16 @@
       <div class="s-card">
         <div class="s-emoji">🗂️</div>
         <span class="s-num" data-target="5">0</span>
-        <div class="s-label">Projects</div>
+        <div class="s-label">Modules</div>
       </div>
       <div class="s-card">
-        <div class="s-emoji">📁</div>
-        <span class="s-num" data-target="9">0</span>
-        <div class="s-label">Sections</div>
+        <div class="s-emoji">🧠</div>
+        <span class="s-num" data-target="10">0</span>
+        <div class="s-label">Bootcamp Days</div>
       </div>
       <div class="s-card">
         <div class="s-emoji">📄</div>
-        <span class="s-num" data-target="24">0</span>
+        <span class="s-num" data-target="27">0</span>
         <div class="s-label">Notes</div>
       </div>
     </div>
@@ -994,6 +1069,10 @@
       <button class="f-btn" data-filter="proj-mcp">MCP</button>
       <button class="f-btn" data-filter="proj-rag">RAG</button>
       <button class="f-btn" data-filter="proj-deploy">Deploy AI</button>
+      <div class="expand-controls">
+        <button class="xbtn" id="expand-all">↕ Expand All</button>
+        <button class="xbtn" id="collapse-all">⊟ Collapse</button>
+      </div>
     </div>
 
     <!-- Empty state -->
@@ -1017,10 +1096,10 @@
             <span class="tag t-e">Bootcamp</span>
             <span class="tag t-i">Fine-tuning</span>
           </div>
+          <p class="p-desc">Closed &amp; open-source APIs, agentic frameworks, fine-tuning, eval and production infra — the complete AI engineering stack across 10 bootcamp days.</p>
         </div>
         <div class="p-badges">
-          <span class="badge">5 sections</span>
-          <span class="badge">10 notes</span>
+          <span class="badge">13 notes</span>
         </div>
         <div class="p-chevron">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
@@ -1043,7 +1122,7 @@
           <div class="note-card n1"
                data-title="LLM & Agentic AI Engineer Bootcamp Notes"
                data-topics="LM Studio Local LLM 14-Day Structure Active Recall Bootcamp"
-               data-file="LLM_Engineering_RAG_AI_Agents/Closed Source LLM/section-1-welcome-to-bootcamp.html">
+               data-file="LLM_Engineering_RAG_AI_Agents/Closed Source LLM/day0-welcome-to-bootcamp.html">
             <div class="note-top">
               <div class="n-icon n1">🚀</div>
               <div class="n-meta">
@@ -1073,7 +1152,7 @@
           <div class="note-card n2"
                data-title="Project 1 Character AI Chatbot Full Notes"
                data-topics="Setup API First Call Response Anatomy Persona Engineering Chatbot"
-               data-file="LLM_Engineering_RAG_AI_Agents/Closed Source LLM/section2-full-notes-character-chatbot.html">
+               data-file="LLM_Engineering_RAG_AI_Agents/Closed Source LLM/day1-intro-full-notes-character-chatbot.html">
             <div class="note-top">
               <div class="n-icon n2">🤖</div>
               <div class="n-meta">
@@ -1102,7 +1181,7 @@
           <div class="note-card n3"
                data-title="Project 2 AI Calorie Tracker Vision API Prompt Engineering"
                data-topics="Vision API Prompt Engineering Calorie Tracker Task Walkthrough Active Recall"
-               data-file="LLM_Engineering_RAG_AI_Agents/Closed Source LLM/section3-calorie-tracker-notes.html">
+               data-file="LLM_Engineering_RAG_AI_Agents/Closed Source LLM/day2-calorie-tracker-notes.html">
             <div class="note-top">
               <div class="n-icon n3">👁️</div>
               <div class="n-meta">
@@ -1132,7 +1211,7 @@
           <div class="note-card n1"
                data-title="Project 3 AI Tutor with Gradio Streaming UI"
                data-topics="Gradio Interface System Prompt Streaming Temperature Slider Persona"
-               data-file="LLM_Engineering_RAG_AI_Agents/Closed Source LLM/section4-ai-tutor-gradio-notes.html">
+               data-file="LLM_Engineering_RAG_AI_Agents/Closed Source LLM/day4-ai-tutor-gradio-notes.html">
             <div class="note-top">
               <div class="n-icon n1">🎓</div>
               <div class="n-meta">
@@ -1162,7 +1241,7 @@
           <div class="note-card n2"
                data-title="Multi-LLM Master Notes Compare Call Build OpenAI Claude Gemini"
                data-topics="Multi-LLM Open vs Closed Models Token Math Benchmarks Risk Management SDK"
-               data-file="LLM_Engineering_RAG_AI_Agents/Closed Source LLM/section5-multi-llm-master.html">
+               data-file="LLM_Engineering_RAG_AI_Agents/Closed Source LLM/day3-multi-llm-master.html">
             <div class="note-top">
               <div class="n-icon n2">⚖️</div>
               <div class="n-meta">
@@ -1197,7 +1276,7 @@
         <div class="sec-header">
           <span class="sec-dot"></span>
           <span class="sec-title">Open Source LLM</span>
-          <span class="sec-badge">1 note</span>
+          <span class="sec-badge">4 notes</span>
         </div>
 
         <div class="notes-grid">
@@ -1206,11 +1285,11 @@
           <div class="note-card n3"
                data-title="Open-Source LLMs Hugging Face Quantization Document QA"
                data-topics="Hugging Face Quantization Pipeline Local Models Document QA Architecture"
-               data-file="LLM_Engineering_RAG_AI_Agents/Open Source LLM/section1-open-source-llms.html">
+               data-file="LLM_Engineering_RAG_AI_Agents/Open Source LLM/day5-open-source-llms.html">
             <div class="note-top">
               <div class="n-icon n3">🤗</div>
               <div class="n-meta">
-                <div class="n-num">Note 01 · Open Source LLM</div>
+                <div class="n-num">Day 05 · Open Source LLM</div>
                 <div class="n-title">Open-Source LLMs — Hugging Face, Quantization &amp; Document Q&amp;A</div>
               </div>
             </div>
@@ -1221,6 +1300,99 @@
               <span class="tp">Local Models</span>
               <span class="tp">Document Q&amp;A</span>
               <span class="tp">Pipeline API</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:100%; --da:#10b981; --db:#059669;"></div>
+                </div>
+                <div class="depth-text">Most detailed</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note 6: Day 6 - Reasoning Models & LLM Selection -->
+          <div class="note-card n1"
+               data-title="Reasoning Models LLM Selection Day 6 o1 o3 DeepSeek Chain-of-Thought"
+               data-topics="Reasoning Models Chain-of-Thought LLM Selection Benchmarks o1 o3 DeepSeek Thinking Models"
+               data-file="LLM_Engineering_RAG_AI_Agents/Open Source LLM/day6-reasoning-models-llm-selection-notes.html">
+            <div class="note-top">
+              <div class="n-icon n1">🧩</div>
+              <div class="n-meta">
+                <div class="n-num">Day 06 · Open Source LLM</div>
+                <div class="n-title">Reasoning Models &amp; LLM Selection</div>
+              </div>
+            </div>
+            <p class="n-desc">When to reach for a reasoning model vs a standard LLM — covers o1/o3 and open-source thinking models, selection frameworks, and the benchmarks that actually predict task performance.</p>
+            <div class="topics">
+              <span class="tp">Reasoning Models</span>
+              <span class="tp">Chain-of-Thought</span>
+              <span class="tp">LLM Selection</span>
+              <span class="tp">Benchmarks</span>
+              <span class="tp">o1 / DeepSeek</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:88%; --da:#6366f1; --db:#8b5cf6;"></div>
+                </div>
+                <div class="depth-text">Thorough</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note 7: Day 7 - RAG with LangChain -->
+          <div class="note-card n2"
+               data-title="RAG LangChain Day 7 Document Loaders Vector Stores Retrieval Chains"
+               data-topics="RAG LangChain Document Loaders Text Splitters Embeddings Vector Stores Retrieval Chains LCEL"
+               data-file="LLM_Engineering_RAG_AI_Agents/Open Source LLM/day7-rag-langchain-notes.html">
+            <div class="note-top">
+              <div class="n-icon n2">🔗</div>
+              <div class="n-meta">
+                <div class="n-num">Day 07 · Open Source LLM</div>
+                <div class="n-title">RAG with LangChain</div>
+              </div>
+            </div>
+            <p class="n-desc">Build a full RAG pipeline with LangChain: document loaders, text splitters, embedding models, vector stores, retrieval chains — wired together with LCEL for production-ready retrieval.</p>
+            <div class="topics">
+              <span class="tp">LangChain</span>
+              <span class="tp">Document Loaders</span>
+              <span class="tp">Vector Stores</span>
+              <span class="tp">Retrieval Chains</span>
+              <span class="tp">LCEL</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:92%; --da:#06b6d4; --db:#0ea5e9;"></div>
+                </div>
+                <div class="depth-text">Thorough</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note 8: Day 9 - Fine-tuning with LoRA/PEFT -->
+          <div class="note-card n3"
+               data-title="Fine-tuning LoRA PEFT QLoRA Day 9 Open Source Models Custom Dataset"
+               data-topics="LoRA QLoRA PEFT Fine-Tuning Open Source Models Custom Dataset Adapters Hugging Face Transformers"
+               data-file="LLM_Engineering_RAG_AI_Agents/Open Source LLM/day9-finetuning-lora-peft-notes.html">
+            <div class="note-top">
+              <div class="n-icon n3">🎯</div>
+              <div class="n-meta">
+                <div class="n-num">Day 09 · Open Source LLM</div>
+                <div class="n-title">Fine-Tuning Open Source Models — LoRA &amp; PEFT</div>
+              </div>
+            </div>
+            <p class="n-desc">Hands-on fine-tuning with LoRA and PEFT on open-source models: adapter layers, QLoRA memory optimisation, custom dataset prep, and the full Hugging Face Trainer loop.</p>
+            <div class="topics">
+              <span class="tp">LoRA / QLoRA</span>
+              <span class="tp">PEFT Adapters</span>
+              <span class="tp">Dataset Prep</span>
+              <span class="tp">Trainer Loop</span>
+              <span class="tp">Open Source Models</span>
             </div>
             <div class="note-foot">
               <div class="depth-wrap">
@@ -1325,7 +1497,7 @@
           <div class="note-card n3"
                data-title="Fine-Tuning Customization LoRA QLoRA PEFT Instruction Tuning"
                data-topics="Fine-Tuning LoRA QLoRA PEFT Instruction Tuning Full Fine-Tuning Dataset RAG vs Fine-Tuning"
-               data-file="Fine-tuning_customization/finetuning-notes.html">
+               data-file="fine_tuning_customization/finetuning-notes.html">
             <div class="note-top">
               <div class="n-icon n3">🎯</div>
               <div class="n-meta">
@@ -1417,9 +1589,9 @@
             <span class="tag t-e">Zero-Shot</span>
             <span class="tag t-c">Few-Shot</span>
           </div>
+          <p class="p-desc">Token mechanics, prompting fundamentals, seven techniques from zero-shot to tree-of-thought, and sampler control — everything to engineer reliable outputs.</p>
         </div>
         <div class="p-badges">
-          <span class="badge">1 section</span>
           <span class="badge">6 notes</span>
         </div>
         <div class="p-chevron">
@@ -1443,7 +1615,7 @@
           <div class="note-card n4"
                data-title="How LLMs Work Tokens Model Landscape Benchmarks"
                data-topics="Token Prediction Attention Mechanics Model Landscape Benchmarks Context Window Closed vs Open"
-               data-file="Prompt_Engineering/llm-mechanics-tokens-landscape.html">
+               data-file="prompt_engineering/llm-mechanics-tokens-landscape.html">
             <div class="note-top">
               <div class="n-icon n4">⚙️</div>
               <div class="n-meta">
@@ -1474,7 +1646,7 @@
           <div class="note-card n5"
                data-title="Prompt Engineering Foundations System Prompt Context Window Roles Temperature"
                data-topics="System Prompt Context Window Instruction Structure Roles Temperature First Principles"
-               data-file="Prompt_Engineering/prompt-engineering-foundations.html">
+               data-file="prompt_engineering/prompt-engineering-foundations.html">
             <div class="note-top">
               <div class="n-icon n5">🧱</div>
               <div class="n-meta">
@@ -1505,7 +1677,7 @@
           <div class="note-card n4"
                data-title="Prompt Engineering Types Zero-Shot Few-Shot Chain-of-Thought Tree-of-Thought ReAct"
                data-topics="Zero-Shot Few-Shot Chain-of-Thought Tree-of-Thought ReAct Role Prompting Reasoning"
-               data-file="Prompt_Engineering/prompt-engineering-types.html">
+               data-file="prompt_engineering/prompt-engineering-types.html">
             <div class="note-top">
               <div class="n-icon n4">🗂️</div>
               <div class="n-meta">
@@ -1536,7 +1708,7 @@
           <div class="note-card n5"
                data-title="Crafting Effective Prompts Specificity Format Constraints Iteration Output Control"
                data-topics="Specificity Format Anchoring Constraints Iteration Output Control Prompt Construction"
-               data-file="Prompt_Engineering/crafting-effective-prompts.html">
+               data-file="prompt_engineering/crafting-effective-prompts.html">
             <div class="note-top">
               <div class="n-icon n5">🔨</div>
               <div class="n-meta">
@@ -1567,7 +1739,7 @@
           <div class="note-card n4"
                data-title="Transformers Attention Why It Changes Your Prompts Architecture Self-Attention"
                data-topics="Transformer Architecture Attention Self-Attention Positional Encoding Prompting Implications Encoder Decoder"
-               data-file="Prompt_Engineering/transformers-attention-prompting.html">
+               data-file="prompt_engineering/transformers-attention-prompting.html">
             <div class="note-top">
               <div class="n-icon n4">🔬</div>
               <div class="n-meta">
@@ -1598,7 +1770,7 @@
           <div class="note-card n5"
                data-title="Prompt Tuning Optimization Temperature Sampling Top-P Top-K Iteration"
                data-topics="Temperature Sampling Top-P Top-K Sampler Control Optimization Iteration Output Quality"
-               data-file="Prompt_Engineering/prompt-tuning-and-optimization.html">
+               data-file="prompt_engineering/prompt-tuning-and-optimization.html">
             <div class="note-top">
               <div class="n-icon n5">🎛️</div>
               <div class="n-meta">
@@ -1646,9 +1818,9 @@
             <span class="tag t-e">Enterprise</span>
             <span class="tag t-v">Architecture</span>
           </div>
+          <p class="p-desc">Universal AI connectivity layer — protocol primitives (tools, resources, prompts), server/client/host model, and enterprise-scale deployment patterns.</p>
         </div>
         <div class="p-badges">
-          <span class="badge">1 section</span>
           <span class="badge">2 notes</span>
         </div>
         <div class="p-chevron">
@@ -1751,9 +1923,9 @@
             <span class="tag t-e">Retrieval</span>
             <span class="tag t-c">Architecture</span>
           </div>
+          <p class="p-desc">End-to-end retrieval pipeline — chunking strategies, embedding models, vector indexing, retrieval reranking, and hallucination evaluation techniques.</p>
         </div>
         <div class="p-badges">
-          <span class="badge">1 section</span>
           <span class="badge">1 note</span>
         </div>
         <div class="p-chevron">
@@ -1833,9 +2005,9 @@
             <div class="day-pip done"></div>
             <span class="day-pip-label">5 / 5 days</span>
           </div>
+          <p class="p-desc">Zero-config deploys through AWS production — auth, Stripe payments, SaaS multi-tenant patterns, and container orchestration via Docker + App Runner.</p>
         </div>
         <div class="p-badges">
-          <span class="badge">1 section</span>
           <span class="badge">5 notes</span>
         </div>
         <div class="p-chevron">
@@ -2021,7 +2193,7 @@
 
   <!-- ── Footer ───────────────────────────────── -->
   <footer class="z1">
-    <p>AI Knowledge Vault &mdash; <span class="hl">24 notes</span> across <span class="hl">5 projects</span> &mdash; Updated <span class="hl">July 2026</span></p>
+    <p>AI Knowledge Vault &mdash; <span class="hl">27 notes</span> across <span class="hl">5 modules</span> &mdash; Updated <span class="hl">July 2026</span></p>
     <p style="margin-top:0.35rem;font-size:0.6rem;opacity:0.5">Press <span style="color:var(--primary)">/</span> to search · Click any card to open note · Neural network reacts to your cursor</p>
   </footer>
 
@@ -2187,10 +2359,21 @@
 
   /* ─── 7. Project collapse ──────────────────────── */
   (function () {
+    /* start all collapsed */
+    document.querySelectorAll('.project').forEach(p => p.classList.add('collapsed'));
+
     document.querySelectorAll('.project-head').forEach(head => {
       head.addEventListener('click', () => {
         head.closest('.project').classList.toggle('collapsed');
       });
+    });
+
+    document.getElementById('expand-all').addEventListener('click', () => {
+      document.querySelectorAll('.project:not(.hidden)').forEach(p => p.classList.remove('collapsed'));
+    });
+
+    document.getElementById('collapse-all').addEventListener('click', () => {
+      document.querySelectorAll('.project:not(.hidden)').forEach(p => p.classList.add('collapsed'));
     });
   })();
 
@@ -2216,6 +2399,8 @@
           Object.entries(projects).forEach(([id, el]) => {
             el.classList.toggle('hidden', id !== f);
           });
+          /* auto-expand the selected project */
+          projects[f].classList.remove('collapsed');
           projects[f].scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       });
