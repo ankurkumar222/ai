@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Architects Lab — AI Resume &amp; Cover Letter Assistant (Pydantic + OpenAI/Gemini)</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#121821; --panel2:#161d28; --border:#22303f;
+    --text:#dbe4ee; --muted:#7d92a8; --accent:#39d3ac; --accent2:#f2b84b;
+    --danger:#ef6a6a; --code:#0d1319; --tag:#1c2a3a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    line-height:1.6; padding:0 0 80px 0;
+  }
+  header{
+    padding:36px 24px 24px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#0e141c,#0b0f14);
+  }
+  .eyebrow{color:var(--accent); font-size:12px; letter-spacing:2px; text-transform:uppercase; font-weight:600;}
+  h1{margin:8px 0 6px; font-size:28px; color:#f2f6fa;}
+  .sub{color:var(--muted); font-size:14px; max-width:780px;}
+  .toolbar{
+    display:flex; gap:10px; padding:16px 24px; position:sticky; top:0;
+    background:rgba(11,15,20,0.95); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--border); z-index:10; flex-wrap:wrap;
+  }
+  button.ctrl{
+    background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    padding:8px 14px; border-radius:6px; cursor:pointer; font-size:13px;
+  }
+  button.ctrl:hover{border-color:var(--accent); color:var(--accent);}
+  .wrap{max-width:920px; margin:0 auto; padding:24px;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    margin-bottom:16px; overflow:hidden;
+  }
+  .card-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 20px; cursor:pointer; user-select:none;
+  }
+  .card-head:hover{background:var(--panel2);}
+  .card-title{font-size:16px; font-weight:600; color:#f2f6fa; display:flex; align-items:center; gap:10px;}
+  .tag{
+    font-size:10px; text-transform:uppercase; letter-spacing:1px;
+    background:var(--tag); color:var(--accent); padding:3px 8px; border-radius:4px; font-weight:700;
+  }
+  .tag.arch{color:var(--accent2);}
+  .tag.risk{color:var(--danger);}
+  .chevron{color:var(--muted); transition:transform .2s;}
+  .card.open .chevron{transform:rotate(90deg);}
+  .card-body{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+    padding:0 20px;
+  }
+  .card.open .card-body{ max-height:4500px; padding:0 20px 20px; }
+  p{margin:8px 0;}
+  .questions{
+    background:var(--code); border-left:3px solid var(--accent);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .questions h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent);}
+  .questions ul{margin:0; padding-left:18px;}
+  .questions li{margin:6px 0; color:#c8d6e2;}
+  .archnote{
+    background:var(--code); border-left:3px solid var(--accent2);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .archnote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent2);}
+  .risknote{
+    background:var(--code); border-left:3px solid var(--danger);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .risknote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--danger);}
+  pre{
+    background:var(--code); border:1px solid var(--border); border-radius:8px;
+    padding:14px; overflow-x:auto; font-size:12.5px; color:#a9e6c9; line-height:1.5;
+  }
+  code{color:var(--accent2); font-family:'Cascadia Code',Consolas,monospace;}
+  .recall{
+    margin-top:12px; border:1px dashed var(--border); border-radius:6px; padding:10px 14px;
+    cursor:pointer; background:#0e1620;
+  }
+  .recall .q{color:var(--accent2); font-weight:600; font-size:13.5px;}
+  .recall .a{display:none; margin-top:8px; color:var(--muted); font-size:13.5px; border-top:1px solid var(--border); padding-top:8px;}
+  .recall.show .a{display:block;}
+  .recall .hint{font-size:11px; color:var(--muted); float:right;}
+  ul.plain li{margin:4px 0;}
+  .foot{color:var(--muted); text-align:center; padding:30px; font-size:12px;}
+  .progress{font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Architects Lab · AI Resume Assistant Project</div>
+  <h1>AI Resume &amp; Cover Letter Assistant — Pydantic + OpenAI/Gemini</h1>
+  <div class="sub">Notes from a hands-on project — a pipeline that compares a resume against a target job
+  description, identifies gaps, generates a tailored resume with tracked changes, and drafts a matching
+  cover letter, using Pydantic for structured output and both OpenAI and Gemini as swappable backends.
+  Structured for a Senior Engineering Manager who is <strong>actively job hunting</strong> — this project
+  maps directly onto your own Sarvam AI / PhonePe / Razorpay applications, not just an abstract exercise.</div>
+</header>
+
+<div class="toolbar">
+  <button class="ctrl" onclick="expandAll()">▾ Expand All</button>
+  <button class="ctrl" onclick="collapseAll()">▸ Collapse All</button>
+  <button class="ctrl" onclick="revealAllRecall()">💡 Reveal All Recall Answers</button>
+  <span class="progress" id="progressLabel"></span>
+</div>
+
+<div class="wrap">
+
+  <!-- SECTION 1 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Framing</span> What This Tool Actually Does — And the One Rule That Matters Most</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Pipeline: old resume + target job description → (1) gap analysis (what's missing, what matches,
+      what's an under-highlighted strength) → (2) a tailored, rewritten resume with tracked
+      additions/removals → (3) a matching, tone-appropriate cover letter.</p>
+
+      <div class="risknote">
+        <h4>The Non-Negotiable Rule — Stated Explicitly and Repeated</h4>
+        <p>Every generated metric (percentages, growth numbers, "increased X by 30%") is fabricated by the
+        LLM to sound impressive — <strong>none of it is real unless you already did it</strong>. The
+        instructor repeats this warning multiple times: submitting an AI-embellished resume with numbers you
+        can't back up is both unethical and a real risk if questioned in an interview. The tool's correct use
+        is to surface phrasing and structure, and to flag genuine gaps — the human must verify every specific
+        claim before it goes anywhere near a real application.</p>
+      </div>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>Given you're actively targeting AI/ML-focused roles, this is worth treating as more than a course
+        exercise — it's a real tool you could adapt for your own applications this week. But the fabricated-metrics
+        risk is exactly the kind of thing that would sink credibility fast in an interview at a company
+        that takes AI engineering seriously (Sarvam AI, PhonePe, Razorpay would all likely probe specifics) —
+        treat every AI-suggested number as a draft placeholder to replace with your own verified data, never
+        as a fact to keep.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What is the single most important guardrail when using this kind of resume tool? <span class="hint">tap to reveal</span></div>
+        <div class="a">Never submit AI-generated quantitative claims (percentages, growth numbers, specific achievements) unless you can personally verify they're true and you actually did them. The LLM fabricates plausible-sounding metrics to make the resume more impressive, but they are not grounded in fact unless the human confirms and edits them — this is a human-in-the-loop requirement, not optional polish.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Pydantic 101</span> Why Structured Output Validation Matters</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+from pydantic import BaseModel
+
+class User(BaseModel):
+    name: str
+    age: int
+    email: str
+
+User(name="Mira Hero", age=30, email="mira@gmail.com")   # ✓ valid
+User(name="Mira", age="not a number", email="...")        # ✗ raises
+                                                            #   a validation error
+      </pre>
+      <p>Pydantic defines a data "blueprint" using Python type hints, then automatically validates that
+      any data assigned to it matches — raising a clear error instead of silently accepting malformed data,
+      and in many cases auto-converting compatible types. This replaces the earlier, weaker pattern of just
+      describing the desired output format in plain-English prompt text and hoping the LLM complies.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is the exact same principle as FastAPI's Pydantic request validation seen in the Vercel
+        production course (Day 4's healthcare app) — the same library, same discipline, applied to LLM
+        <em>output</em> here instead of API <em>input</em>. Worth recognizing as one unified pattern: wherever
+        untrusted or generated data crosses a boundary into your system (an API request, an LLM response),
+        Pydantic-style schema validation at that boundary is the fix, not manual parsing or hoping for the best.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What happens differently when you pass invalid data to a Pydantic model versus a plain Python dictionary? <span class="hint">tap to reveal</span></div>
+        <div class="a">A plain dictionary would silently accept whatever value you give it, regardless of type. A Pydantic model actively validates each field against its declared type hint and raises a clear validation error immediately if the data doesn't match (e.g. a string passed where an integer was expected) — catching the problem at the boundary instead of letting bad data flow silently into your application.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Integration</span> Getting Structured JSON Directly From OpenAI</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+class Destination(BaseModel):
+    city: str
+    country: str
+    top_attractions: list[str]
+
+response = client.beta.chat.completions.parse(
+    model="gpt-4o",
+    messages=[...],
+    temperature=0,
+    response_format=Destination      # ← the Pydantic model itself
+)
+      </pre>
+      <p>The <code>.beta.chat.completions.parse()</code> method takes a Pydantic model directly as
+      <code>response_format</code> — OpenAI returns output that's guaranteed to match that schema, instead of
+      generating free text that you then have to hope parses correctly. A list-type field
+      (<code>top_attractions: list[str]</code>) tells the model to return a collection, not a single value.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What's the practical benefit of passing a Pydantic model as response_format, versus just describing the desired JSON structure in the prompt text? <span class="hint">tap to reveal</span></div>
+        <div class="a">The API enforces the schema at generation time and returns validated, guaranteed-structured output — eliminating the risk of the model returning malformed JSON, missing fields, or wrong types that you'd otherwise have to catch and handle after the fact when relying purely on prompt instructions.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Design</span> A Dual-Purpose Generate Function — Plain Text or Structured</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+def openai_generate(
+    prompt: str,
+    model: str = "gpt-4o",
+    temperature: float = 0.7,
+    max_tokens: int = 1500,
+    response_format: dict | None = None
+) -> str | dict:
+    if not response_format:
+        # plain chat.completions.create(...)
+        ...
+    else:
+        # structured .beta.chat.completions.parse(...)
+        ...
+</pre>
+      <p>One function handles both plain-text and Pydantic-structured generation, branching on whether
+      <code>response_format</code> was supplied. Default parameter values (model, temperature, max_tokens) mean
+      callers only need to specify what differs from the default — the same "sensible defaults, override what
+      you need" pattern seen across the FastAPI and LangChain projects.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This dual-mode function design (one function, two behaviors, selected by an optional parameter) is
+        a clean, reusable pattern worth lifting directly for any internal Optimus wrapper around an LLM call —
+        rather than maintaining two separate near-duplicate functions for "structured" and "unstructured"
+        generation, a single well-documented function with an optional schema parameter keeps the call surface
+        simple for callers while supporting both use cases.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Comparison</span> OpenAI vs. Gemini — Same Prompt, Different Providers, Different Results</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Two near-identical generate functions (<code>openai_generate</code>, <code>gemini_generate</code>)
+      accept the same prompt and produce comparable output — a direct, hands-on multi-provider comparison.
+      Notable findings from the live tests:</p>
+      <ul class="plain">
+        <li>Both models correctly followed the "results-driven metrics" instruction, but generated different specific numbers (100 vs. 50 blog posts) for the same underlying vague resume bullet — a direct illustration that these numbers are fabricated, not recalled facts.</li>
+        <li>At the same prompt, Gemini consistently picked up an added instruction (mention AI/prompt-engineering skills) that OpenAI sometimes missed on one run and caught on another — non-deterministic instruction-following even at fixed settings.</li>
+        <li>Cranking OpenAI's temperature to 1.6 (near the 0-2 range's upper bound) visibly degraded output — the model started drifting into other languages and incoherent text, a live demonstration of the "high temperature = erratic" warning from earlier lessons.</li>
+      </ul>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is a very concrete data point for your multi-LLM bootcamp work: even with the same prompt,
+        temperature, and task, provider behavior is not perfectly interchangeable or fully deterministic run
+        to run. For any production pipeline (Optimus or otherwise) relying on a specific model to reliably
+        follow an instruction, this argues for either explicit output validation (Pydantic, again) that
+        catches when an instruction was missed, or a retry/self-check step, rather than trusting a single
+        generation to consistently comply.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What happened to OpenAI's output when temperature was pushed to 1.6, and what does that confirm? <span class="hint">tap to reveal</span></div>
+        <div class="a">The output became visibly erratic — it started drifting into other languages and generating incoherent text. This confirms the general rule that pushing temperature toward the top of its range (near 2) sacrifices coherence for randomness/creativity, and for tasks like resume writing that need to stay factual and readable, a much lower temperature is appropriate.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Core Logic</span> The Gap Analysis Function — The Heart of the Tool</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Prompt structure asks the model to produce four distinct sections in one pass:</p>
+      <ol style="padding-left:18px; color:#c8d6e2;">
+        <li>Key requirements extracted from the job description</li>
+        <li>Relevant experience already present in the resume</li>
+        <li>Gaps/mismatches — requirements not evidenced in the resume</li>
+        <li>Potential strengths — resume content not explicitly requested, but valuable</li>
+      </ol>
+      <p>The same function supports either OpenAI or Gemini via a simple <code>if/elif</code> branch on a
+      <code>model</code> parameter — one interface, swappable backend, directly reusing the dual-provider
+      pattern from Section 5.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why does the gap analysis explicitly include a "potential strengths" section, not just "gaps"? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because a resume may contain valuable, relevant experience that isn't literally listed as a job requirement but still strengthens the application — surfacing this helps the candidate deliberately highlight it, rather than only reacting defensively to what's missing.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Iteration</span> Prompt Tuning — Surfacing AI/Prompt-Engineering Skills as a Strength</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>A follow-up refinement adds an explicit instruction to the "potential strengths" section: highlight
+      any AI-adjacent skills (prompt engineering, ChatGPT familiarity) as valuable, even if not literally
+      requested in the job posting — reflecting how AI fluency is increasingly treated as a real hiring signal.</p>
+      <p>Result: Gemini consistently surfaced this addition; OpenAI was inconsistent — catching it on one run,
+      missing it on a re-run with the identical prompt and inputs, only reliably appearing after the
+      temperature was adjusted.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>Directly relevant to your own resume/LinkedIn positioning: this project's own finding validates
+        explicitly calling out AI/prompt-engineering fluency as a distinct, valued skill category — not
+        assuming it's implied by "used ChatGPT for tasks." Given your idfc-coder and Optimus Project work,
+        that's a concrete, evidenced example (leading AI adoption for 80+ microservices, prompt template
+        design) that this tool's own logic would flag as a "potential strength" worth surfacing explicitly
+        rather than burying in a generic bullet point.</p>
+      </div>
+
+      <div class="questions">
+        <h4>Question worth sitting with</h4>
+        <ul>
+          <li>Looking at your own resume through this tool's lens — is your Optimus Project / idfc-coder AI
+          adoption leadership explicitly called out as a distinct skill category, or is it currently folded
+          into general "engineering management" bullets where it might get missed the same way OpenAI
+          sometimes missed the AI-skills instruction here?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Generation</span> Producing the Tailored Resume — With Tracked Changes</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Feeding the original resume + job description + gap analysis into a resume-rewriting prompt
+      produces two outputs: the updated resume text, and a separate <strong>markdown "diff"</strong> showing
+      what was added/changed/removed — letting the human clearly review and approve every modification
+      before using it, directly supporting the human-in-the-loop verification rule from Section 1.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why generate a separate "diff" markdown alongside the updated resume, rather than just handing over the final rewritten version? <span class="hint">tap to reveal</span></div>
+        <div class="a">To make every change explicitly visible and reviewable — since the tool can fabricate plausible-sounding metrics or additions, the diff lets the human quickly scan exactly what was added, changed, or removed and verify or correct each claim before using the resume for a real application, rather than having to compare two full documents line by line.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Generation</span> Cover Letter — Tone Control as a Real Parameter</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+class CoverLetterOutput(BaseModel):
+    cover_letter: str
+
+def generate_cover_letter(
+    job_description_text: str,
+    updated_resume: str,
+    model: str = "openai",
+    tone: str = "professional"     # ← added in a later iteration
+) -> dict:
+    ...
+</pre>
+      <p>A <code>tone</code> parameter was added specifically so the same function could produce a formal,
+      corporate-appropriate letter or a more informal, startup-friendly one depending on the target company's
+      culture — tested explicitly by generating both a "professional" and a "slightly informal, enthusiastic,
+      startup-suited" version from the identical resume and job description.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>Tone-as-parameter is a small but genuinely useful design choice — it turns a qualitative,
+        judgment-heavy decision (how formal should this sound?) into an explicit, controllable input rather
+        than something baked implicitly into a fixed prompt. Worth using directly: before applying to a
+        specific company, read their careers page or LinkedIn voice, and set the tone parameter to match —
+        this tool's own "read the company culture first" framing is good practical career advice on its own.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 10 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag arch">Pipeline</span> The Unified "Resume Rocket" Function</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+def run_resume_rocket(resume: str, job_description: str):
+    gaps = analyze_resume_against_job_description(resume, job_description, model="openai")
+    print(gaps)
+
+    updated_resume, diff_markdown = generate_updated_resume(resume, job_description, gaps)
+    print(updated_resume)
+    print(diff_markdown)
+
+    cover_letter = generate_cover_letter(job_description, updated_resume, model="openai")
+    return updated_resume, cover_letter
+</pre>
+      <p>All previously-built functions composed into a single call — feed in an old resume and a target job
+      description, get back a full gap analysis, tailored resume, tracked diff, and cover letter in one pass.
+      Explicitly framed by the instructor as a legitimate small-scale startup idea, and noted as a natural next
+      step toward wrapping this in an agentic system that could handle more of the job-application workflow autonomously.</p>
+
+      <div class="questions">
+        <h4>Questions worth sitting with</h4>
+        <ul>
+          <li>Given you're actively job hunting right now, would it be worth actually adapting this exact
+          pipeline — swap in your real resume and a real Sarvam AI / PhonePe / Razorpay job posting — as a
+          practical tool this week, rather than just as a study exercise?</li>
+          <li>The instructor floats wrapping this in an agentic system for more autonomous job-application
+          handling — where would you personally want to keep a hard human-in-the-loop checkpoint (e.g. before
+          actually submitting an application), even if the drafting itself became more automated?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 11 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag arch">Wrap-up</span> Project Recap</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+1. Pydantic: schema-defined, validated data structures using
+   Python type hints — same discipline as FastAPI request models,
+   applied here to LLM output instead of API input
+2. OpenAI's .beta.chat.completions.parse() enforces a Pydantic
+   schema directly on generation, guaranteeing structured output
+3. One dual-mode generate function per provider (plain text OR
+   structured, via an optional response_format parameter)
+4. Same prompts run against OpenAI AND Gemini side by side —
+   results differ in specifics and instruction-following
+   consistency, even at matched settings
+5. Gap analysis: 4-part structured comparison (requirements /
+   matches / gaps / hidden strengths)
+6. Tailored resume generation + a separate tracked-changes diff,
+   explicitly to support human verification of every claim
+7. Cover letter generation with a tone parameter for matching
+   company culture
+8. All steps composed into one unified pipeline function
+9. THE RULE, repeated throughout: never submit AI-fabricated
+   metrics as fact — verify everything before it goes anywhere near
+   a real application
+      </pre>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">Architects Lab · Study Notes · Source: AI Resume &amp; Cover Letter Assistant Udemy Project (Pydantic + OpenAI/Gemini)</div>
+
+<script>
+  function toggleCard(headEl){
+    const card = headEl.parentElement;
+    card.classList.toggle('open');
+    updateProgress();
+  }
+  function toggleRecall(el){
+    el.classList.toggle('show');
+  }
+  function expandAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('open'));
+    updateProgress();
+  }
+  function collapseAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.remove('open'));
+    updateProgress();
+  }
+  function revealAllRecall(){
+    document.querySelectorAll('.recall').forEach(r=>r.classList.add('show'));
+  }
+  function updateProgress(){
+    const total = document.querySelectorAll('.card').length;
+    const open = document.querySelectorAll('.card.open').length;
+    document.getElementById('progressLabel').textContent = open + ' / ' + total + ' sections expanded';
+  }
+  updateProgress();
+</script>
+
+</body>
+</html>
