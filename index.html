@@ -744,6 +744,153 @@
     /* ── Utility ────────────────────────────────── */
     .hidden { display: none !important; }
 
+    /* ── Upcoming courses ────────────────────────── */
+    .upcoming-section {
+      margin-bottom: 1.5rem;
+      animation: fade-up 0.5s 0.28s ease both;
+    }
+
+    .upcoming-header {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.875rem;
+    }
+
+    .upcoming-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--amber), rgba(245,158,11,0.3));
+      box-shadow: 0 0 8px rgba(245,158,11,0.3);
+      flex-shrink: 0;
+    }
+
+    .upcoming-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      color: var(--amber);
+    }
+
+    .upcoming-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+
+    .course-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.2rem 1.3rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .course-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 999px;
+    }
+
+    .cc1::before { background: linear-gradient(180deg, #06b6d4, #3b82f6); }
+    .cc2::before { background: linear-gradient(180deg, #f59e0b, #f43f5e); }
+    .cc3::before { background: linear-gradient(180deg, #8b5cf6, #6366f1); }
+    .cc4::before { background: linear-gradient(180deg, #10b981, #059669); }
+
+    .course-card:hover { transform: translateY(-3px); border-color: var(--border-hover); }
+    .cc1:hover { box-shadow: 0 10px 32px rgba(6,182,212,0.15); }
+    .cc2:hover { box-shadow: 0 10px 32px rgba(245,158,11,0.15); }
+    .cc3:hover { box-shadow: 0 10px 32px rgba(139,92,246,0.15); }
+    .cc4:hover { box-shadow: 0 10px 32px rgba(16,185,129,0.15); }
+
+    .cc-num {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .cc-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cc-icon { font-size: 1.5rem; line-height: 1; }
+
+    .cc-platform {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 0.18rem 0.5rem;
+      border-radius: 6px;
+    }
+
+    [data-theme="light"] .cc-platform {
+      background: rgba(0,0,0,0.05);
+      border-color: rgba(0,0,0,0.08);
+    }
+
+    .cc-title {
+      font-family: var(--heading);
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.38;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .cc-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .cc-tags span {
+      padding: 0.12rem 0.45rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.57rem;
+      color: var(--text-dim);
+    }
+
+    [data-theme="light"] .cc-tags span {
+      background: rgba(0,0,0,0.04);
+      border-color: rgba(0,0,0,0.07);
+    }
+
+    .cc-go {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+      transition: color 0.2s;
+    }
+
+    .course-card:hover .cc-go { color: var(--text); }
+
+    @media (max-width: 640px) {
+      .upcoming-grid { grid-template-columns: 1fr; }
+    }
+
     /* ── Reading progress bar ────────────────────── */
     #reading-progress {
       position: fixed;
@@ -1248,24 +1395,74 @@
       </div>
     </div>
 
-    <!-- Current Focus Banner -->
-    <div class="focus-banner">
-      <div class="focus-icon">☁️</div>
-      <div class="focus-body">
-        <div class="focus-label">Currently Studying</div>
-        <div class="focus-title">Deploy AI to Cloud — Architects Lab</div>
-        <div class="track-dots">
-          <div class="track-dot done"></div>
-          <div class="track-dot done"></div>
-          <div class="track-dot done"></div>
-          <div class="track-dot done"></div>
-          <div class="track-dot done"></div>
-          <span style="font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);margin-left:0.4rem;">5 / 5 days</span>
-        </div>
+    <!-- Upcoming Courses -->
+    <div class="upcoming-section">
+      <div class="upcoming-header">
+        <span class="upcoming-dot"></span>
+        <span class="upcoming-eyebrow">Up Next — Queued Courses</span>
       </div>
-      <div class="focus-right">
-        <div class="focus-stat">5/5</div>
-        <div class="focus-stat-label">Days Done</div>
+      <div class="upcoming-grid">
+
+        <a class="course-card cc1"
+           href="https://www.udemy.com/course/mastering-aiml-with-docker/"
+           target="_blank" rel="noopener">
+          <div class="cc-num">01 / 04</div>
+          <div class="cc-top">
+            <span class="cc-icon">🐳</span>
+            <span class="cc-platform">Udemy</span>
+          </div>
+          <div class="cc-title">Ultimate Docker Bootcamp for ML, GenAI &amp; Agentic AI</div>
+          <div class="cc-tags">
+            <span>Docker</span><span>ML</span><span>GenAI</span><span>Agentic AI</span>
+          </div>
+          <div class="cc-go">View Course →</div>
+        </a>
+
+        <a class="course-card cc2"
+           href="https://www.udemy.com/course/chief-ai-officer-program-lead-ai-strategy-governance/?couponCode=PMNVD2025"
+           target="_blank" rel="noopener">
+          <div class="cc-num">02 / 04</div>
+          <div class="cc-top">
+            <span class="cc-icon">🎯</span>
+            <span class="cc-platform">Udemy</span>
+          </div>
+          <div class="cc-title">Certified Chief AI Officer Program: AI Strategy &amp; Governance</div>
+          <div class="cc-tags">
+            <span>AI Strategy</span><span>Governance</span><span>Leadership</span><span>Certification</span>
+          </div>
+          <div class="cc-go">View Course →</div>
+        </a>
+
+        <a class="course-card cc3"
+           href="https://www.udemy.com/course/executive-briefing-generative-ai-and-large-language-models-llm/?couponCode=PMNVD2025"
+           target="_blank" rel="noopener">
+          <div class="cc-num">03 / 04</div>
+          <div class="cc-top">
+            <span class="cc-icon">📊</span>
+            <span class="cc-platform">Udemy</span>
+          </div>
+          <div class="cc-title">AI Leader: Generative AI &amp; Agentic AI for Leaders &amp; Founders</div>
+          <div class="cc-tags">
+            <span>GenAI</span><span>Agentic AI</span><span>Leadership</span><span>Founders</span>
+          </div>
+          <div class="cc-go">View Course →</div>
+        </a>
+
+        <a class="course-card cc4"
+           href="https://www.udemy.com/course/ai-project-lifecycle-mastery-strategy-to-deployment/?couponCode=PMNVD2025"
+           target="_blank" rel="noopener">
+          <div class="cc-num">04 / 04</div>
+          <div class="cc-top">
+            <span class="cc-icon">🚀</span>
+            <span class="cc-platform">Udemy</span>
+          </div>
+          <div class="cc-title">AI for Leaders &amp; Program Managers: Strategy to Deployment</div>
+          <div class="cc-tags">
+            <span>AI Strategy</span><span>Program Mgmt</span><span>Deployment</span><span>Leadership</span>
+          </div>
+          <div class="cc-go">View Course →</div>
+        </a>
+
       </div>
     </div>
 
