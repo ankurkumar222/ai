@@ -740,6 +740,154 @@
 
     /* ── Utility ────────────────────────────────── */
     .hidden { display: none !important; }
+
+    /* ── Deploy project accent ──────────────────────── */
+    .note-card.n8 { --card-glow: linear-gradient(135deg, rgba(249,115,22,0.07), rgba(225,29,72,0.03)); }
+    .note-card.n8:hover { box-shadow: 0 18px 50px rgba(249,115,22,0.18); }
+    .n-icon.n8 { background: linear-gradient(135deg,#f97316,#e11d48); box-shadow: 0 5px 18px rgba(249,115,22,0.35); }
+
+    .project.deploy { animation-delay: 0.65s; }
+    .project.deploy .project-head { background: linear-gradient(135deg, rgba(249,115,22,0.07) 0%, rgba(225,29,72,0.03) 100%); }
+    .project.deploy .p-icon { background: linear-gradient(135deg,#f97316,#e11d48); box-shadow: 0 0 30px rgba(249,115,22,0.35); }
+    .project.deploy .p-eyebrow { color: #fb923c; }
+    .project.deploy .badge { background: rgba(249,115,22,0.08); border-color: rgba(249,115,22,0.18); color: #fdba74; }
+    .project.deploy .sec-dot { background: radial-gradient(circle,#f97316,rgba(249,115,22,0.3)); box-shadow: 0 0 8px rgba(249,115,22,0.28); }
+    .project.deploy .sec-title { color: #fb923c; }
+    .project.deploy .open-btn { background: rgba(249,115,22,0.08); border-color: rgba(249,115,22,0.18); color: #fdba74; }
+    .project.deploy .note-card:hover .open-btn { background: rgba(249,115,22,0.18); border-color: rgba(249,115,22,0.45); box-shadow: 0 0 14px rgba(249,115,22,0.2); }
+    .f-btn[data-filter="proj-deploy"].active { background: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.38); color: #fdba74; }
+
+    /* ── Focus banner ──────────────────────────────── */
+    .focus-banner {
+      background: linear-gradient(135deg, rgba(249,115,22,0.09) 0%, rgba(225,29,72,0.04) 100%);
+      border: 1px solid rgba(249,115,22,0.22);
+      border-radius: 20px;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      animation: fade-up 0.5s 0.28s ease both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .focus-banner::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #f97316, #e11d48);
+      border-radius: 999px;
+    }
+
+    .focus-icon {
+      width: 50px; height: 50px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #f97316, #e11d48);
+      box-shadow: 0 0 28px rgba(249,115,22,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .focus-body { flex: 1; min-width: 0; }
+
+    .focus-label {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #fb923c;
+      margin-bottom: 0.3rem;
+    }
+
+    .focus-title {
+      font-family: var(--heading);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.6rem;
+    }
+
+    .track-dots { display: flex; gap: 0.3rem; align-items: center; }
+
+    .track-dot {
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      transition: background 0.2s, width 0.2s;
+    }
+
+    .track-dot.done { background: linear-gradient(90deg, #f97316, #e11d48); }
+    .track-dot.done:last-of-type { width: 28px; }
+    .track-dot { width: 20px; }
+
+    .focus-right { flex-shrink: 0; text-align: right; }
+
+    .focus-stat {
+      font-family: var(--heading);
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fb923c, #f43f5e);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .focus-stat-label {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── New badge ──────────────────────────────────── */
+    .new-badge {
+      position: absolute;
+      top: 0.75rem; right: 0.75rem;
+      background: linear-gradient(135deg, #f97316, #e11d48);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 0.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.16rem 0.48rem;
+      border-radius: 999px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* ── Day-track pips in project header ─────────── */
+    .day-track {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.65rem;
+    }
+
+    .day-pip {
+      width: 26px; height: 5px;
+      border-radius: 999px;
+      background: rgba(249,115,22,0.12);
+      border: 1px solid rgba(249,115,22,0.2);
+    }
+
+    .day-pip.done {
+      background: linear-gradient(90deg, #f97316, #e11d48);
+      border-color: transparent;
+      box-shadow: 0 0 6px rgba(249,115,22,0.3);
+    }
+
+    .day-pip-label {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      color: #fb923c;
+      margin-left: 0.35rem;
+    }
   </style>
 </head>
 <body>
@@ -802,18 +950,39 @@
     <div class="stats">
       <div class="s-card">
         <div class="s-emoji">🗂️</div>
-        <span class="s-num" data-target="4">0</span>
+        <span class="s-num" data-target="5">0</span>
         <div class="s-label">Projects</div>
       </div>
       <div class="s-card">
         <div class="s-emoji">📁</div>
-        <span class="s-num" data-target="8">0</span>
+        <span class="s-num" data-target="9">0</span>
         <div class="s-label">Sections</div>
       </div>
       <div class="s-card">
         <div class="s-emoji">📄</div>
-        <span class="s-num" data-target="19">0</span>
+        <span class="s-num" data-target="24">0</span>
         <div class="s-label">Notes</div>
+      </div>
+    </div>
+
+    <!-- Current Focus Banner -->
+    <div class="focus-banner">
+      <div class="focus-icon">☁️</div>
+      <div class="focus-body">
+        <div class="focus-label">Currently Studying</div>
+        <div class="focus-title">Deploy AI to Cloud — Architects Lab</div>
+        <div class="track-dots">
+          <div class="track-dot done"></div>
+          <div class="track-dot done"></div>
+          <div class="track-dot done"></div>
+          <div class="track-dot done"></div>
+          <div class="track-dot done"></div>
+          <span style="font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);margin-left:0.4rem;">5 / 5 days</span>
+        </div>
+      </div>
+      <div class="focus-right">
+        <div class="focus-stat">5/5</div>
+        <div class="focus-stat-label">Days Done</div>
       </div>
     </div>
 
@@ -824,6 +993,7 @@
       <button class="f-btn" data-filter="proj-pe">Prompt Engineering</button>
       <button class="f-btn" data-filter="proj-mcp">MCP</button>
       <button class="f-btn" data-filter="proj-rag">RAG</button>
+      <button class="f-btn" data-filter="proj-deploy">Deploy AI</button>
     </div>
 
     <!-- Empty state -->
@@ -1640,11 +1810,218 @@
       </div><!-- /project-body -->
     </article>
 
+    <!-- ── Project: Deploy AI to Cloud ──────────────── -->
+    <article class="project deploy" id="proj-deploy">
+
+      <div class="project-head">
+        <div class="p-icon">☁️</div>
+        <div class="p-meta">
+          <div class="p-eyebrow">Project · 05</div>
+          <div class="p-name">Deploy AI to Cloud — Architects Lab</div>
+          <div class="tags">
+            <span class="tag t-e">AWS</span>
+            <span class="tag t-c">Docker</span>
+            <span class="tag t-i">Vercel</span>
+            <span class="tag t-v">SaaS</span>
+            <span class="tag t-e">Full-Stack</span>
+          </div>
+          <div class="day-track">
+            <div class="day-pip done"></div>
+            <div class="day-pip done"></div>
+            <div class="day-pip done"></div>
+            <div class="day-pip done"></div>
+            <div class="day-pip done"></div>
+            <span class="day-pip-label">5 / 5 days</span>
+          </div>
+        </div>
+        <div class="p-badges">
+          <span class="badge">1 section</span>
+          <span class="badge">5 notes</span>
+        </div>
+        <div class="p-chevron">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="project-body">
+
+      <!-- Section: Deploy Series -->
+      <div class="section">
+        <div class="sec-header">
+          <span class="sec-dot"></span>
+          <span class="sec-title">Instant Deploy → AWS Production</span>
+          <span class="sec-badge">5 notes</span>
+        </div>
+
+        <div class="notes-grid">
+
+          <!-- Note D1: Instant Gratification Deploy -->
+          <div class="note-card n8"
+               data-title="Day 1 Instant Gratification Deploy Vercel Railway Zero Config"
+               data-topics="Vercel Railway Zero-Config Deploy Frontend CI/CD One-Click Deployment"
+               data-file="Deploy_AI_to_AWS_GCP_Azure_Vercel /day1-instant-gratification-notes.html">
+            <span class="new-badge">New</span>
+            <div class="note-top">
+              <div class="n-icon n8">🚀</div>
+              <div class="n-meta">
+                <div class="n-num">Day 01 · Deploy</div>
+                <div class="n-title">Instant Gratification Deploy</div>
+              </div>
+            </div>
+            <p class="n-desc">Zero to live in minutes: deploy AI apps with Vercel and Railway using zero-config pipelines. Learn the fastest paths from local to production before touching a single cloud console.</p>
+            <div class="topics">
+              <span class="tp">Vercel</span>
+              <span class="tp">Railway</span>
+              <span class="tp">Zero-Config Deploy</span>
+              <span class="tp">CI/CD</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:90%; --da:#f97316; --db:#e11d48;"></div>
+                </div>
+                <div class="depth-text">Thorough</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note D2: Frontend Meets Backend -->
+          <div class="note-card n8"
+               data-title="Day 2 Frontend Backend Full Stack Deploy API Integration Environment Variables"
+               data-topics="Full-Stack API Routes Environment Variables Build Config Frontend Backend Integration"
+               data-file="Deploy_AI_to_AWS_GCP_Azure_Vercel /day2-frontend-backend-notes.html">
+            <span class="new-badge">New</span>
+            <div class="note-top">
+              <div class="n-icon n8">🔗</div>
+              <div class="n-meta">
+                <div class="n-num">Day 02 · Deploy</div>
+                <div class="n-title">Front End Meets Back End</div>
+              </div>
+            </div>
+            <p class="n-desc">Wire a React frontend to a Python/Node backend and deploy them as a cohesive unit. Covers API routes, environment variable management, build config, and CORS across environments.</p>
+            <div class="topics">
+              <span class="tp">Full-Stack Deploy</span>
+              <span class="tp">API Routes</span>
+              <span class="tp">Env Variables</span>
+              <span class="tp">Build Config</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:85%; --da:#f97316; --db:#e11d48;"></div>
+                </div>
+                <div class="depth-text">Thorough</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note D3: Auth & Subscription -->
+          <div class="note-card n8"
+               data-title="Day 3 Authentication Subscription Clerk Auth Stripe Webhooks"
+               data-topics="Clerk Auth Stripe Subscriptions Webhooks JWT Middleware Subscription Tiers Payments"
+               data-file="Deploy_AI_to_AWS_GCP_Azure_Vercel /day3-auth-subscription-notes.html">
+            <span class="new-badge">New</span>
+            <div class="note-top">
+              <div class="n-icon n8">🔐</div>
+              <div class="n-meta">
+                <div class="n-num">Day 03 · Deploy</div>
+                <div class="n-title">Authentication &amp; Subscription</div>
+              </div>
+            </div>
+            <p class="n-desc">Add production-grade auth and payments to AI apps: Clerk for user management, Stripe for subscription tiers, and webhook handling to keep billing state in sync with your backend.</p>
+            <div class="topics">
+              <span class="tp">Clerk Auth</span>
+              <span class="tp">Stripe</span>
+              <span class="tp">Subscription Tiers</span>
+              <span class="tp">Webhooks</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:88%; --da:#f97316; --db:#e11d48;"></div>
+                </div>
+                <div class="depth-text">Thorough</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note D4: Healthcare SaaS -->
+          <div class="note-card n8"
+               data-title="Day 4 Healthcare SaaS App Production Architecture Multi-Tenant HIPAA"
+               data-topics="SaaS Architecture Healthcare Multi-Tenant Production HIPAA Compliance Data Isolation"
+               data-file="Deploy_AI_to_AWS_GCP_Azure_Vercel /day4-healthcare-saas-notes.html">
+            <span class="new-badge">New</span>
+            <div class="note-top">
+              <div class="n-icon n8">🏥</div>
+              <div class="n-meta">
+                <div class="n-num">Day 04 · Deploy</div>
+                <div class="n-title">The Healthcare SaaS App</div>
+              </div>
+            </div>
+            <p class="n-desc">Build a real-world SaaS application for healthcare: multi-tenant architecture, data isolation, compliance guardrails, and production deploy patterns for regulated domains.</p>
+            <div class="topics">
+              <span class="tp">SaaS Architecture</span>
+              <span class="tp">Multi-Tenant</span>
+              <span class="tp">Healthcare / HIPAA</span>
+              <span class="tp">Production Patterns</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:100%; --da:#f97316; --db:#e11d48;"></div>
+                </div>
+                <div class="depth-text">Most detailed</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <!-- Note D5: AWS Deploy -->
+          <div class="note-card n8"
+               data-title="Day 5 First AWS Deploy IAM Docker App Runner ECR Container"
+               data-topics="AWS IAM Docker App Runner ECR Container Registry Roles Policies Cloud Deploy"
+               data-file="day5-aws-docker-notes.html">
+            <span class="new-badge">New</span>
+            <div class="note-top">
+              <div class="n-icon n8">🐳</div>
+              <div class="n-meta">
+                <div class="n-num">Day 05 · Deploy</div>
+                <div class="n-title">First AWS Deploy — IAM, Docker &amp; App Runner</div>
+              </div>
+            </div>
+            <p class="n-desc">Container-first AWS deployment: set up IAM roles, build and push a Docker image to ECR, then deploy it via App Runner. The production-safe path from local Docker to AWS cloud.</p>
+            <div class="topics">
+              <span class="tp">AWS IAM</span>
+              <span class="tp">Docker</span>
+              <span class="tp">App Runner</span>
+              <span class="tp">ECR</span>
+              <span class="tp">Container Deploy</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:100%; --da:#f97316; --db:#e11d48;"></div>
+                </div>
+                <div class="depth-text">Most detailed</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+        </div><!-- /notes-grid -->
+      </div><!-- /section -->
+
+      </div><!-- /project-body -->
+    </article>
+
   </div><!-- /wrap -->
 
   <!-- ── Footer ───────────────────────────────── -->
   <footer class="z1">
-    <p>AI Knowledge Vault &mdash; <span class="hl">19 notes</span> across <span class="hl">4 projects</span> &mdash; Updated <span class="hl">July 2026</span></p>
+    <p>AI Knowledge Vault &mdash; <span class="hl">24 notes</span> across <span class="hl">5 projects</span> &mdash; Updated <span class="hl">July 2026</span></p>
     <p style="margin-top:0.35rem;font-size:0.6rem;opacity:0.5">Press <span style="color:var(--primary)">/</span> to search · Click any card to open note · Neural network reacts to your cursor</p>
   </footer>
 
@@ -1821,10 +2198,11 @@
   (function () {
     const btns = document.querySelectorAll('.f-btn');
     const projects = {
-      'proj-llm': document.getElementById('proj-llm'),
-      'proj-pe':  document.getElementById('proj-pe'),
-      'proj-mcp': document.getElementById('proj-mcp'),
-      'proj-rag': document.getElementById('proj-rag'),
+      'proj-llm':    document.getElementById('proj-llm'),
+      'proj-pe':     document.getElementById('proj-pe'),
+      'proj-mcp':    document.getElementById('proj-mcp'),
+      'proj-rag':    document.getElementById('proj-rag'),
+      'proj-deploy': document.getElementById('proj-deploy'),
     };
 
     btns.forEach(btn => {
