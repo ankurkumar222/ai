@@ -60,12 +60,87 @@ A Hugging Face login and GPU check follow the now-familiar pattern.
 
 **Practice challenge:** Try a different sample from the dataset, and compare the formatted output using the DeepSeek model's chat template versus Gemma's — noting how their special tokens differ.
 
+> #### 🧑‍🏫 In Plain English: What Is SFT Format, Really?
+>
+> Supervised Fine-Tuning (SFT) Format is simply a way of preparing data so an AI model can learn from examples.
+>
+> Think of it like teaching a student. You give the student:
+> - **Question (Input)** → What the student sees.
+> - **Correct Answer (Output)** → What the student should learn to say.
+>
+> The AI repeats this thousands of times until it learns the pattern.
+>
+> **Example — Training Data:**
+> ```text
+> User: What is Python?
+> Assistant: Python is a programming language used for web development, AI, automation, and more.
+> ```
+> Here:
+> - Input: `What is Python?`
+> - Expected Output: `Python is a programming language...`
+>
+> During training, the model compares its answer with the correct answer, finds mistakes, and updates itself to improve.
+>
+> **Chat Format Example:**
+> ```python
+> messages = [
+>     {"role": "user", "content": "What is Python?"},
+>     {"role": "assistant", "content": "Python is a programming language."}
+> ]
+> ```
+> This is called the SFT format because it stores the conversation exactly as a chat.
+>
+> **One-line Summary:** SFT Format = Input + Correct Output, used to teach the AI by example.
+
 ---
 
 ## Stop 5 — 📏 Confusion Matrix & Classification Metrics (Precision, Recall, F1-Score)
 **What's happening:** A conceptual stop covering how to actually *judge* a classifier fairly: accuracy alone can be misleading (especially with imbalanced classes), so this introduces **precision**, **recall**, **F1-score**, and the **confusion matrix** as the real toolkit for evaluation.
 
 **Why it matters:** These are exactly the metrics used two stops later to compare the zero-shot and fine-tuned models — understanding them here makes those results actually interpretable rather than just "a number that's bigger."
+
+> #### 🧑‍🏫 In Plain English: Confusion Matrix, Precision, Recall & F1
+>
+> **1. Confusion Matrix**
+> A Confusion Matrix is a table that shows how many predictions were correct and incorrect.
+>
+> | Actual \ Predicted | Positive | Negative |
+> |---|---|---|
+> | **Positive** | ✅ True Positive (TP) | ❌ False Negative (FN) |
+> | **Negative** | ❌ False Positive (FP) | ✅ True Negative (TN) |
+>
+> **Example:** Detecting spam emails.
+> - **TP:** Spam correctly detected as spam.
+> - **TN:** Normal email correctly detected as normal.
+> - **FP:** Normal email wrongly marked as spam.
+> - **FN:** Spam wrongly marked as normal.
+>
+> **2. Precision**
+> Precision answers: *Out of everything the model predicted as Positive, how many were actually Positive?*
+>
+> **Easy Example:** The model marked 100 emails as spam, but only 90 were actually spam. **Precision = 90/100 = 90%**
+> ➡️ High Precision = Few false alarms (False Positives).
+>
+> **3. Recall**
+> Recall answers: *Out of all actual Positive cases, how many did the model find?*
+>
+> **Easy Example:** There were 120 spam emails, but the model found only 90. **Recall = 90/120 = 75%**
+> ➡️ High Recall = Misses very few actual positives (Few False Negatives).
+>
+> **4. F1-Score**
+> The F1-Score combines Precision and Recall into a single score. It's useful when you want a balance between both.
+>
+> **Easy Example:** Precision = 90%, Recall = 75% → F1-Score ≈ 82%
+> ➡️ High F1-Score = Good balance between being accurate and not missing important cases.
+>
+> **Quick Memory Trick:**
+>
+> | Metric | Simple Question |
+> |---|---|
+> | **Confusion Matrix** | What predictions were correct and incorrect? |
+> | **Precision** | When the model says Yes, how often is it right? |
+> | **Recall** | Of all the real Yes cases, how many did it find? |
+> | **F1-Score** | Overall balance between Precision and Recall. |
 
 ---
 
@@ -90,6 +165,40 @@ A Hugging Face login and GPU check follow the now-familiar pattern.
 - `TrainingArguments` configure the practical training details: batch size, gradient accumulation, learning rate, and number of epochs — tuned to fit within Colab's free-tier limits
 
 **Why it matters:** LoRA is *why* this fine-tuning is even feasible on free hardware — full fine-tuning of billions of parameters would be far too memory-hungry, but training a small set of adapter weights fits comfortably.
+
+> #### 🧑‍🏫 In Plain English: PEFT, LoRA & SFTTrainer
+>
+> **1. PEFT (Parameter-Efficient Fine-Tuning)**
+> PEFT means: instead of changing the entire AI model, change only a small part of it.
+>
+> **Easy Example:** Imagine a 500-page textbook.
+> - **Normal Fine-Tuning:** Rewrite all 500 pages.
+> - **PEFT:** Add or update just 5 important pages.
+> ➡️ Benefit: Faster training, less memory, and cheaper.
+>
+> **2. LoRA (Low-Rank Adaptation)**
+> LoRA is a PEFT technique. Instead of changing the original model's weights, LoRA adds a small adapter that learns the new task.
+>
+> **Easy Example:** Think of the AI model as a car.
+> - Don't replace the entire engine.
+> - Just add a turbocharger (adapter) to improve performance.
+> ➡️ Benefit: Small, fast, and the original model remains unchanged.
+>
+> **3. SFTTrainer**
+> SFTTrainer is a tool (from Hugging Face TRL) that trains a model using Supervised Fine-Tuning (SFT).
+>
+> **Easy Example:** Imagine you are teaching a student.
+> - You provide Question → Correct Answer examples.
+> - SFTTrainer is the teacher that repeatedly shows these examples, checks mistakes, and helps the student improve.
+> ➡️ Benefit: It handles the training process for you, so you don't have to write all the training code yourself.
+>
+> **Quick Memory Trick:**
+>
+> | Term | Easy Meaning |
+> |---|---|
+> | **PEFT** | Train only a small part of the model. |
+> | **LoRA** | A PEFT method that adds small adapters instead of changing the whole model. |
+> | **SFTTrainer** | The trainer/teacher that fine-tunes the model using question–answer examples. |
 
 ---
 
