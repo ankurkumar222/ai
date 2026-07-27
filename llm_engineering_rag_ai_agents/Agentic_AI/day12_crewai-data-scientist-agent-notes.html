@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Architects Lab — Building a Data Scientist Agent with CrewAI</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#121821; --panel2:#161d28; --border:#22303f;
+    --text:#dbe4ee; --muted:#7d92a8; --accent:#39d3ac; --accent2:#f2b84b;
+    --danger:#ef6a6a; --code:#0d1319; --tag:#1c2a3a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    line-height:1.6; padding:0 0 80px 0;
+  }
+  header{
+    padding:36px 24px 24px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#0e141c,#0b0f14);
+  }
+  .eyebrow{color:var(--accent); font-size:12px; letter-spacing:2px; text-transform:uppercase; font-weight:600;}
+  h1{margin:8px 0 6px; font-size:28px; color:#f2f6fa;}
+  .sub{color:var(--muted); font-size:14px; max-width:780px;}
+  .toolbar{
+    display:flex; gap:10px; padding:16px 24px; position:sticky; top:0;
+    background:rgba(11,15,20,0.95); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--border); z-index:10; flex-wrap:wrap;
+  }
+  button.ctrl{
+    background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    padding:8px 14px; border-radius:6px; cursor:pointer; font-size:13px;
+  }
+  button.ctrl:hover{border-color:var(--accent); color:var(--accent);}
+  .wrap{max-width:920px; margin:0 auto; padding:24px;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    margin-bottom:16px; overflow:hidden;
+  }
+  .card-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 20px; cursor:pointer; user-select:none;
+  }
+  .card-head:hover{background:var(--panel2);}
+  .card-title{font-size:16px; font-weight:600; color:#f2f6fa; display:flex; align-items:center; gap:10px;}
+  .tag{
+    font-size:10px; text-transform:uppercase; letter-spacing:1px;
+    background:var(--tag); color:var(--accent); padding:3px 8px; border-radius:4px; font-weight:700;
+  }
+  .tag.arch{color:var(--accent2);}
+  .tag.risk{color:var(--danger);}
+  .chevron{color:var(--muted); transition:transform .2s;}
+  .card.open .chevron{transform:rotate(90deg);}
+  .card-body{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+    padding:0 20px;
+  }
+  .card.open .card-body{ max-height:5000px; padding:0 20px 20px; }
+  p{margin:8px 0;}
+  .questions{
+    background:var(--code); border-left:3px solid var(--accent);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .questions h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent);}
+  .questions ul{margin:0; padding-left:18px;}
+  .questions li{margin:6px 0; color:#c8d6e2;}
+  .archnote{
+    background:var(--code); border-left:3px solid var(--accent2);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .archnote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent2);}
+  .risknote{
+    background:var(--code); border-left:3px solid var(--danger);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .risknote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--danger);}
+  pre{
+    background:var(--code); border:1px solid var(--border); border-radius:8px;
+    padding:14px; overflow-x:auto; font-size:12.5px; color:#a9e6c9; line-height:1.5;
+  }
+  code{color:var(--accent2); font-family:'Cascadia Code',Consolas,monospace;}
+  .recall{
+    margin-top:12px; border:1px dashed var(--border); border-radius:6px; padding:10px 14px;
+    cursor:pointer; background:#0e1620;
+  }
+  .recall .q{color:var(--accent2); font-weight:600; font-size:13.5px;}
+  .recall .a{display:none; margin-top:8px; color:var(--muted); font-size:13.5px; border-top:1px solid var(--border); padding-top:8px;}
+  .recall.show .a{display:block;}
+  .recall .hint{font-size:11px; color:var(--muted); float:right;}
+  ul.plain li{margin:4px 0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
+  th{background:var(--panel2); color:var(--accent2);}
+  .foot{color:var(--muted); text-align:center; padding:30px; font-size:12px;}
+  .progress{font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Architects Lab · Multi-Agent Systems Project</div>
+  <h1>Building a Data Scientist Agent with CrewAI</h1>
+  <div class="sub">Notes from a two-part project: first, the full ML regression workflow built manually
+  (pandas, imputation, EDA, encoding, linear/random forest/XGBoost models, feature importance) — then the
+  exact same workflow rebuilt as a crew of three autonomous AI agents that write and execute their own
+  Python code. Structured for a Senior Engineering Manager weighing multi-agent orchestration frameworks
+  against the code-first (LangChain, OpenAI Agents SDK) and low-code (n8n) approaches already studied.</div>
+</header>
+
+<div class="toolbar">
+  <button class="ctrl" onclick="expandAll()">▾ Expand All</button>
+  <button class="ctrl" onclick="collapseAll()">▸ Collapse All</button>
+  <button class="ctrl" onclick="revealAllRecall()">💡 Reveal All Recall Answers</button>
+  <span class="progress" id="progressLabel"></span>
+</div>
+
+<div class="wrap">
+
+  <!-- SECTION 1 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Framing</span> Why Build It Manually Before Automating It</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Goal: predict weekly <code>units_sold</code> for a supplement company from features like date,
+      product, category, price, discount, and location. The project is deliberately split into two halves —
+      first build the entire regression workflow by hand (load → clean → explore → encode → split → train
+      → evaluate), then rebuild the identical workflow as a CrewAI multi-agent system that plans, writes,
+      and executes its own code.</p>
+      <p>The stated reason for going manual first: if you don't understand every step of the workflow, you
+      can't write a good task description for an agent to execute it, and you won't be able to judge whether
+      the agent's output is actually correct.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This "understand it by hand before you delegate it to AI" sequencing is worth treating as a
+        general engineering-management principle, not just a teaching device — the same logic applies to
+        any Optimus tooling decision: don't let a squad automate a workflow with an agent until someone on
+        the team has actually done it manually enough times to write a precise specification and recognize
+        a wrong answer. Agent output that "looks plausible" is a real risk category when nobody on the
+        reviewing side has ground-truth intuition for what correct looks like.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why does the instructor insist on building the ML workflow manually before automating it with CrewAI? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because writing precise task descriptions for an AI agent requires understanding every step of the workflow yourself, and being able to judge whether the agent's generated output and results are actually correct requires the same ground-truth understanding — without it, you can't write a good specification or catch when the agent gets something wrong.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Fundamentals</span> Pandas — The Data Frame as a Spreadsheet on Steroids</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th>Method</th><th>Purpose</th></tr>
+        <tr><td><code>df.head(n)</code> / <code>df.tail(n)</code></td><td>First/last n rows (default 5)</td></tr>
+        <tr><td><code>df.info()</code></td><td>Column types + non-null counts — quick missing-value scan</td></tr>
+        <tr><td><code>df.describe()</code></td><td>Statistical summary (mean, std, min/max, percentiles) for numeric columns; add <code>include='object'</code> for categorical columns</td></tr>
+        <tr><td><code>df.shape</code></td><td>(rows, columns) tuple</td></tr>
+        <tr><td><code>df.isnull().sum()</code></td><td>Count of missing values per column</td></tr>
+        <tr><td><code>df['col'].nunique()</code></td><td>Count of unique values in a column</td></tr>
+      </table>
+      <p>Indexing starts at 0, consistent with Python's general zero-indexing convention — the "first" row
+      is row 0, not row 1.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What's the fastest single line of code to check how many missing values exist in each column of a pandas DataFrame? <span class="hint">tap to reveal</span></div>
+        <div class="a">df.isnull().sum() — isnull() converts every cell to True/False (missing/not-missing), and sum() adds up the True values (treated as 1) per column, giving a per-column count of missing values in one line.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Cleaning</span> Handling Missing Values — Choosing the Right Strategy</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th>Strategy</th><th>When to use</th><th>Trade-off</th></tr>
+        <tr><td>Drop rows</td><td>Very few missing values, or a column is mostly empty</td><td>Simple but wastes data — risky if missingness is widespread</td></tr>
+        <tr><td>Mean imputation</td><td>Numeric columns, roughly normal distribution</td><td>Sensitive to outliers — a few extreme values skew the mean</td></tr>
+        <tr><td>Median imputation</td><td>Numeric columns with outliers/skew</td><td>More robust than mean — unaffected by extreme values</td></tr>
+        <tr><td>Mode imputation</td><td>Categorical columns</td><td>Replace with the most frequent category</td></tr>
+        <tr><td>Regression / KNN imputation</td><td>Advanced — predict missing values from other features</td><td>More accurate but adds real complexity; not used in this project</td></tr>
+      </table>
+      <pre>
+from sklearn.impute import SimpleImputer
+imputer = SimpleImputer(strategy='median')
+df[cols_with_missing] = imputer.fit_transform(df[cols_with_missing])
+      </pre>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The project explicitly notes a subtlety worth internalizing: the textbook-correct order is to
+        split data into train/test FIRST, then impute — computing the median only from the training set and
+        applying it to both, to avoid "data leakage" (information from the test set silently influencing
+        preprocessing). This project deliberately imputes before splitting for simplicity, but flags this as
+        a shortcut, not a best practice. Worth treating as a real checklist item for any production ML
+        pipeline: is preprocessing fit only on the training data, or does it silently leak test-set information?</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What is "data leakage" in the context of imputation, and why does splitting before imputing prevent it? <span class="hint">tap to reveal</span></div>
+        <div class="a">Data leakage happens when information from the test set influences how the model or preprocessing is built — e.g. if you compute the median for imputation using the FULL dataset (including test rows) before splitting, the imputed training values are subtly informed by test-set data the model should never have seen, making the evaluation less honest. Splitting first and fitting the imputer only on the training set avoids this, since the test set stays completely untouched until final evaluation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Exploration</span> EDA — Reading the Data's Story Before Modeling It</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Three visualization libraries compared: <strong>Matplotlib</strong> (the low-level "grandfather,"
+      static/interactive), <strong>Seaborn</strong> (built on Matplotlib, higher-level, better default
+      aesthetics — "Matplotlib on steroids"), and <strong>Plotly</strong> (interactive, zoomable charts
+      with 40+ chart types).</p>
+      <p>EDA steps followed: target variable distribution (histogram — checking for <strong>skewness</strong>,
+      here a high value of ~2.05, flagged as a risk for linear models specifically), numeric feature
+      distributions (histogram + box plot per feature, to spot outliers), categorical feature frequency
+      (count plots), pairwise relationships (scatter plots against the target), and a full
+      <strong>correlation heatmap</strong> across all numeric features.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The skewness check is the detail worth flagging as more than a passing observation — it directly
+        foreshadows and explains the later result (linear regression underperforming at R²=0.67 while
+        tree-based models like Random Forest reached ~0.80). Linear models assume roughly linear,
+        symmetric relationships; a highly skewed target is a leading indicator that a linear model will
+        struggle before you've even trained it. Reading EDA output as a prediction of which model family
+        will work, not just a description of the data, is the more sophisticated way to use exploratory analysis.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What did the high skewness (~2.05) observed in the target variable's histogram predict about the later linear regression model's performance? <span class="hint">tap to reveal</span></div>
+        <div class="a">It predicted the linear regression model would underperform — and it did, achieving only R²=0.67 compared to ~0.80 for tree-based models like Random Forest. Linear regression assumes relationships close to linear/symmetric, so a highly skewed target distribution is an early warning sign that a linear model won't capture the data's structure well, visible before any model is even trained.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Preprocessing</span> One-Hot Encoding — And the Multicollinearity Trap</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+BAD:  red=1, yellow=2, green=3
+      (implies green > yellow > red numerically — false ordering!)
+
+GOOD (one-hot): red=[1,0,0]  yellow=[0,1,0]  green=[0,0,1]
+      (each category gets its own binary column, no false ranking)
+
+pd.get_dummies(df, columns=['category','location','platform'],
+                drop_first=True)
+      </pre>
+      <p>Why <strong>drop_first=True</strong> matters: with 3 categories (e.g. Canada/UK/US) and no dropping,
+      you get 3 binary columns — but if you know 2 of them, the 3rd is fully determined (perfectly
+      predictable from the other two), creating <strong>multicollinearity</strong> — redundant, perfectly
+      correlated predictor columns that undermine a linear model's statistical validity. Dropping one
+      category (it becomes the implicit "baseline") removes the redundancy without losing information.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: With 3 categories one-hot encoded and drop_first=True applied, how many columns are created, and why doesn't this lose information? <span class="hint">tap to reveal</span></div>
+        <div class="a">Only 2 columns are created (not 3). No information is lost because the 3rd category becomes the implicit "baseline" — if both remaining columns are 0, that row belongs to the dropped category by elimination. This avoids multicollinearity (perfect redundancy between columns) while still fully distinguishing all 3 original categories.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Evaluation</span> Regression Metrics — What Each Number Actually Tells You</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th>Metric</th><th>Meaning</th><th>Units</th></tr>
+        <tr><td>MAE (Mean Absolute Error)</td><td>Average absolute prediction error</td><td>Same as target (e.g. units)</td></tr>
+        <tr><td>MSE (Mean Squared Error)</td><td>Squares errors before averaging — penalizes large errors more heavily</td><td>Squared units (hard to interpret directly)</td></tr>
+        <tr><td>RMSE (Root MSE)</td><td>Square root of MSE — the "best" of the error metrics for interpretability</td><td>Same as target — lower is better</td></tr>
+        <tr><td>R² (coefficient of determination)</td><td>Proportion of target variance explained by the model, 0 to 1</td><td>Unitless — closer to 1 is better</td></tr>
+      </table>
+      <p>Rule of thumb applied in this project: R² &gt; 0.9 = excellent, R² &gt; 0.7 = good fit, below that =
+      likely underfitting, consider non-linear models. Linear regression's R²=0.67 triggered exactly this
+      conclusion, motivating the shift to Random Forest and XGBoost.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why is RMSE generally preferred over raw MSE for communicating model error to a non-technical stakeholder? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because MSE is in squared units of the target (e.g. squared units sold), which is hard to interpret intuitively — a large number that doesn't map cleanly to a real-world quantity. RMSE takes the square root of MSE, bringing it back into the SAME units as the original target variable, so "RMSE = 319" directly means "the model's typical prediction error is about 319 units sold" — immediately interpretable.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Modeling</span> Linear Regression → Random Forest → XGBoost — The Progression</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th>Model</th><th>R²</th><th>RMSE</th></tr>
+        <tr><td>Linear Regression</td><td>0.67</td><td>319</td></tr>
+        <tr><td>Random Forest</td><td>~0.80</td><td>~246</td></tr>
+        <tr><td>XGBoost (tuned)</td><td>~0.81</td><td>~245</td></tr>
+        <tr><td>XGBoost (default params)</td><td>lower than tuned</td><td>higher than tuned</td></tr>
+      </table>
+      <p>Each model followed the same three-step pattern: instantiate → <code>.fit(X_train, y_train)</code>
+      → <code>.predict(X_test)</code>, then compare predictions against <code>y_test</code> (ground truth)
+      using the metrics above. XGBoost's hyperparameters (n_estimators, learning_rate, max_depth) were shown
+      to matter significantly — running with default values instead of the tuned ones visibly degraded
+      performance, a live demonstration that "just use XGBoost" isn't a free lunch without tuning.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The near-identical final performance between Random Forest and tuned XGBoost (0.80 vs 0.81) is
+        itself a useful data point: more sophisticated algorithms don't always translate into meaningfully
+        better results on a given dataset — the actual gain here came from moving off linear models
+        entirely (0.67→0.80), not from XGBoost's fancier gradient-boosting mechanics over Random Forest's
+        simpler bagging approach. Worth remembering as a prioritization heuristic: the biggest performance
+        jump usually comes from picking the right MODEL FAMILY for your data's shape, not from endlessly
+        tuning within one family.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Which model transition produced the larger performance jump — linear regression to Random Forest, or Random Forest to tuned XGBoost? <span class="hint">tap to reveal</span></div>
+        <div class="a">Linear regression to Random Forest produced the larger jump (R² 0.67 → ~0.80). The jump from Random Forest to tuned XGBoost was much smaller (~0.80 → ~0.81) — illustrating that switching model FAMILIES (linear to tree-based) mattered far more here than further sophistication within the tree-based family.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Interpretation</span> Feature Importance — Turning a Model Into a Business Insight</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>rf_model.feature_importances_  # array of scores, one per input feature</pre>
+      <p>Random Forest's built-in feature importance revealed <strong>price</strong> as by far the dominant
+      driver of units sold (~0.78 importance score), with discount a distant second — directly matching the
+      earlier correlation heatmap finding (price: -0.76 correlation, discount: +0.23). This kind of analysis
+      converts a black-box prediction model into an actionable business insight: "price is what drives sales
+      volume — pricing strategy matters more than which platform you sell on."</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Which single feature dominated the Random Forest's feature importance ranking, and did this match the earlier EDA correlation analysis? <span class="hint">tap to reveal</span></div>
+        <div class="a">Price dominated, at roughly 0.78 importance — far ahead of any other feature. Yes, this matched the earlier correlation heatmap, which had already shown price as the most strongly correlated feature with units sold (a correlation of -0.76), confirming the same signal was visible both through simple correlation analysis and through the trained model's internal feature weighting.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Framing</span> Why CrewAI — Multi-Agent Orchestration as "an AI Company"</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>CrewAI is an open-source Python framework for building teams of coordinated AI agents — the
+      explicit analogy used throughout is a company's departments (sales, engineering, marketing) working
+      together toward a shared business goal, rather than one monolithic agent doing everything.</p>
+      <table>
+        <tr><th>Component</th><th>Role</th></tr>
+        <tr><td>Agent</td><td>role + goal + backstory (persona) + LLM ("brain") + optional tools + delegation on/off</td></tr>
+        <tr><td>Tool</td><td>A capability an agent can invoke — web search, file I/O, code execution, custom APIs</td></tr>
+        <tr><td>Task</td><td>description + expected_output ("definition of done") + assigned agent + optional context (prior tasks' outputs feeding in)</td></tr>
+        <tr><td>Crew</td><td>agents + tasks + process (sequential or hierarchical)</td></tr>
+      </table>
+      <p><strong>Sequential</strong> process: tasks run one after another, each output feeding the next via
+      context — simple and predictable (used throughout this project). <strong>Hierarchical</strong>: a
+      manager agent dynamically delegates to subordinates — more powerful, more complex, not used here.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>Comparing this directly to the n8n notes and the OpenAI Agents SDK/MCP notes from earlier: CrewAI
+        sits conceptually between them — more structured and role-oriented than a single flat agent with
+        many tools (OpenAI Agents SDK), but more code-native and version-controllable than n8n's visual
+        canvas. The "role + goal + backstory" persona pattern is a genuinely distinct design choice worth
+        noting — giving each agent an explicit narrative identity (not just a system prompt) appears to
+        meaningfully shape how reliably it stays in its lane during a multi-agent handoff, which is exactly
+        the kind of role-discipline problem that gets harder as agent count grows in any Optimus-style
+        multi-agent tooling.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What's the practical difference between CrewAI's "sequential" and "hierarchical" process types? <span class="hint">tap to reveal</span></div>
+        <div class="a">Sequential: tasks execute one after another in a fixed, predetermined order, with each task's output feeding into the next as context — simple and predictable. Hierarchical: a manager agent dynamically decides how to delegate tasks among subordinate agents at runtime — more flexible and powerful, but also more complex to reason about and debug.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 10 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Design</span> The Three-Agent Data Science Team</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+1. Planner Agent
+   - Role: Lead Data Scientist and Planner
+   - No tools — generates a numbered plan only, doesn't execute code
+   - Output: sequenced instructions for the other two agents
+
+2. Analyst/Preprocessor Agent
+   - Tools: notebook_code_executor
+   - Inspects data, imputes, encodes, splits into train/test —
+     ALL via generated-and-executed Python code, not the agent
+     "reasoning" about the answer
+
+3. Modeler/Evaluator Agent
+   - Tools: notebook_code_executor
+   - Trains model(s), evaluates metrics, extracts feature
+     importance — again via generated-and-executed code
+</pre>
+      <p>Critical design principle repeated throughout: these agents don't <em>calculate</em> anything
+      themselves in the LLM sense — they <strong>write Python code that performs the calculation, then
+      execute that code</strong> via a custom tool. This is a deliberate and important distinction: an LLM
+      "eyeballing" a mean squared error would be unreliable; an LLM writing correct
+      <code>mean_squared_error(y_test, y_pred)</code> code and running it gets an exact, deterministic answer.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This "agent writes code, then executes it, rather than reasoning numerically itself" pattern is
+        the single most important architectural decision in the whole project, and it's a general principle
+        worth applying anywhere precision matters: LLMs are unreliable at arithmetic and exact computation
+        done "in their head," but highly reliable at writing correct code that a deterministic interpreter
+        then executes exactly. Any agentic system doing quantitative work (financial calculations, metrics,
+        anything audit-sensitive) should follow this same "generate code, don't generate the number
+        directly" discipline.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why do the analyst and modeler agents generate and execute Python code rather than computing results directly through LLM reasoning? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because LLMs are unreliable at precise numerical computation done purely "in their head" through text reasoning, but highly reliable at writing syntactically correct code that a deterministic Python interpreter then executes exactly — offloading the actual calculation to real, verifiable code execution rather than trusting the model's own arithmetic produces exact, reproducible results instead of approximate or occasionally wrong ones.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 11 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag risk">Prompt Engineering</span> Writing Task Descriptions Precise Enough for Autonomous Execution</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>The task descriptions shown are notably long and explicit — far more detailed than a typical
+      single-turn chat prompt — because there's no human in the loop to catch ambiguity mid-execution. Key
+      techniques observed:</p>
+      <ul class="plain">
+        <li><strong>Emphasis markers</strong> (e.g. double asterisks around "generate Python code," "crucially") — used deliberately to make critical instructions stand out to the model, the same way a human skimming a spec would notice bolded text</li>
+        <li><strong>Explicit global variable contracts</strong> — instructing agents to create/update specific named variables (<code>shared_df</code>, <code>X_train</code>, <code>y_test</code>, etc.) in a shared execution scope, since later agents/tasks depend on those exact variables existing</li>
+        <li><strong>"Crucially, update the original DataFrame"</strong> — an explicit fix after observing the agent's first attempt created a NEW DataFrame instead of updating the shared one in place, breaking the downstream pipeline</li>
+        <li><strong>Precise expected_output</strong> — describing exactly what successful completion looks like (specific print statements, specific confirmations) so the agent has an unambiguous stopping condition</li>
+      </ul>
+
+      <div class="risknote">
+        <h4>Risk Flag — Iteration Was Required, Not One-Shot</h4>
+        <p>The instructor explicitly notes going through "multiple iterations back and forth" to refine task
+        descriptions — the first version of the pipeline didn't work correctly (the DataFrame-not-updated
+        bug is a direct example). This is worth taking seriously: multi-agent autonomous systems are NOT
+        reliably one-shot correct on a first attempt, even with careful upfront design — budget for
+        observed-failure-driven prompt iteration as a normal part of building any such system, not an
+        exception.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What specific bug required the task description to be revised with a "crucially, update the original DataFrame" instruction? <span class="hint">tap to reveal</span></div>
+        <div class="a">The analyst/preprocessor agent's first attempt at one-hot encoding created a NEW, separate DataFrame with the encoded columns, rather than updating the shared_df variable in place — breaking the pipeline since downstream tasks (train/test split, modeling) expected the transformations to be reflected in the same shared_df variable they'd reference. The fix was adding explicit emphasis instructing the agent to update the original shared variable, not create a separate one.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 12 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag risk">Security</span> Giving an AI Agent the Ability to Execute Code — Worth Pausing On</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>The instructor explicitly flags, before running the assembled crew, that this "imposes risk to
+      your computer" — an LLM is autonomously generating and then <em>actually executing</em> Python code
+      on the local machine via the notebook code executor tool, with no human review step between code
+      generation and execution.</p>
+
+      <div class="risknote">
+        <h4>Risk Flag — Real, Not Hypothetical</h4>
+        <p>This is the second explicit "this could go wrong" warning across this course's agentic projects
+        (the first being the n8n module's Google Sheets delete-access warning). Arbitrary code execution by
+        an autonomous agent is a materially different risk category from an agent calling a scoped, read-only
+        tool — code execution can, in principle, do anything the host process can do. For any production
+        use of this pattern, sandboxing (containerized/ephemeral execution environments, resource limits, no
+        network/filesystem access beyond what's needed) would be a hard requirement, not an optional hardening step.</p>
+      </div>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>Worth connecting this directly to the Docker notes studied earlier — a properly isolated, ephemeral
+        container is exactly the kind of sandbox that makes "let an agent execute arbitrary code" a
+        defensible pattern rather than a reckless one. If this pattern were ever proposed for a real Optimus
+        tool (an agent that writes and runs its own analysis code against production-adjacent data), the
+        non-negotiable requirement would be: code execution happens in a disposable, network-isolated
+        container with no access to anything beyond the specific dataset it's meant to analyze — never
+        directly on a developer's or a production host's local environment.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What category of risk does giving an agent arbitrary code-execution ability introduce, that a scoped API tool (like a search or calendar tool) doesn't? <span class="hint">tap to reveal</span></div>
+        <div class="a">Arbitrary code execution can, in principle, do anything the host process/environment is capable of — read/write any accessible file, make any network call, consume unbounded resources — whereas a scoped API tool is limited to whatever specific, narrow actions that particular API exposes. This is why arbitrary code execution needs sandboxing (isolated, ephemeral, resource-limited environments) as a hard requirement for any production use, not just careful prompting.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 13 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Result</span> Running the Crew — What Actually Happened</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>With <code>verbose=True</code>, the full execution trace is visible: the Planner agent produces a
+      numbered plan → the Analyst/Preprocessor agent generates and executes preprocessing code (visibly
+      matching the manual notebook's steps: <code>get_dummies</code>, <code>train_test_split</code>, etc.) →
+      the Modeler/Evaluator agent trains a Random Forest, evaluates it, and reports feature importance.</p>
+      <p>Final agent-produced results (R²≈0.78, RMSE≈286, price as top feature at ≈0.78 importance) closely
+      matched the manually-built Random Forest's results (R²≈0.80) — a genuine validation that the
+      automated crew reproduced equivalent-quality work to the hand-built pipeline, not just superficially
+      similar-looking output.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The close numeric match between manual and agent-automated results is the actual proof point of
+        this whole project — anyone can generate plausible-looking code; whether the automated pipeline
+        produces genuinely comparable numerical results to a known-correct manual baseline is what separates
+        a real validation from a demo. Worth using this same discipline for any Optimus automation
+        candidate: don't just check "did the agent's output look reasonable," check "does it match a
+        known-correct baseline within an acceptable tolerance."</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What made the crew's results a genuine validation rather than just a plausible-looking demo? <span class="hint">tap to reveal</span></div>
+        <div class="a">The crew's final numeric results (R², RMSE, feature importance rankings) were compared directly against the KNOWN-CORRECT manually-built Random Forest results from earlier in the project, and closely matched them (R²≈0.78 vs ≈0.80) — proving the automated pipeline reproduced genuinely equivalent-quality analysis, not just code that superficially resembled a correct solution without actually matching known-good numbers.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 14: WRAP-UP -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag arch">Wrap-up</span> The Honest Conclusion — Augmentation, Not Replacement</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>The project's closing framing is notably measured rather than hyperbolic: CrewAI agents won't
+      fully replace data scientists — human intuition is still needed to design the agent system itself,
+      debug it when it goes wrong (as the DataFrame bug demonstrated), and validate results against domain
+      knowledge. The stated position: "you still need humans in tandem with AI agents... but without AI
+      agents you will definitely be left behind."</p>
+
+      <pre>
+Full pipeline recap:
+1. Manual baseline: pandas → EDA → imputation → encoding →
+   split → linear regression → random forest → XGBoost →
+   feature importance (all hand-coded, ground truth established)
+2. CrewAI components: Agent (role/goal/backstory/brain/tools) +
+   Task (description/expected_output/agent/context) + Crew
+   (agents+tasks+process)
+3. Notebook code executor tool: agents generate code, execute
+   it via a real Python interpreter — not "reasoning" numerically
+4. Three-agent team: Planner (strategy only) → Analyst/
+   Preprocessor (data prep, via code execution) → Modeler/
+   Evaluator (training + evaluation, via code execution)
+5. Task descriptions require extreme precision — explicit
+   global variable contracts, emphasis markers, iteration after
+   observed failures (not one-shot correct)
+6. Code execution by an autonomous agent is a real security
+   risk category requiring sandboxing discipline
+7. Validation = matching a known-correct manual baseline, not
+   just plausible-looking output
+      </pre>
+
+      <div class="questions">
+        <h4>Questions worth carrying forward</h4>
+        <ul>
+          <li>Across the three multi-agent frameworks now studied (n8n visual workflows, OpenAI Agents SDK
+          + MCP, CrewAI role-based crews) — which would you reach for first for a realistic Optimus data
+          analysis automation task, and does the answer depend more on the task's complexity or on who
+          needs to maintain the resulting system afterward (engineers vs. non-engineers)?</li>
+          <li>Given the explicit "multiple iterations required, not one-shot correct" honesty in this
+          project — how would you budget realistic development time for a similar internal agentic tool,
+          versus the (often optimistic) time estimates a vendor or excited team member might propose?</li>
+          <li>The code-execution risk flag here and the Google Sheets delete-risk flag from the n8n notes
+          are the same underlying category (agent with real-world write/execute power) — would it be worth
+          drafting one unified internal "agentic tool safety checklist" covering sandboxing, least-privilege
+          scoping, and human-in-the-loop checkpoints, applicable across all these frameworks rather than
+          re-deriving the same principles project by project?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">Architects Lab · Study Notes · Source: "Data Scientist Agent with CrewAI" Project</div>
+
+<script>
+  function toggleCard(headEl){
+    const card = headEl.parentElement;
+    card.classList.toggle('open');
+    updateProgress();
+  }
+  function toggleRecall(el){
+    el.classList.toggle('show');
+  }
+  function expandAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('open'));
+    updateProgress();
+  }
+  function collapseAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.remove('open'));
+    updateProgress();
+  }
+  function revealAllRecall(){
+    document.querySelectorAll('.recall').forEach(r=>r.classList.add('show'));
+  }
+  function updateProgress(){
+    const total = document.querySelectorAll('.card').length;
+    const open = document.querySelectorAll('.card.open').length;
+    document.getElementById('progressLabel').textContent = open + ' / ' + total + ' sections expanded';
+  }
+  updateProgress();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Architects Lab — Low-Code Agentic AI Workflows with n8n</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#121821; --panel2:#161d28; --border:#22303f;
+    --text:#dbe4ee; --muted:#7d92a8; --accent:#39d3ac; --accent2:#f2b84b;
+    --danger:#ef6a6a; --code:#0d1319; --tag:#1c2a3a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    line-height:1.6; padding:0 0 80px 0;
+  }
+  header{
+    padding:36px 24px 24px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#0e141c,#0b0f14);
+  }
+  .eyebrow{color:var(--accent); font-size:12px; letter-spacing:2px; text-transform:uppercase; font-weight:600;}
+  h1{margin:8px 0 6px; font-size:28px; color:#f2f6fa;}
+  .sub{color:var(--muted); font-size:14px; max-width:780px;}
+  .toolbar{
+    display:flex; gap:10px; padding:16px 24px; position:sticky; top:0;
+    background:rgba(11,15,20,0.95); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--border); z-index:10; flex-wrap:wrap;
+  }
+  button.ctrl{
+    background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    padding:8px 14px; border-radius:6px; cursor:pointer; font-size:13px;
+  }
+  button.ctrl:hover{border-color:var(--accent); color:var(--accent);}
+  .wrap{max-width:920px; margin:0 auto; padding:24px;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    margin-bottom:16px; overflow:hidden;
+  }
+  .card-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 20px; cursor:pointer; user-select:none;
+  }
+  .card-head:hover{background:var(--panel2);}
+  .card-title{font-size:16px; font-weight:600; color:#f2f6fa; display:flex; align-items:center; gap:10px;}
+  .tag{
+    font-size:10px; text-transform:uppercase; letter-spacing:1px;
+    background:var(--tag); color:var(--accent); padding:3px 8px; border-radius:4px; font-weight:700;
+  }
+  .tag.arch{color:var(--accent2);}
+  .tag.risk{color:var(--danger);}
+  .chevron{color:var(--muted); transition:transform .2s;}
+  .card.open .chevron{transform:rotate(90deg);}
+  .card-body{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+    padding:0 20px;
+  }
+  .card.open .card-body{ max-height:4800px; padding:0 20px 20px; }
+  p{margin:8px 0;}
+  .questions{
+    background:var(--code); border-left:3px solid var(--accent);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .questions h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent);}
+  .questions ul{margin:0; padding-left:18px;}
+  .questions li{margin:6px 0; color:#c8d6e2;}
+  .archnote{
+    background:var(--code); border-left:3px solid var(--accent2);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .archnote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent2);}
+  .risknote{
+    background:var(--code); border-left:3px solid var(--danger);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .risknote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--danger);}
+  pre{
+    background:var(--code); border:1px solid var(--border); border-radius:8px;
+    padding:14px; overflow-x:auto; font-size:12.5px; color:#a9e6c9; line-height:1.5;
+  }
+  code{color:var(--accent2); font-family:'Cascadia Code',Consolas,monospace;}
+  .recall{
+    margin-top:12px; border:1px dashed var(--border); border-radius:6px; padding:10px 14px;
+    cursor:pointer; background:#0e1620;
+  }
+  .recall .q{color:var(--accent2); font-weight:600; font-size:13.5px;}
+  .recall .a{display:none; margin-top:8px; color:var(--muted); font-size:13.5px; border-top:1px solid var(--border); padding-top:8px;}
+  .recall.show .a{display:block;}
+  .recall .hint{font-size:11px; color:var(--muted); float:right;}
+  ul.plain li{margin:4px 0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
+  th{background:var(--panel2); color:var(--accent2);}
+  .foot{color:var(--muted); text-align:center; padding:30px; font-size:12px;}
+  .progress{font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Architects Lab · Low-Code Agentic AI Module</div>
+  <h1>Building Agentic AI Workflows with n8n</h1>
+  <div class="sub">Notes from a hands-on n8n module — building a text summarizer, a translation engine,
+  a Google Sheets logger, and a calendar-reading/scheduling agent, all via drag-and-drop nodes rather than
+  hand-written code. Structured for a Senior Engineering Manager evaluating low-code agentic tooling as a
+  complement (or alternative) to code-first frameworks already explored — LangChain, OpenAI Agents SDK, MCP.</div>
+</header>
+
+<div class="toolbar">
+  <button class="ctrl" onclick="expandAll()">▾ Expand All</button>
+  <button class="ctrl" onclick="collapseAll()">▸ Collapse All</button>
+  <button class="ctrl" onclick="revealAllRecall()">💡 Reveal All Recall Answers</button>
+  <span class="progress" id="progressLabel"></span>
+</div>
+
+<div class="wrap">
+
+  <!-- SECTION 1 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Framing</span> What n8n Actually Is — Low-Code Agentic Workflows</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>n8n is a low-code/no-code workflow automation tool that connects services (Gmail, Google Sheets,
+      Slack, Notion, custom APIs, and AI models like OpenAI/Anthropic/DeepSeek) via a visual drag-and-drop
+      canvas rather than hand-written integration code. Described as "the world's most popular workflow
+      automation platform for technical teams."</p>
+      <p>Core building blocks: <strong>triggers</strong> (what starts a workflow — a chat message, an
+      incoming email, a schedule), <strong>nodes</strong> (each represents a service or a processing step),
+      and an <strong>AI Agent node</strong> specifically, which can be given a "brain" (an LLM), memory,
+      and tools — the same conceptual pieces as a code-first agent framework, just wired together visually.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is worth evaluating explicitly against the code-first alternatives already covered
+        (LangChain/RAG, OpenAI Agents SDK + MCP) — n8n trades flexibility and version-controllability for
+        speed of iteration and approachability to non-engineers. For an Optimus-style internal tooling
+        strategy, that's a genuine build-vs-buy-style decision axis: low-code platforms like n8n let
+        non-engineers (business analysts, ops teams) build and maintain their own automations without
+        needing an engineer in the loop for every change — at the cost of workflows living outside your
+        normal code review, testing, and version control practices.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What are the three things an n8n AI Agent node can be given, mirroring a code-first agent's capabilities? <span class="hint">tap to reveal</span></div>
+        <div class="a">A "brain" (connection to an LLM like OpenAI, Anthropic Claude, or DeepSeek), memory (to retain context across a conversation), and tools (access to external services/APIs like search, calendar, or spreadsheets) — the same three conceptual components a code-first agent framework provides, but configured through a visual interface instead of code.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Build</span> Workflow 1 — A Text Summarization Engine</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+[Chat Trigger] → [AI Agent] → (brain: OpenAI GPT-4o-mini)
+   "on chat message received"    prompt: "Summarize the user input
+                                   in one sentence: {{ $json.chatInput }}"
+      </pre>
+      <p>The minimal viable agentic workflow: a chat trigger feeds a message into an AI Agent node, whose
+      prompt is configured in "expression" mode (as opposed to "fixed" text) so it can dynamically pull in
+      the prior node's output via <code>{{ $json.chatInput }}</code> — n8n's templating syntax for
+      referencing data from earlier steps. The agent is given a brain by connecting an OpenAI Chat Model
+      node with an API key, no memory, and no external tools for this first, deliberately minimal build.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What's the difference between "fixed" and "expression" mode when configuring a node's input field in n8n? <span class="hint">tap to reveal</span></div>
+        <div class="a">"Fixed" mode means the field contains static, literal text that never changes. "Expression" mode lets the field dynamically reference data from previous steps in the workflow (e.g. the chat trigger's input) using n8n's templating syntax, so the value is computed at runtime based on what actually flowed through the workflow rather than being hardcoded.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Ops</span> Debugging, Export/Import, and Multiple Data Views</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <ul class="plain">
+        <li><strong>Export/Import as JSON</strong> — an entire workflow (every node, connection, and configuration) can be downloaded as a single JSON file and re-imported elsewhere, making workflows fully portable and shareable without rebuilding from scratch</li>
+        <li><strong>Per-node execution inspection</strong> — clicking into any executed node shows exactly what data flowed in and out, viewable as Schema (blueprint-style field list), Table (spreadsheet-style), or raw JSON</li>
+        <li><strong>Token usage tracking</strong> — visible per execution, directly supporting cost monitoring</li>
+        <li><strong>Drag-and-drop variable wiring</strong> — you can literally drag a field name from one node's output panel directly into another node's input field, rather than typing expression syntax by hand</li>
+      </ul>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The JSON export/import feature is the detail that makes this genuinely practical rather than a
+        toy — it's effectively n8n's answer to "infrastructure as code" for a low-code tool, letting workflows
+        be version-controlled, backed up, and shared as artifacts rather than living only as UI state. Worth
+        checking whether your team would treat these exported JSON files with the same discipline as any
+        other config-as-code artifact (stored in git, reviewed before import) if n8n were ever adopted
+        internally — otherwise you get the same "who changed this and why" problem that plagued pre-IaC
+        infrastructure management.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What does exporting a workflow as JSON actually let you do that you couldn't do with the workflow only existing inside the n8n UI? <span class="hint">tap to reveal</span></div>
+        <div class="a">It makes the workflow portable and shareable as a standalone file — you can back it up, version it, move it between n8n instances/accounts, or share it with someone else who can import it directly rather than having to manually rebuild every node and connection from scratch by hand.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Practice</span> Swapping the Brain — Translation Workflow with Claude</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Same structural pattern as the summarizer (chat trigger → AI Agent), but with the prompt changed
+      to "translate the input message to French" and — the actual point of the exercise — the brain swapped
+      from an OpenAI Chat Model node to an <strong>Anthropic Chat Model</strong> node (Claude), configured
+      with a separate API key/credential.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The ease of this brain-swap (a completely different model provider, same workflow logic, same
+        prompt structure, near-zero rework) is the clearest practical illustration in this whole module of
+        why visual, node-based agent building is genuinely useful for rapid model comparison — you could
+        build the same workflow four times with four different brains (OpenAI, Claude, Gemini, DeepSeek) in
+        the time it'd take to write and test one code-based integration, directly useful for exactly the kind
+        of multi-LLM comparison work you're already doing in your bootcamp notes.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What had to change to swap the workflow's underlying model from OpenAI to Claude? <span class="hint">tap to reveal</span></div>
+        <div class="a">Only the model connection node itself — replacing the OpenAI Chat Model node with an Anthropic Chat Model node and providing its API key/credentials. The AI Agent's prompt, the chat trigger, and the overall workflow structure required no changes at all.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Practice</span> Testing Memory and Search Tools — Multi-Turn Context</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>A separate workflow (built with memory and a search API tool attached to the AI Agent) was tested
+      across a multi-turn conversation: "What is the price of Bitcoin?" → "How many are in circulation?" →
+      "Show the price history since 2010" → then an abrupt topic change to "list the top 5 restaurants in
+      the world." Each follow-up correctly triggered a fresh search API call and the agent maintained
+      conversational context (understanding "how many are in circulation" referred to Bitcoin without
+      restating it) until the topic was deliberately changed.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What specifically demonstrates that the agent's "memory" feature was working in this test sequence? <span class="hint">tap to reveal</span></div>
+        <div class="a">The follow-up question "how many are in circulation today?" was correctly understood as referring to Bitcoin (from the previous question) without the user needing to restate "Bitcoin" explicitly — the agent used its memory of the prior turn to resolve the implicit reference, which it could only do if conversational context was actually being retained across turns.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Build</span> Google Sheets Integration — Persisting Agent Output</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+[Chat Trigger] → [AI Agent: summarize] → [Google Sheets: Append Row]
+                     (brain: OpenAI)         columns: Input | Summary
+                                              (values dragged in from
+                                               prior nodes' outputs)
+      </pre>
+      <p>Extends the summarizer to persist every input/output pair as a new row in a Google Sheet, rather
+      than just displaying the result in chat. Setup required: a pre-created sheet with exact,
+      case-sensitive column headers (<code>Input</code>, <code>Summary</code>), a Google account connected
+      via OAuth credentials, and the <strong>Append Row</strong> operation selected (as opposed to Create
+      Spreadsheet, Delete Spreadsheet, Clear Sheet, or Update — all available operations on the same node).</p>
+
+      <div class="risknote">
+        <h4>Risk Flag — Explicitly Raised in the Lecture</h4>
+        <p>The instructor pauses specifically to flag the danger here: an AI agent connected to Google
+        Sheets doesn't just have append access — the same node type can <strong>delete spreadsheets
+        entirely</strong>. Connecting an LLM-driven agent to destructive operations on real data without
+        careful operation-scoping and guardrails is called out explicitly as a real risk, not hypothetical —
+        "just imagine what could be done in 5 or 10 years when these workflows are in place."</p>
+      </div>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is worth taking seriously as a design principle for any agentic tool with write access to
+        real systems, not just a passing warning: the node/operation you grant should be scoped to the
+        narrowest capability actually needed (Append Row, not "Google Sheets: all operations"), the same
+        least-privilege discipline already flagged for IAM policies back in the AWS Day 5 notes. An agent
+        with unscoped delete/update access to production data is a real operational risk category, and this
+        n8n example makes it viscerally concrete — the same "full access is convenient but not least
+        privilege" trade-off shows up here as it did with IAM policies.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What specific risk does the instructor flag when connecting an AI agent to a Google Sheets node? <span class="hint">tap to reveal</span></div>
+        <div class="a">That the same Google Sheets node type that enables useful operations like appending a row can also perform destructive operations like deleting an entire spreadsheet — an AI agent given broad, unscoped access to such a node could, in principle, delete real data, which is why careful operation scoping and guardrails matter for any agent with write access to real systems.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Practice</span> Python-to-C Code Translator, With an Output-Cleanup Lesson</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Exercise: build a workflow that receives Python code, converts it to C, and logs both versions to
+      a new Google Sheet (columns: <code>Python</code>, <code>C</code>). The instructive twist: the first
+      naive prompt produced output cluttered with explanatory prose around the code, unsuitable for a clean
+      spreadsheet cell — requiring the prompt to be explicitly tightened to request <em>only</em> the raw C
+      code, with no surrounding explanation.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is a small but genuinely representative lesson in prompt engineering for structured
+        downstream consumption — "the model did what I asked, but not what I actually needed for this
+        pipeline" is an extremely common first-pass failure mode whenever an LLM's output feeds directly into
+        another system (a spreadsheet cell, a database field, a UI) rather than being read by a human. The
+        fix (tightening the prompt to specify format constraints explicitly: "output ONLY the code, no
+        explanation") is a pattern worth applying by default anywhere an LLM output becomes another system's
+        structured input.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why did the first version of the Python-to-C prompt produce unusable output for this specific pipeline? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because the model included explanatory prose alongside the converted C code by default, and that mixed text-plus-code output wasn't suitable for being written cleanly into a single spreadsheet cell — the prompt needed to be explicitly tightened to request ONLY the raw code with no surrounding explanation, since a downstream system (the spreadsheet) needed clean, structured output, not a conversational response.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Build</span> Calendar Agent — Reading and Creating Events</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+[Chat Trigger] → [AI Agent] → tools: [Google Calendar: Get Many]
+                     (brain: OpenAI)  [Google Calendar: Create]
+
+Prompt structure (same pattern used throughout the bootcamp):
+  Context      → "You are a helpful assistant with access to the
+                   user's Google Calendar..."
+  Instructions → "...use available tools to retrieve or create
+                   events based on user input..."
+  Time         → dynamically set to "now" (so the agent reasons
+                   about availability going forward, not the past)
+  Input        → {{ $json.chatInput }}
+      </pre>
+      <p>Two calendar tool instances are attached to one agent: <strong>Get Many</strong> (retrieve
+      existing events — configured with a record limit, a start time of "now," and an end time explicitly
+      left as <em>"defined automatically by the model"</em> — letting the LLM itself decide the appropriate
+      lookback/lookahead window based on the user's actual question) and <strong>Create</strong> (schedule
+      a new event, with start/end times similarly left for the model to infer from context).</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>"Defined automatically by the model" for a parameter like event date range is a genuinely
+        interesting design choice worth flagging — it hands a piece of reasoning (how far forward should I
+        look, given what the user actually asked?) to the LLM rather than hardcoding it, which is more
+        flexible but also introduces a new class of failure mode: the model's inference about scope could be
+        wrong in ways a fixed parameter never would be. Worth treating this as a spectrum, not a binary — for
+        low-stakes queries (read-only calendar checks) model-inferred parameters are a reasonable trade for
+        flexibility; for higher-stakes actions (the actual event creation), tighter, more explicit
+        constraints might be worth the loss of flexibility.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Why is the calendar tool's time window set to "now" as the start, rather than being left unset or defaulting to some earlier point? <span class="hint">tap to reveal</span></div>
+        <div class="a">So the agent only reasons about calendar availability going forward from the present moment, not events that already happened in the past — this ensures scheduling and availability-checking logic stays relevant to real, current, and future commitments rather than potentially getting confused by or referencing stale past events.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Debug</span> The Missing-Title Bug — A Real Iteration Cycle</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>First test of the Create-event tool successfully booked a meeting at the correct time, but the
+      calendar entry showed <strong>"No title"</strong> — the agent understood the requested time slot
+      correctly but had no configured field to actually pass through the event's title/summary text. Fix:
+      going back into the Google Calendar node's configuration and explicitly adding a "Summary" field, also
+      set to "defined by the model," giving the LLM an actual output slot to populate with the event title
+      it had already correctly inferred from the conversation.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This bug is a clean, realistic example of an integration gap rather than a model reasoning
+        failure — the agent's language understanding was fine (it knew the meeting should be called "video
+        editing"); the tool's configuration simply didn't expose a field for that information to land in.
+        Worth internalizing as a debugging heuristic for any agent-plus-tool system: when output looks
+        "almost right but missing a piece," check the tool's parameter/field configuration before assuming
+        the model's reasoning is at fault — often the gap is in what the tool call is actually wired to accept.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Was the "No title" bug caused by the AI model failing to understand the meeting title, or by something else? <span class="hint">tap to reveal</span></div>
+        <div class="a">Something else — a tool configuration gap, not a model reasoning failure. The agent correctly understood what the meeting should be titled based on the conversation, but the Google Calendar node's configuration hadn't been set up with a "Summary" field for that title information to actually be passed through to the created event. Adding that field (set to "defined by the model") fixed it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 10: WRAP-UP -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag arch">Wrap-up</span> Module Recap</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+1. n8n: visual, node-based workflow builder — triggers, nodes,
+   AI Agent nodes with pluggable brain/memory/tools
+2. Prompt structure reused throughout: Context → Instructions →
+   Input → Output format (same pattern as code-first prompting)
+3. Expression mode ({{ $json.field }}) dynamically wires data
+   between nodes — the low-code equivalent of variable passing
+4. Swapping the underlying LLM (OpenAI ↔ Claude) requires
+   changing only the model node, not the workflow logic
+5. Memory + tools (search, calendar, sheets) attach to an agent
+   the same way they would in a code framework, just visually
+6. Real risk: broad tool/operation access (e.g. unscoped Google
+   Sheets access) on an LLM-driven agent is a genuine operational
+   hazard, not hypothetical — least-privilege scoping matters here too
+7. "Defined automatically by the model" parameters trade
+   flexibility for a new class of possible reasoning-error failure mode
+8. Debugging agent+tool systems: check tool field configuration
+   before assuming a model reasoning failure when output is
+   "almost right but missing something"
+      </pre>
+
+      <div class="questions">
+        <h4>Questions worth carrying forward</h4>
+        <ul>
+          <li>Given everything built here (summarizer, translator, sheets logger, calendar agent) uses the
+          same AI Agent node pattern with different tools attached — at what point would you reach for
+          n8n's more advanced primitives (sub-workflows, the Switch/conditional node, error-handling
+          branches) instead of one flat agent with many tools, and does that mirror the same "when do you
+          need multi-agent handoffs" question raised in the MCP/OpenAI Agents SDK notes?</li>
+          <li>Given the explicit Google Sheets delete-risk warning — if you were evaluating n8n (or any
+          low-code agentic platform) for internal Optimus adoption, what would your minimum guardrail
+          requirement be before allowing any workflow write/delete access to production-adjacent systems?</li>
+          <li>The low-code approach here lets non-engineers build and modify their own automations — does
+          that trade-off (approachability vs. code review/version control rigor) change your view on where
+          low-code agentic tools fit relative to code-first frameworks for a regulated banking environment
+          specifically?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">Architects Lab · Study Notes · Source: "Building Agentic AI Workflows with n8n" — LLM/Agentic AI Engineer Bootcamp</div>
+
+<script>
+  function toggleCard(headEl){
+    const card = headEl.parentElement;
+    card.classList.toggle('open');
+    updateProgress();
+  }
+  function toggleRecall(el){
+    el.classList.toggle('show');
+  }
+  function expandAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('open'));
+    updateProgress();
+  }
+  function collapseAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.remove('open'));
+    updateProgress();
+  }
+  function revealAllRecall(){
+    document.querySelectorAll('.recall').forEach(r=>r.classList.add('show'));
+  }
+  function updateProgress(){
+    const total = document.querySelectorAll('.card').length;
+    const open = document.querySelectorAll('.card.open').length;
+    document.getElementById('progressLabel').textContent = open + ' / ' + total + ' sections expanded';
+  }
+  updateProgress();
+</script>
+
+</body>
+</html>

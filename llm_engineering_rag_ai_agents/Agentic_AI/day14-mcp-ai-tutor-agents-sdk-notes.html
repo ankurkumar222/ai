@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Architects Lab — Advanced AI Tutor with MCP &amp; OpenAI Agents SDK</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#121821; --panel2:#161d28; --border:#22303f;
+    --text:#dbe4ee; --muted:#7d92a8; --accent:#39d3ac; --accent2:#f2b84b;
+    --danger:#ef6a6a; --code:#0d1319; --tag:#1c2a3a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    line-height:1.6; padding:0 0 80px 0;
+  }
+  header{
+    padding:36px 24px 24px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#0e141c,#0b0f14);
+  }
+  .eyebrow{color:var(--accent); font-size:12px; letter-spacing:2px; text-transform:uppercase; font-weight:600;}
+  h1{margin:8px 0 6px; font-size:28px; color:#f2f6fa;}
+  .sub{color:var(--muted); font-size:14px; max-width:780px;}
+  .course-link{
+    display:inline-block; margin-top:14px; font-size:13px; font-weight:600;
+    color:var(--accent); text-decoration:none; border:1px solid var(--border);
+    background:var(--panel2); padding:8px 14px; border-radius:6px;
+  }
+  .course-link:hover{border-color:var(--accent); background:#152030;}
+  .toolbar{
+    display:flex; gap:10px; padding:16px 24px; position:sticky; top:0;
+    background:rgba(11,15,20,0.95); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--border); z-index:10; flex-wrap:wrap;
+  }
+  button.ctrl{
+    background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    padding:8px 14px; border-radius:6px; cursor:pointer; font-size:13px;
+  }
+  button.ctrl:hover{border-color:var(--accent); color:var(--accent);}
+  .wrap{max-width:920px; margin:0 auto; padding:24px;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    margin-bottom:16px; overflow:hidden;
+  }
+  .card-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 20px; cursor:pointer; user-select:none;
+  }
+  .card-head:hover{background:var(--panel2);}
+  .card-title{font-size:16px; font-weight:600; color:#f2f6fa; display:flex; align-items:center; gap:10px;}
+  .tag{
+    font-size:10px; text-transform:uppercase; letter-spacing:1px;
+    background:var(--tag); color:var(--accent); padding:3px 8px; border-radius:4px; font-weight:700;
+  }
+  .tag.arch{color:var(--accent2);}
+  .tag.risk{color:var(--danger);}
+  .chevron{color:var(--muted); transition:transform .2s;}
+  .card.open .chevron{transform:rotate(90deg);}
+  .card-body{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+    padding:0 20px;
+  }
+  .card.open .card-body{ max-height:4800px; padding:0 20px 20px; }
+  p{margin:8px 0;}
+  .questions{
+    background:var(--code); border-left:3px solid var(--accent);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .questions h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent);}
+  .questions ul{margin:0; padding-left:18px;}
+  .questions li{margin:6px 0; color:#c8d6e2;}
+  .archnote{
+    background:var(--code); border-left:3px solid var(--accent2);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .archnote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent2);}
+  .risknote{
+    background:var(--code); border-left:3px solid var(--danger);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .risknote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--danger);}
+  pre{
+    background:var(--code); border:1px solid var(--border); border-radius:8px;
+    padding:14px; overflow-x:auto; font-size:12.5px; color:#a9e6c9; line-height:1.5;
+  }
+  code{color:var(--accent2); font-family:'Cascadia Code',Consolas,monospace;}
+  .recall{
+    margin-top:12px; border:1px dashed var(--border); border-radius:6px; padding:10px 14px;
+    cursor:pointer; background:#0e1620;
+  }
+  .recall .q{color:var(--accent2); font-weight:600; font-size:13.5px;}
+  .recall .a{display:none; margin-top:8px; color:var(--muted); font-size:13.5px; border-top:1px solid var(--border); padding-top:8px;}
+  .recall.show .a{display:block;}
+  .recall .hint{font-size:11px; color:var(--muted); float:right;}
+  ul.plain li{margin:4px 0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
+  th{background:var(--panel2); color:var(--accent2);}
+  .foot{color:var(--muted); text-align:center; padding:30px; font-size:12px;}
+  .progress{font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Architects Lab · MCP + Agentic AI Project</div>
+  <h1>Advanced AI Tutor — Model Context Protocol + OpenAI Agents SDK</h1>
+  <div class="sub">Notes from a hands-on project building a multi-tool AI tutor (explain / summarize /
+  flashcards / quiz) exposed as an MCP server via Gradio, then consumed by an agent built with the OpenAI
+  Agents SDK. Structured for a Senior Engineering Manager building direct working knowledge of MCP —
+  directly relevant to Claude Tag, MCP Apps, and any Optimus tooling that needs standardized tool access.</div>
+  <a class="course-link" href="https://www.udemy.com/course/become-an-llm-agentic-ai-engineer-14-day-bootcamp-2025/learn/lecture/50203033#overview" target="_blank" rel="noopener noreferrer">
+    ↗ Open on Udemy — Become an LLM/Agentic AI Engineer (14-Day Bootcamp)
+  </a>
+</header>
+
+<div class="toolbar">
+  <button class="ctrl" onclick="expandAll()">▾ Expand All</button>
+  <button class="ctrl" onclick="collapseAll()">▸ Collapse All</button>
+  <button class="ctrl" onclick="revealAllRecall()">💡 Reveal All Recall Answers</button>
+  <span class="progress" id="progressLabel"></span>
+</div>
+
+<div class="wrap">
+
+  <!-- SECTION 1 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Framing</span> What MCP Actually Solves — The USB-C Analogy</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>The core problem MCP addresses: how does an LLM reliably use external tools/APIs, without you
+      hand-writing custom integration code for every single tool an agent might need? Historically, wiring
+      an agent to Slack, Gmail, a calendar, and a web API each required bespoke, tool-specific glue code.</p>
+      <p>MCP (Model Context Protocol) is an open standard that lets AI models securely discover and interact
+      with tools, APIs, and data through one consistent interface — <strong>"a universal USB-C port for AI
+      applications."</strong> Once a tool speaks MCP, any MCP-aware agent can use it without custom
+      per-tool integration work.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This is directly the same standardization problem you already navigate in fintech integration
+        work — before a common protocol, every bank/vendor integration is a bespoke adapter; after, it's a
+        conformance requirement. MCP is doing for AI tool access exactly what standardized APIs (ISO 20022,
+        REST conventions, OAuth) did for payments and identity integration: reducing N×M integration
+        complexity down to N+M by agreeing on one shared interface. Worth using this framing directly if you
+        ever need to pitch MCP adoption internally to non-AI-specialist stakeholders at IDFC or elsewhere.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What specific integration problem does MCP eliminate, described in N×M terms? <span class="hint">tap to reveal</span></div>
+        <div class="a">Without MCP, connecting M different AI agents to N different tools/APIs requires up to N×M custom integrations, since each agent-tool pairing might need bespoke glue code. MCP standardizes the interface both sides speak, reducing this to roughly N+M — each tool implements MCP once, and each agent implements MCP-client support once, and any agent can then use any MCP-compliant tool.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Concepts</span> The Three Building Blocks — Server, Manifest, Action Endpoint</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th>Component</th><th>What it is</th></tr>
+        <tr><td>MCP Server</td><td>An application (here, a Gradio app) that exposes one or more tools, listening on a specific HTTP endpoint</td></tr>
+        <tr><td>Manifest (schema)</td><td>A standardized JSON description of available tools — name, description, expected input parameters and their types, and output format. This is how an agent "discovers" what it can do</td></tr>
+        <tr><td>Action Endpoint</td><td>The standard endpoint where the model sends a POST request (tool name + parameters) to actually execute a specific tool</td></tr>
+      </table>
+      <p>The manifest is described as a "language translator" — an agent doesn't need to be pre-programmed
+      with knowledge of a specific tool; it reads the manifest at runtime to learn what's available and how
+      to call it correctly.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: How does an AI agent know what tools an MCP server offers and how to call them, without being hardcoded in advance? <span class="hint">tap to reveal</span></div>
+        <div class="a">By fetching the server's manifest (schema) — a standardized JSON document describing each available tool's name, description, expected input parameters (and their types), and output format. The agent reads this at runtime to discover capabilities dynamically, rather than needing pre-written, tool-specific integration code.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Architecture</span> Two Notebooks, Two Roles — Server and Client</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+Notebook 1: MCP Client
+  - Builds the AI agent (OpenAI Agents SDK)
+  - Connects to the MCP server and sends requests
+
+Notebook 2: MCP Server
+  - Defines the 4 tool functions
+  - Launches a Gradio app with mcp_server=True
+  - Listens for MCP requests (SSE — Server-Sent Events)
+
+MCPServerSse(name="AI Tutor", url=MCP_BASE,
+             timeout=30,                      # per-tool-call timeout
+             client_session_timeout_seconds=60) # idle session expiry
+      </pre>
+      <p><code>MCPServerSse</code> is the class used client-side to connect via Server-Sent Events (SSE) —
+      a mechanism for the server to push updates to the client in real time, well suited to streaming token
+      output back from an LLM call.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What's the practical difference between the 30-second timeout and the 60-second client_session_timeout_seconds setting? <span class="hint">tap to reveal</span></div>
+        <div class="a">The 30-second timeout controls how long the server waits for a SINGLE tool execution/action to complete before giving up. The 60-second client_session_timeout_seconds controls how long an entire session can stay idle (no activity at all) before it's considered expired/disconnected — one governs a single call, the other governs the whole connection's lifespan.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Build</span> The Four Tools — What Each One Actually Does</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <tr><th>Tool</th><th>Inputs</th><th>Behavior</th></tr>
+        <tr><td>explain_concept</td><td>question (str), level (int 1-5)</td><td>Streams an explanation at a chosen complexity — 1 = "explain like I'm five," 5 = expert/technical depth</td></tr>
+        <tr><td>summarize_text</td><td>text (str), compression_ratio (float)</td><td>Streams a summary compressed to roughly that fraction of the original length</td></tr>
+        <tr><td>generate_flashcards</td><td>topic (str), num_cards (int 1-20)</td><td>Streams Q&amp;A flashcard pairs in JSON-line format for a topic</td></tr>
+        <tr><td>quiz_me</td><td>topic (str), level (int), num_questions (int 1-15)</td><td>Streams a multiple-choice quiz with an answer key</td></tr>
+      </table>
+      <p>All four functions share a consistent shape: build a system prompt encoding the tool's specific
+      instructions and parameters → call <code>client.chat.completions.create()</code> with
+      <code>stream=True</code> → yield chunks back progressively rather than waiting for the full response.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>Notice these four tools are really the same underlying pattern (parameterized system prompt →
+        streamed completion) applied four times with different prompt templates and parameter shapes — the
+        same "thin vertical slice on a shared scaffold" pattern already seen in the Vercel course's healthcare
+        app (Day 4) and the resume assistant project. Recognizing this repeated shape across projects is
+        itself useful: once you have one well-built streaming-completion wrapper, adding a fifth tool (as the
+        practice opportunity does) is nearly copy-paste work, not new architecture.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What's the common structural pattern shared by all four tool functions in this MCP server? <span class="hint">tap to reveal</span></div>
+        <div class="a">Each tool builds a parameterized system prompt specific to its task, calls the OpenAI chat completions API with streaming enabled, and yields response chunks progressively back to the caller — the only real differences between tools are the specific prompt template and the input/output parameter shape, not the underlying execution pattern.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag risk">The Trick</span> One Parameter Turns a Gradio App Into an MCP Server</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>demo.launch(mcp_server=True)</pre>
+      <p>That's the entire mechanism — a normal Gradio UI (tabs, text boxes, sliders, buttons) becomes
+      simultaneously usable two ways: as a human-facing web interface AND as a machine-facing MCP server
+      exposing each function as a discoverable, callable tool. The Gradio component definitions themselves
+      (labels, types, ranges via sliders) become part of what gets reflected in the generated manifest/schema.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>This single-flag duality is a genuinely clever piece of framework design — the same UI-definition
+        code doubles as an API contract, meaning you don't maintain the human interface and the machine
+        interface separately (a common source of drift in traditional systems, where a UI and its underlying
+        API spec silently diverge over time). Worth remembering as a design goal even outside Gradio
+        specifically: wherever feasible, generate your API surface FROM your interface definition rather than
+        maintaining both by hand.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What single change converts a normal Gradio app into a functioning MCP server? <span class="hint">tap to reveal</span></div>
+        <div class="a">Adding mcp_server=True to the demo.launch() call. No other structural change is needed — the same Gradio interface then serves both as a human-facing UI and as a machine-callable MCP server, with the UI component definitions themselves informing the generated tool manifest/schema.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Extension</span> Practice Opportunity — Adding a Fifth Tool (Multi-Language Explanations)</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>A new tool, <code>explain_concept_in_language</code>, adds a <code>language</code> string
+      parameter to the existing explain_concept pattern — same core logic, with the system prompt extended
+      to instruct the model to respond in the specified language. Confirms the "copy-paste plus one new
+      parameter" ease predicted by the shared-pattern observation in Section 4.</p>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What's the one meaningful code difference between explain_concept and explain_concept_in_language? <span class="hint">tap to reveal</span></div>
+        <div class="a">The addition of a language parameter, which gets woven into the system prompt (instructing the model to respond in that specified language) — everything else (the level mapping, the streaming completion call, the overall function shape) is identical to the original explain_concept tool.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Discovery</span> Fetching the Manifest — Seeing What the Agent Sees</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+def fetch_schema(server_url):
+    schema_url = server_url.replace("sse", "schema")
+    response = http_client.get(schema_url, timeout=10)
+    response.raise_for_status()
+    return response.json()
+</pre>
+      <p>The MCP server exposes its manifest at a predictable URL pattern (swap "sse" for "schema" in the
+      base URL) — fetching it as plain JSON returns, for every tool, its name, parameter types, and
+      description. Critically, <strong>the docstring you write on each Python function becomes the tool's
+      description in the manifest</strong> — a follow-up practice opportunity demonstrates this directly by
+      improving a docstring and re-fetching the schema to see the richer description reflected automatically.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The docstring-becomes-manifest-description behavior is the single most practically important
+        detail in this whole discovery section — it means <strong>prompt-engineering discipline extends
+        directly to docstring-writing discipline</strong> for any MCP tool you build. A vague docstring
+        produces a vague tool description, which directly degrades an agent's ability to choose the right
+        tool at the right time. This is worth treating as a hard rule for any future MCP tool you or your
+        team builds: write the docstring as carefully as you'd write a user-facing prompt, because
+        functionally, that's exactly what it becomes.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: Where does the tool description text that appears in the MCP manifest actually come from? <span class="hint">tap to reveal</span></div>
+        <div class="a">From the Python docstring written on each tool's function definition — the docstring is automatically surfaced as the tool's description in the generated MCP schema/manifest, meaning a more detailed, precise docstring directly produces a more detailed, precise tool description that the agent can use to decide when and how to call that tool.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Agent</span> Building the Client — OpenAI Agents SDK</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Three core primitives in the OpenAI Agents SDK:</p>
+      <ul class="plain">
+        <li><strong>Agents</strong> — LLMs equipped with instructions and tools</li>
+        <li><strong>Handoffs</strong> — agents delegating tasks to other agents</li>
+        <li><strong>Guardrails</strong> — validating inputs to agents</li>
+      </ul>
+      <pre>
+agent = Agent(
+    name="Smart Assistant",
+    instructions="""You are an AI assistant with access to an MCP
+    server exposing four streaming tools: explain_concept, ...
+    For each user request, decide the tool (if any) that fulfills
+    it best. Call the tool via MCP by returning only JSON with
+    tool and arguments — no extra text. If no tool fits, answer
+    directly in plain language.
+
+    Example: "explain quantum tunneling like I'm 10" → calls
+    explain_concept with question="quantum tunneling", level=2
+    """,
+    model="gpt-4o-mini",
+    mcp_servers=[mcp_tool]
+)
+
+await mcp_tool.connect()
+
+while True:
+    user_input = input("You: ")
+    if user_input in ("exit", "quit"): break
+    result = await Runner.run(agent, conversation_history)
+    conversation_history.append(...)  # maintain context
+</pre>
+      <p>The agent's instructions include a worked example — a form of few-shot prompting embedded directly
+      in the system instructions, showing the model exactly what tool-selection reasoning and JSON output
+      format is expected for a sample query.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>The pattern "instructions + explicit example of correct tool-call output format, embedded in the
+        prompt" is a very reliable technique for improving structured tool-selection accuracy — directly
+        useful for any Optimus prompt template that needs to route between multiple internal tools reliably.
+        Worth treating as a standard component of any agent system prompt you write going forward: don't just
+        describe the tools abstractly, show one concrete input→tool-call mapping.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What are the three core primitives of the OpenAI Agents SDK, and what does each one do? <span class="hint">tap to reveal</span></div>
+        <div class="a">Agents (LLMs equipped with instructions and tools), Handoffs (allowing one agent to delegate a task to another agent), and Guardrails (validating the inputs sent to an agent before they're acted on).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag">Validation</span> Testing the Full Loop — And Auditing Tool Usage</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <p>Live test: asking "explain how iPhones work in simple terms" correctly triggered the
+      <code>explain_concept</code> tool; a follow-up "generate 10 quiz questions about this" correctly
+      triggered <code>quiz_me</code> — demonstrating the agent maintaining conversational context across
+      multiple tool calls in one session.</p>
+      <p>A notable follow-up capability: simply asking the agent <em>"which tools have you called?"</em>
+      produces an accurate list — the agent can introspect and report on its own tool-usage history within
+      the conversation.</p>
+
+      <div class="archnote">
+        <h4>Architect's Lens</h4>
+        <p>That tool-usage introspection capability is worth flagging as more than a party trick — it's a
+        lightweight, built-in observability mechanism. For any production agentic tool, being able to ask
+        (or programmatically query) "what tools were actually invoked for this session, and with what
+        arguments" is essential for debugging, auditing, and cost attribution — directly relevant to
+        anything in the Optimus Project that needs traceability for compliance or quality-review purposes.</p>
+      </div>
+
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Active Recall: What capability does the agent demonstrate when asked "which tools have you called?" partway through a conversation? <span class="hint">tap to reveal</span></div>
+        <div class="a">Self-introspection on its own tool-usage history — the agent can accurately report which specific MCP tools it invoked earlier in the same conversation session, functioning as a built-in, conversational audit trail without needing separate external logging to be queried.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 10: WRAP-UP -->
+  <div class="card">
+    <div class="card-head" onclick="toggleCard(this)">
+      <div class="card-title"><span class="tag arch">Wrap-up</span> Full Project Recap</div>
+      <span class="chevron">▸</span>
+    </div>
+    <div class="card-body">
+      <pre>
+1. MCP = a standardized "USB-C" protocol for AI agents to
+   discover and call external tools, eliminating N×M custom
+   integration work
+2. Server exposes tools + a manifest (auto-derived partly from
+   docstrings) + an action endpoint for execution
+3. Gradio app + mcp_server=True = instant MCP server, no
+   separate API layer needed — UI definition doubles as API contract
+4. Four streaming tools built on one shared pattern: parameterized
+   system prompt → streamed OpenAI completion
+5. Fetching the manifest (schema URL) shows exactly what an
+   agent "sees" — docstrings directly become tool descriptions
+6. OpenAI Agents SDK: Agent (instructions + tools) +
+   MCPServerSse connection + Runner.run() in a conversation loop
+7. Agent reliably selects the correct tool per request, maintains
+   context across turns, and can self-report its own tool-usage history
+      </pre>
+
+      <div class="questions">
+        <h4>Questions worth carrying forward</h4>
+        <ul>
+          <li>Given your existing Claude Tag / MCP Apps context at Anthropic's product suite — how does this
+          project's DIY MCP server (Gradio + mcp_server=True) compare structurally to how MCP Apps or
+          third-party MCP connectors are packaged and discovered in that ecosystem? Same manifest/schema
+          concept, or a materially different discovery mechanism?</li>
+          <li>The docstring-as-tool-description finding is a strong argument for treating MCP tool
+          documentation with the same rigor as a public API spec — would it be worth drafting a short internal
+          "MCP tool documentation standard" for Optimus before more tools get built ad hoc, given how directly
+          documentation quality here translates to agent tool-selection accuracy?</li>
+          <li>This project's agent used a single flat instruction set to route between four tools — at what
+          point (how many tools, how much routing complexity) would you expect to need the SDK's "handoffs"
+          primitive instead, splitting responsibilities across multiple specialized agents rather than one
+          agent with a longer tool list?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot">Architects Lab · Study Notes · Source: "Advanced AI Tutor with MCP" — Become an LLM/Agentic AI Engineer Bootcamp</div>
+
+<script>
+  function toggleCard(headEl){
+    const card = headEl.parentElement;
+    card.classList.toggle('open');
+    updateProgress();
+  }
+  function toggleRecall(el){
+    el.classList.toggle('show');
+  }
+  function expandAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.add('open'));
+    updateProgress();
+  }
+  function collapseAll(){
+    document.querySelectorAll('.card').forEach(c=>c.classList.remove('open'));
+    updateProgress();
+  }
+  function revealAllRecall(){
+    document.querySelectorAll('.recall').forEach(r=>r.classList.add('show'));
+  }
+  function updateProgress(){
+    const total = document.querySelectorAll('.card').length;
+    const open = document.querySelectorAll('.card.open').length;
+    document.getElementById('progressLabel').textContent = open + ' / ' + total + ' sections expanded';
+  }
+  updateProgress();
+</script>
+
+</body>
+</html>
