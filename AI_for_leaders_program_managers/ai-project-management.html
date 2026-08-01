@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Project Management &amp; Inception · Architects Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0e14;
+    --panel: #10151d;
+    --panel-2: #151b25;
+    --panel-3: #192132;
+    --grid: #1c2430;
+    --line: #212b3a;
+    --ink: #c7d0dc;
+    --ink-dim: #7c8898;
+    --ink-bright: #eef2f7;
+    --blueprint: #3fb6ff;
+    --blueprint-dim: #1f4a63;
+    --amber: #ffb454;
+    --green: #5fd9a0;
+    --red: #ff6b6b;
+    --violet: #c07bff;
+    --radius: 4px;
+    --display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/42px 42px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/42px 42px,
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.65;
+    padding:0 0 90px 0;
+  }
+  a{color:var(--blueprint);}
+
+  .course-box{
+    margin:28px auto 0 auto; max-width:952px; padding:18px 26px;
+    background:var(--panel-2); border:1px solid var(--blueprint-dim); border-left:4px solid var(--blueprint);
+    border-radius:var(--radius); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px;
+  }
+  .course-box .label{font-family:var(--mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--blueprint);}
+  .course-box .sub{font-family:var(--mono); font-size:12px; color:var(--ink-dim);}
+
+  .source-box{
+    max-width:952px; margin:10px auto 0 auto; padding:11px 26px;
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  .source-box .src-tag{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--amber); font-weight:700;}
+  .source-box a{font-family:var(--mono); font-size:12.5px; color:var(--blueprint); text-decoration:none; border-bottom:1px dashed var(--blueprint-dim);}
+  .source-box a:hover{color:var(--ink-bright); border-bottom-color:var(--blueprint);}
+  .source-box .assume{font-family:var(--mono); font-size:10.5px; color:var(--ink-dim); font-style:italic;}
+
+  header.hero{max-width:952px; margin:22px auto 0 auto; padding:44px 26px 24px;}
+  header.hero h1{font-family:var(--display); font-size:clamp(30px,4.4vw,46px); font-weight:700; color:var(--ink-bright); margin:0 0 10px 0; letter-spacing:-.01em; line-height:1.12;}
+  header.hero .tagline{font-family:var(--mono); color:var(--amber); font-size:14px; letter-spacing:.04em; margin-bottom:16px;}
+  header.hero p.lede{max-width:720px; color:var(--ink-dim); font-size:16px;}
+
+  nav.toc{max-width:952px; margin:0 auto 20px; padding:18px 26px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);}
+  nav.toc .cap{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:10px;}
+  nav.toc ol{margin:0; padding-left:20px; columns:2; gap:24px;}
+  nav.toc li{font-size:13.5px; margin-bottom:7px;}
+  nav.toc a{color:var(--ink); text-decoration:none;}
+  nav.toc a:hover{color:var(--blueprint);}
+
+  section.block{max-width:952px; margin:0 auto; padding:36px 26px; border-top:1px solid var(--line);}
+  .kicker{display:flex; align-items:center; gap:12px; margin-bottom:6px;}
+  .kicker .num{font-family:var(--mono); font-size:12px; color:var(--bg); background:var(--blueprint); padding:3px 9px; border-radius:3px; font-weight:700; letter-spacing:.03em;}
+  .kicker .layer-tag{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-dim);}
+  h2.title{font-family:var(--display); font-size:25px; color:var(--ink-bright); margin:4px 0 14px 0; font-weight:600;}
+  h3.subtitle{font-family:var(--display); font-size:16.5px; color:var(--ink-bright); margin:22px 0 10px 0; font-weight:600;}
+  p{margin:0 0 14px 0; font-size:15.5px;}
+  ul{margin:0 0 14px 0; padding-left:20px;}
+  li{margin-bottom:6px; font-size:15px;}
+  strong{color:var(--ink-bright);}
+  code{font-family:var(--mono); background:var(--panel-3); padding:1px 6px; border-radius:3px; font-size:.87em; color:var(--blueprint); border:1px solid var(--line);}
+
+  .diagram-frame{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 14px 10px; margin:18px 0 22px 0; overflow-x:auto;}
+  .diagram-frame .cap{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); padding:0 6px 12px; display:flex; justify-content:space-between;}
+  .diagram-frame svg{display:block; width:100%; height:auto; min-width:560px;}
+
+  .prime-box{background:linear-gradient(180deg, rgba(192,123,255,.07), transparent); border:1px solid var(--violet); border-radius:var(--radius); padding:16px 18px; margin:6px 0 26px 0;}
+  .prime-box .ptag{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--violet); font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .prime-box .ptag::before{content:"◆"; font-size:9px;}
+  .prime-box ol{margin:0; padding-left:20px;}
+  .prime-box li{font-family:var(--mono); font-size:13px; color:var(--ink); margin-bottom:8px;}
+  .prime-box .hint{font-size:12.5px; color:var(--ink-dim); font-style:italic; margin-top:6px;}
+
+  .recap{background:var(--panel-2); border:1px solid var(--green); border-left:4px solid var(--green); border-radius:var(--radius); padding:16px 20px; margin:26px 0 18px 0;}
+  .recap .rtag{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--green); font-weight:700; margin-bottom:8px;}
+  .recap p{margin:0; font-size:14.5px; color:var(--ink);}
+
+  .persp-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:14px; margin:0 0 8px 0;}
+  .persp-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px;}
+  .persp-card.cto{border-top:3px solid var(--amber);}
+  .persp-card.arch{border-top:3px solid var(--blueprint);}
+  .persp-card.pm{border-top:3px solid var(--violet);}
+  .persp-card .ptitle{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .persp-card.cto .ptitle{color:var(--amber);}
+  .persp-card.arch .ptitle{color:var(--blueprint);}
+  .persp-card.pm .ptitle{color:var(--violet);}
+  .persp-card p{font-size:13.8px; color:var(--ink-dim); margin:0;}
+
+  table{width:100%; border-collapse:collapse; margin:16px 0 22px 0; font-size:13.5px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+  th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--blueprint); background:var(--panel-2);}
+  td{color:var(--ink);}
+  tr:last-child td{border-bottom:none;}
+  td.mono{font-family:var(--mono); font-size:12.5px;}
+  .yes{color:var(--green); font-weight:600;}
+  .no{color:var(--red); font-weight:600;}
+  .warn{color:var(--amber); font-weight:600;}
+
+  .card-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; margin:18px 0;}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px;}
+  .card .n{font-family:var(--mono); color:var(--blueprint); font-size:12px; font-weight:700; margin-bottom:6px;}
+  .card h4{font-family:var(--display); color:var(--ink-bright); font-size:15px; margin:0 0 8px 0;}
+  .card p{font-size:13.8px; color:var(--ink-dim); margin:0;}
+  .card ul{margin:6px 0 0 0; padding-left:16px;}
+  .card li{font-size:12.8px; color:var(--ink-dim); margin-bottom:3px;}
+
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0;}
+  @media (max-width:640px){.two-col{grid-template-columns:1fr;}}
+  .col-panel{border-radius:var(--radius); padding:16px 18px; border:1px solid var(--line); background:var(--panel);}
+  .col-panel.in{border-left:3px solid var(--green);}
+  .col-panel.out{border-left:3px solid var(--red);}
+  .col-panel .ctag{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; margin-bottom:8px;}
+  .col-panel.in .ctag{color:var(--green);}
+  .col-panel.out .ctag{color:var(--red);}
+  .col-panel ul{margin:0; padding-left:18px;}
+  .col-panel li{font-size:13.5px; margin-bottom:5px;}
+
+  .timeline{display:flex; flex-direction:column; gap:0; margin:18px 0;}
+  .tl-row{display:grid; grid-template-columns:170px 1fr; gap:16px; padding:12px 0; border-bottom:1px solid var(--line);}
+  .tl-row:last-child{border-bottom:none;}
+  .tl-week{font-family:var(--mono); font-size:12px; color:var(--amber); font-weight:700;}
+  .tl-desc{font-size:14.5px; color:var(--ink);}
+
+  .risk-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; margin:12px 0;}
+  .risk-card .rtitle{font-family:var(--display); font-size:14.5px; color:var(--ink-bright); font-weight:600; margin-bottom:10px;}
+  .risk-cols{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:640px){.risk-cols{grid-template-columns:1fr;}}
+  .risk-cols .idtag{font-family:var(--mono); font-size:10.5px; color:var(--red); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; font-weight:700;}
+  .risk-cols .mtag{font-family:var(--mono); font-size:10.5px; color:var(--green); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; font-weight:700;}
+  .risk-cols ul{margin:0; padding-left:16px;}
+  .risk-cols li{font-size:13px; color:var(--ink-dim); margin-bottom:4px;}
+
+  .recall{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px 18px; margin:10px 0; cursor:pointer;}
+  .recall .rq{font-family:var(--mono); font-size:13.5px; color:var(--violet); display:flex; align-items:flex-start; gap:8px;}
+  .recall .rq::before{content:"Q ›"; color:var(--ink-dim); flex-shrink:0;}
+  .recall .ra{display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:14px; color:var(--ink-dim);}
+  .recall.open .ra{display:block;}
+  .recall .ra::before{content:"A › "; color:var(--green); font-family:var(--mono);}
+
+  footer{max-width:952px; margin:40px auto 0; padding:22px 26px 0; font-family:var(--mono); font-size:11px; color:var(--ink-dim); letter-spacing:.06em; text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="course-box">
+  <div class="label">Architects Lab · Study Note 023</div>
+  <div class="sub">Domain: AI Project Management &amp; Inception · Format: Prime → Learn → Recap → Perspective</div>
+</div>
+
+<div class="source-box">
+  <span class="src-tag">SOURCE COURSE</span>
+  <a href="https://www.udemy.com/course/ai-project-lifecycle-mastery-strategy-to-deployment/" target="_blank" rel="noopener">AI Project Lifecycle Mastery: Strategy to Deployment — Udemy ↗</a>
+  <span class="assume">(same course as Study Note 022 — link to the specific lecture on request)</span>
+</div>
+
+<header class="hero">
+  <div class="tagline">STEP 1 OF THE LIFECYCLE, DONE PROPERLY</div>
+  <h1>AI Project Management &amp; Inception</h1>
+  <p class="lede">Vision, feasibility, scope, metrics, roles, methodology, risk, and budget — everything that has to be right before a single line of model code gets written. Same rhythm as before: prime with a few questions, learn the concept, recap what stuck, then view it from the CTO's, the Architect's, and the PM's seat.</p>
+</header>
+
+<nav class="toc">
+  <div class="cap">Contents</div>
+  <ol>
+    <li><a href="#t1">Lifecycle Refresher &amp; Why AI PM Matters</a></li>
+    <li><a href="#t2">Vision, Feasibility &amp; Scope</a></li>
+    <li><a href="#t3">Success Metrics — 3 Levels</a></li>
+    <li><a href="#t4">SMART Goals Framework</a></li>
+    <li><a href="#t5">Stakeholders &amp; Roles</a></li>
+    <li><a href="#t6">Waterfall vs Agile</a></li>
+    <li><a href="#t7">CRISP-DM, Agile &amp; Hybrid Frameworks</a></li>
+    <li><a href="#t8">SAFe — Scaled Agile Framework</a></li>
+    <li><a href="#t9">Risks &amp; Mitigation</a></li>
+    <li><a href="#t10">Ingredients for Success</a></li>
+    <li><a href="#t11">Budgeting &amp; the GPT-4 Case Study</a></li>
+    <li><a href="#t12">Applied Practice — Three Scenarios</a></li>
+    <li><a href="#t13">Module Summary &amp; Glossary</a></li>
+    <li><a href="#recall">Active Recall Deck</a></li>
+  </ol>
+</nav>
+
+<!-- ============ TOPIC 1 ============ -->
+<section class="block" id="t1">
+  <div class="kicker"><span class="num">01</span><span class="layer-tag">Foundations</span></div>
+  <h2 class="title">Lifecycle Refresher &amp; Why AI PM Matters</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Of the 7 lifecycle steps, which one does this entire module live inside?</li>
+      <li>Name one way an AI project can have "great data and a great model" and still fail.</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 1.1 — 7-STEP LIFECYCLE, THIS MODULE = STEP 1</span><span>problem scoping &amp; planning</span></div>
+    <svg viewBox="0 0 700 560" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="q1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="140" y="10" width="420" height="64" rx="6" fill="#241a10" stroke="#ffb454" stroke-width="1.8"/>
+      <text x="350" y="36" text-anchor="middle" fill="#ffb454" font-family="JetBrains Mono" font-size="11" font-weight="700">STEP 1 — WE ARE HERE</text>
+      <text x="350" y="58" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="14" font-weight="700">Problem Scoping &amp; Planning</text>
+      <line x1="350" y1="74" x2="350" y2="96" stroke="#3fb6ff" marker-end="url(#q1)"/>
+
+      <rect x="140" y="98" width="420" height="50" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="350" y="128" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="12">Step 2 — Data Acquisition</text>
+      <line x1="350" y1="148" x2="350" y2="170" stroke="#3fb6ff" marker-end="url(#q1)"/>
+
+      <rect x="140" y="172" width="420" height="50" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="350" y="202" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="12">Step 3 — Data Exploration &amp; Prep</text>
+      <line x1="350" y1="222" x2="350" y2="244" stroke="#3fb6ff" marker-end="url(#q1)"/>
+
+      <rect x="140" y="246" width="420" height="50" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="350" y="276" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="12">Step 4 — Modeling</text>
+      <line x1="350" y1="296" x2="350" y2="318" stroke="#3fb6ff" marker-end="url(#q1)"/>
+
+      <rect x="140" y="320" width="420" height="50" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="350" y="350" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="12">Step 5 — Evaluation</text>
+      <line x1="350" y1="370" x2="350" y2="392" stroke="#3fb6ff" marker-end="url(#q1)"/>
+
+      <rect x="140" y="394" width="420" height="50" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="350" y="424" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="12">Step 6 — Deployment</text>
+      <line x1="350" y1="444" x2="350" y2="466" stroke="#3fb6ff" marker-end="url(#q1)"/>
+
+      <rect x="140" y="468" width="420" height="50" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="350" y="498" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="12">Step 7 — Maintenance &amp; Monitoring</text>
+    </svg>
+  </div>
+
+  <h3 class="subtitle">Why AI project management is critical — 3 pillars</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="n">01</div>
+      <h4>Proper planning</h4>
+      <ul>
+        <li>Define scope clearly</li>
+        <li>Set success metrics — not just accuracy</li>
+        <li>Define realistic timelines</li>
+        <li>Link business KPIs to model KPIs</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="n">02</div>
+      <h4>Coordination</h4>
+      <ul>
+        <li>Cross-functional communication</li>
+        <li>Agile teams — AI moves fast</li>
+        <li>New models release weekly, adaptability required</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="n">03</div>
+      <h4>Business alignment</h4>
+      <ul>
+        <li>Define ROI clearly</li>
+        <li>Stakeholder buy-in</li>
+        <li>Business + Data Science + MLOps alignment</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="col-panel out"><div class="ctag">❌ Common pitfall</div>"We have data and a model — we're done!"</div>
+    <div class="col-panel in"><div class="ctag">✅ Reality</div>AI projects fail due to misalignment, not technology.</div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>This whole module lives inside Step 1 of the lifecycle: problem scoping and planning. Project management in AI rests on three pillars — planning, coordination, and business alignment — and the most common failure mode isn't a bad model, it's a team that shipped a working model nobody asked the right question about.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>"We have data and a model" is the sentence that precedes most AI project write-offs. Require a named business KPI before funding moves past step 1 — not after the model exists.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Because new models ship weekly, a plan that assumed today's tooling is stale within a quarter. Build re-evaluation checkpoints into the plan itself, not just the backlog.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 2 ============ -->
+<section class="block" id="t2">
+  <div class="kicker"><span class="num">02</span><span class="layer-tag">Inception</span></div>
+  <h2 class="title">Vision, Feasibility &amp; Scope</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Before checking whether an AI project is technically possible, what should you check first?</li>
+      <li>What's the actual risk of skipping a scope definition and just "seeing where the model takes us"?</li>
+    </ol>
+  </div>
+
+  <h3 class="subtitle">Defining your North Star</h3>
+  <p>Three questions anchor the vision before anything else gets planned:</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="n">1</div>
+      <h4>Why this project?</h4>
+      <ul>
+        <li>Quantify expected business value</li>
+        <li>15% cost reduction?</li>
+        <li>$1M annual revenue growth?</li>
+        <li>3,000 labor hours saved?</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="n">2</div>
+      <h4>Alignment with strategic goals</h4>
+      <ul>
+        <li>Customer retention improvement?</li>
+        <li>Operational efficiency?</li>
+        <li>New revenue streams?</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="n">3</div>
+      <h4>Clear success metrics</h4>
+      <ul>
+        <li>Well-defined KPIs</li>
+        <li>Track ROI</li>
+        <li>Measure what matters</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="subtitle">Feasibility assessment — 4 dimensions</h3>
+  <table>
+    <tr><th>Dimension</th><th>Key questions</th></tr>
+    <tr><td>Technical feasibility</td><td>Right tools/infrastructure? Cloud (AWS/GCP/Azure) available? Can we prototype quickly? Is the model technically achievable for this use case?</td></tr>
+    <tr><td>Organizational readiness</td><td>Skilled data scientists, ML engineers, AI PMs on hand? Can we hire or consult if needed?</td></tr>
+    <tr><td>Data availability &amp; quality</td><td>Access to the right data? Historical/real-time labeled data? Is it clean? How long to prepare?</td></tr>
+    <tr><td>Cost &amp; resource constraints</td><td>Deliverable within budget and timeline? Can AutoML or pre-trained open-source models cut cost?</td></tr>
+  </table>
+
+  <h3 class="subtitle">Scope definition — MVP first, avoid scope creep</h3>
+  <p>Practical example: a self-driving car project.</p>
+  <div class="two-col">
+    <div class="col-panel in">
+      <div class="ctag">✅ In scope (MVP)</div>
+      <ul>
+        <li>Highway driving only</li>
+        <li>Lane keeping on highways</li>
+        <li>Adaptive cruise control</li>
+        <li>Automatic lane changes in clear conditions</li>
+        <li>Clear daylight + good weather</li>
+      </ul>
+    </div>
+    <div class="col-panel out">
+      <div class="ctag">❌ Out of scope (future phases)</div>
+      <ul>
+        <li>Urban driving — traffic lights, pedestrians</li>
+        <li>Complex lighting &amp; weather — snow, rain, fog</li>
+        <li>Construction zones</li>
+        <li>Night-time driving</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Vision comes before feasibility, and feasibility comes before scope. You quantify why the project matters and how it ties to strategy first; only then do you check whether it's technically, organizationally, and financially achievable; only then do you draw a hard MVP line — what ships now versus what's explicitly deferred — because an undefined scope is how "highway lane-keeping" quietly turns into "full self-driving everywhere" and the project never ships.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Feasibility is a go/no-go gate, not a formality — a project that's organizationally infeasible (no ML engineer on staff) needs a hiring or consulting line item before it's greenlit, not a hopeful assumption.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Design the MVP's architecture to be extensible toward the out-of-scope items, even though you're not building them yet — retrofitting night-time or weather handling onto a highway-only architecture is far more expensive than anticipating the seam now.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Write the out-of-scope list down and get stakeholder sign-off on it explicitly — an unwritten "we'll get to that later" is exactly where scope creep enters through the back door.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 3 ============ -->
+<section class="block" id="t3">
+  <div class="kicker"><span class="num">03</span><span class="layer-tag">Measurement</span></div>
+  <h2 class="title">Success Metrics — 3 Levels</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Can a model with excellent accuracy still be a business failure? What would that look like?</li>
+      <li>Where would "response time" belong — model metrics, system metrics, or business metrics?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 3.1 — THREE LEVELS OF MEASUREMENT</span><span>each level answers a different question</span></div>
+    <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+      <rect x="180" y="10" width="340" height="66" rx="6" fill="#151b25" stroke="#c07bff" stroke-width="1.6"/>
+      <text x="350" y="36" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="14" font-weight="700">Business Metrics</text>
+      <text x="350" y="56" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">"Does it matter?"</text>
+
+      <rect x="180" y="96" width="340" height="66" rx="6" fill="#151b25" stroke="#ffb454" stroke-width="1.6"/>
+      <text x="350" y="122" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="14" font-weight="700">System Metrics</text>
+      <text x="350" y="142" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">"Does it run?"</text>
+
+      <rect x="180" y="182" width="340" height="66" rx="6" fill="#151b25" stroke="#3fb6ff" stroke-width="1.6"/>
+      <text x="350" y="208" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="14" font-weight="700">Model Metrics</text>
+      <text x="350" y="228" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">"Is it correct?"</text>
+    </svg>
+  </div>
+
+  <table>
+    <tr><th>Level</th><th>Measures</th><th>Examples</th></tr>
+    <tr><td>Model quality</td><td>What the model produces</td><td>Classification: accuracy, precision, recall, F1. LLMs: coherence, instruction adherence.</td></tr>
+    <tr><td>System quality</td><td>How well it runs in production</td><td>Latency, throughput, uptime, resource efficiency (CPU/GPU usage)</td></tr>
+    <tr><td>Business</td><td>Real-world impact</td><td>Productivity gains, cost savings, customer experience, revenue growth</td></tr>
+  </table>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>A model can be correct (model metrics), fast and reliable (system metrics), and still miss the point if it doesn't move a business number (business metrics). All three levels have to clear the bar together — optimizing one in isolation, like chasing accuracy at the cost of latency, can quietly sink the other two.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Report all three levels to leadership, not just model accuracy — a board that only hears "94% accuracy" has no way to judge whether the project is actually working in production or moving the business.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Assign an owner to each level — data science owns model metrics, engineering owns system metrics, the business sponsor owns business metrics — so no level quietly goes unmeasured.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 4 ============ -->
+<section class="block" id="t4">
+  <div class="kicker"><span class="num">04</span><span class="layer-tag">Goal Setting</span></div>
+  <h2 class="title">SMART Goals Framework</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>What's wrong with the goal "improve the chatbot's response time"? What's it missing?</li>
+    </ol>
+  </div>
+
+  <table>
+    <tr><th>Letter</th><th>Means</th><th>Example</th></tr>
+    <tr><td class="mono">S</td><td>Specific</td><td>Reduce customer service response time using an AI chatbot</td></tr>
+    <tr><td class="mono">M</td><td>Measurable</td><td>40% reduction, from 5 min to 3 min</td></tr>
+    <tr><td class="mono">A</td><td>Achievable</td><td>Based on industry benchmarks and current capacity</td></tr>
+    <tr><td class="mono">R</td><td>Relevant</td><td>Aligns with improving UX and reducing cost</td></tr>
+    <tr><td class="mono">T</td><td>Time-bound</td><td>Within 3 months, maintaining CSAT &gt; 85%</td></tr>
+  </table>
+
+  <div class="panel" style="background:var(--panel-2); border:1px solid var(--line); border-left:3px solid var(--green); border-radius:var(--radius); padding:16px 18px; margin:16px 0;">
+    <div style="font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--green); font-weight:700; margin-bottom:6px;">Complete SMART goal</div>
+    <p style="margin:0; font-style:italic;">"Reduce average customer service response time by 40% (from 5 minutes to 3 minutes) by deploying an AI-powered chatbot within 3 months, while maintaining customer satisfaction score above 85%."</p>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>A SMART goal isn't five separate checkboxes — it's one sentence that survives all five tests at once. "Improve response time" fails on measurable, achievable, and time-bound; the complete example bundles a number, a deadline, and a guardrail metric (CSAT) so success can't be redefined after the fact.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>The guardrail metric (CSAT &gt; 85%) is the part teams skip under deadline pressure — without it, a team can "hit" the speed goal by giving worse answers faster. Always pair the primary SMART metric with at least one guardrail.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 5 ============ -->
+<section class="block" id="t5">
+  <div class="kicker"><span class="num">05</span><span class="layer-tag">People</span></div>
+  <h2 class="title">Stakeholders &amp; Roles</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Which role bridges business and technical teams — and what happens to a project without one?</li>
+      <li>What's the difference between a Data Scientist and a Machine Learning Engineer, in one sentence?</li>
+    </ol>
+  </div>
+
+  <h3 class="subtitle">Category 1 — Business &amp; Product</h3>
+  <div class="card-grid">
+    <div class="card"><div class="n">01</div><h4>AI Product Manager</h4><p>Bridges technical &amp; business teams, defines vision &amp; roadmap, translates business problems into ML objectives, sets success metrics. <strong>AI initiatives fail without this role.</strong></p></div>
+    <div class="card"><div class="n">02</div><h4>Industry Domain Expert</h4><p>Provides domain knowledge, validates data relevance, guides feature engineering, explains outputs in business context. Without this, models can mislead or even harm.</p></div>
+    <div class="card"><div class="n">03</div><h4>Project Manager</h4><p>Coordinates all moving parts, tracks milestones &amp; deliverables, manages risk and budget, facilitates cross-functional communication.</p></div>
+  </div>
+
+  <h3 class="subtitle">Category 2 — Data Science &amp; AI</h3>
+  <div class="card-grid">
+    <div class="card"><div class="n">01</div><h4>AI Researcher</h4><p>Often PhD-level. Develops novel algorithms, publishes research, pushes the boundaries of AI theory. (e.g. "Attention Is All You Need.")</p></div>
+    <div class="card"><div class="n">02</div><h4>Data Scientist</h4><p>Analyzes data and builds models, uses statistical analysis, performs feature engineering, communicates insights. Turns raw data into business value.</p></div>
+    <div class="card"><div class="n">03</div><h4>ML Engineer</h4><p>Builds scalable ML pipelines, deploys to production, tunes for performance and scalability. Takes models from notebook to production.</p></div>
+    <div class="card"><div class="n">04</div><h4>Responsible AI &amp; Ethics Lead</h4><p>Audits for bias and discrimination, ensures fairness and explainability, enforces ethical practice. Prevents reputational damage.</p></div>
+    <div class="card"><div class="n">05</div><h4>UX Designer</h4><p>Designs intuitive interfaces, creates user journeys for AI outputs, builds trust and usability. If users can't interact with it, the AI is useless.</p></div>
+  </div>
+
+  <h3 class="subtitle">Category 3 — Development &amp; Ops</h3>
+  <div class="card-grid">
+    <div class="card"><div class="n">01</div><h4>Software Engineer</h4><p>Builds applications and APIs, connects AI models to user interfaces, ensures code quality and scalability. The best model is useless without integration.</p></div>
+    <div class="card"><div class="n">02</div><h4>Solution Architect</h4><p>Designs the technical blueprint, defines system architecture, chooses tools and platforms, ensures scalability and security. Poor architecture means a slow, expensive system.</p></div>
+    <div class="card"><div class="n">03</div><h4>MLOps Architect</h4><p>Automates deployment (CI/CD), monitors model performance, manages versioning and rollback, detects model drift. AI must run reliably in production.</p></div>
+  </div>
+
+  <h3 class="subtitle">Category 4 — Data Engineering</h3>
+  <div class="card-grid">
+    <div class="card"><div class="n">01</div><h4>Data Engineer</h4><p>Builds ETL pipelines, cleans and structures raw data, integrates data sources. No data means no AI — data is the fuel.</p></div>
+    <div class="card"><div class="n">02</div><h4>Data Architect</h4><p>Designs data infrastructure, defines data models and schema, governs access and retention. Without sound architecture, data becomes siloed, slow, or expensive.</p></div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>An AI project needs four distinct clusters of people — business/product, data science/AI, development/ops, and data engineering — and each has a role whose absence has a named, predictable failure mode: no AI PM means misaligned scope, no domain expert means misleading models, no MLOps means unreliable production, no data engineer means no fuel at all.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Headcount planning should map to these four categories explicitly — a team of five data scientists and zero data engineers or MLOps staff is not a smaller version of a full team, it's a team that structurally cannot reach production.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>When a role is missing (common in small teams — see the UnitedHealth case later), don't silently absorb its responsibilities into an adjacent role. Name the gap and either hire, consult, or explicitly de-scope what that missing role would have covered.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 6 ============ -->
+<section class="block" id="t6">
+  <div class="kicker"><span class="num">06</span><span class="layer-tag">Methodology</span></div>
+  <h2 class="title">Waterfall vs Agile</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Why would a methodology built for construction (Waterfall) struggle specifically with AI projects?</li>
+      <li>What does "iterative and incremental" actually buy you that "linear and sequential" doesn't?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 6.1 — WATERFALL: LINEAR &amp; SEQUENTIAL</span><span>testing happens last</span></div>
+    <svg viewBox="0 0 820 160" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="q2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="10" y="20" width="120" height="54" rx="5" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="70" y="52" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Requirements</text>
+      <line x1="130" y1="47" x2="152" y2="47" stroke="#3fb6ff" marker-end="url(#q2)"/>
+      <rect x="154" y="20" width="120" height="54" rx="5" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="214" y="52" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Design</text>
+      <line x1="274" y1="47" x2="296" y2="47" stroke="#3fb6ff" marker-end="url(#q2)"/>
+      <rect x="298" y="20" width="120" height="54" rx="5" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="358" y="52" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Implement</text>
+      <line x1="418" y1="47" x2="440" y2="47" stroke="#3fb6ff" marker-end="url(#q2)"/>
+      <rect x="442" y="20" width="120" height="54" rx="5" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="502" y="52" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Deployment</text>
+      <line x1="562" y1="47" x2="584" y2="47" stroke="#3fb6ff" marker-end="url(#q2)"/>
+      <rect x="586" y="20" width="110" height="54" rx="5" fill="#151b25" stroke="#ffb454"/>
+      <text x="641" y="52" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Testing</text>
+      <line x1="696" y1="47" x2="718" y2="47" stroke="#3fb6ff" marker-end="url(#q2)"/>
+      <rect x="720" y="20" width="100" height="54" rx="5" fill="#151b25" stroke="#ff6b6b"/>
+      <text x="770" y="52" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Maintenance</text>
+      <text x="415" y="112" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">rigid · minimal flexibility · stakeholders see the result only at the end</text>
+      <text x="415" y="132" text-anchor="middle" fill="#ff6b6b" font-family="JetBrains Mono" font-size="10">works poorly for AI: uncertainty, data-dependence, non-determinism</text>
+    </svg>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 6.2 — AGILE: ITERATIVE &amp; INCREMENTAL</span><span>working software every sprint</span></div>
+    <svg viewBox="0 0 820 220" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="q3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="30" y="15" width="120" height="44" rx="5" fill="#151b25" stroke="#212b3a"/><text x="90" y="41" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10">Story A</text>
+      <rect x="170" y="15" width="120" height="44" rx="5" fill="#151b25" stroke="#212b3a"/><text x="230" y="41" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10">Story B</text>
+      <rect x="310" y="15" width="120" height="44" rx="5" fill="#151b25" stroke="#212b3a"/><text x="370" y="41" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10">Story C</text>
+      <rect x="450" y="15" width="120" height="44" rx="5" fill="#151b25" stroke="#212b3a"/><text x="510" y="41" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10">Story D</text>
+      <rect x="590" y="15" width="120" height="44" rx="5" fill="#151b25" stroke="#212b3a"/><text x="650" y="41" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10">Story E</text>
+      <text x="30" y="88" fill="#7c8898" font-family="JetBrains Mono" font-size="10" letter-spacing="1">BACKLOG</text>
+      <line x1="370" y1="59" x2="370" y2="90" stroke="#3fb6ff" marker-end="url(#q3)"/>
+
+      <rect x="120" y="92" width="500" height="56" rx="6" fill="#151b25" stroke="#3fb6ff" stroke-width="1.4"/>
+      <text x="370" y="126" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">Sprint (1–4 weeks): Plan → Design → Develop → Test → Review</text>
+      <line x1="370" y1="148" x2="370" y2="170" stroke="#3fb6ff" marker-end="url(#q3)"/>
+
+      <rect x="170" y="172" width="400" height="42" rx="6" fill="#0e1420" stroke="#5fd9a0"/>
+      <text x="370" y="198" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Incremental delivery — working, tested functionality each sprint</text>
+    </svg>
+  </div>
+
+  <table>
+    <tr><th>Aspect</th><th>Waterfall</th><th>Agile</th></tr>
+    <tr><td>Approach</td><td>Linear &amp; sequential</td><td>Iterative &amp; incremental</td></tr>
+    <tr><td>Flexibility</td><td class="no">Inflexible — changes are hard</td><td class="yes">Highly flexible — changes accommodated</td></tr>
+    <tr><td>Phases</td><td>Distinct, completed once</td><td>Repeated each sprint</td></tr>
+    <tr><td>Customer involvement</td><td>Limited — mostly start/end</td><td>Continuous, regular feedback</td></tr>
+    <tr><td>Testing</td><td>After development completes</td><td>Ongoing throughout</td></tr>
+    <tr><td>Delivery</td><td>Single delivery at the end</td><td>Working product in increments</td></tr>
+    <tr><td>Risk management</td><td class="no">Higher — issues surface late</td><td class="yes">Lower — frequent reassessment</td></tr>
+    <tr><td>Team collaboration</td><td>Top-down, siloed</td><td>Cross-functional, daily stand-ups</td></tr>
+    <tr><td>Best for</td><td>Simple, well-defined (construction)</td><td>Complex, evolving (AI, startups)</td></tr>
+    <tr><td>Examples</td><td>Bridges, manufacturing, regulated builds</td><td>Software startups, AI/ML, mobile/web</td></tr>
+  </table>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Waterfall assumes you can fully specify the outcome up front — true for a bridge, false for a model whose accuracy you can't know until you've trained it. Agile's core advantage for AI isn't speed, it's that testing and stakeholder feedback happen continuously instead of at the very end, so a bad direction gets caught in week 2 instead of month 6. AI projects are exploratory by nature — Agile is almost always the better default.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>If a regulated business unit insists on Waterfall-style sign-offs, don't fight it head-on — layer Agile sprints inside Waterfall-style milestones (see the Hybrid framework next) rather than picking one pure methodology.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Non-determinism is the real argument against Waterfall for AI — a model may never reach a "finished" state the way a bridge does. Architecture needs to support continuous redeployment, not a single go-live event.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 7 ============ -->
+<section class="block" id="t7">
+  <div class="kicker"><span class="num">07</span><span class="layer-tag">Frameworks</span></div>
+  <h2 class="title">CRISP-DM, Agile &amp; Hybrid Frameworks</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>CRISP-DM comes from data mining, Agile comes from software. What problem does combining them into "Hybrid" actually solve?</li>
+      <li>Which framework would you guess is most common in regulated industries like banking — and why?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 7.1 — CRISP-DM: SIX STRUCTURED PHASES</span><span>cross-industry standard process for data mining</span></div>
+    <svg viewBox="0 0 820 180" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="q4" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="20" y="20" width="230" height="56" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="135" y="53" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Business Understanding</text>
+      <line x1="250" y1="48" x2="285" y2="48" stroke="#3fb6ff" marker-end="url(#q4)"/>
+      <rect x="290" y="20" width="230" height="56" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="405" y="53" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Data Understanding</text>
+      <line x1="520" y1="48" x2="555" y2="48" stroke="#3fb6ff" marker-end="url(#q4)"/>
+      <rect x="560" y="20" width="230" height="56" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="675" y="53" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Data Preparation</text>
+
+      <line x1="675" y1="76" x2="675" y2="90" stroke="#3fb6ff"/>
+      <line x1="675" y1="90" x2="135" y2="90" stroke="#3fb6ff"/>
+      <line x1="135" y1="90" x2="135" y2="104" stroke="#3fb6ff" marker-end="url(#q4)"/>
+
+      <rect x="20" y="106" width="230" height="56" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="135" y="139" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Modeling</text>
+      <line x1="250" y1="134" x2="285" y2="134" stroke="#3fb6ff" marker-end="url(#q4)"/>
+      <rect x="290" y="106" width="230" height="56" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="405" y="139" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Evaluation</text>
+      <line x1="520" y1="134" x2="555" y2="134" stroke="#3fb6ff" marker-end="url(#q4)"/>
+      <rect x="560" y="106" width="230" height="56" rx="6" fill="#151b25" stroke="#5fd9a0"/>
+      <text x="675" y="139" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Deployment</text>
+    </svg>
+  </div>
+  <p><strong>CRISP-DM:</strong> ✅ structured, phase-based, heavy upfront planning. ❌ slow feedback loops, stakeholders only at key milestones. Best for fixed-scope projects.</p>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 7.2 — AGILE: SUCCESSIVE SPRINTS</span><span>plan → design → develop → test → review, repeated</span></div>
+    <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="q5" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="20" y="10" width="780" height="50" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="410" y="40" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Sprint 1 — Plan → Design → Develop → Test → Review</text>
+      <line x1="410" y1="60" x2="410" y2="80" stroke="#3fb6ff" marker-end="url(#q5)"/>
+      <rect x="20" y="82" width="780" height="50" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="410" y="112" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Sprint 2 — Plan → Design → Develop → Test → Review</text>
+      <line x1="410" y1="132" x2="410" y2="152" stroke="#3fb6ff" marker-end="url(#q5)"/>
+      <rect x="20" y="154" width="780" height="42" rx="6" fill="#0e1420" stroke="#5fd9a0"/>
+      <text x="410" y="180" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Sprint N — same rhythm, continuously</text>
+    </svg>
+  </div>
+  <p><strong>Agile:</strong> ✅ fast feedback, frequent collaboration (daily stand-ups), rapid prototyping. ❌ can lack documentation. Best for research, startups, evolving projects.</p>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 7.3 — HYBRID: CRISP-DM PHASES + AGILE SPRINTS INSIDE</span><span>governance and adaptability together</span></div>
+    <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="q6" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="180" y="10" width="460" height="48" rx="6" fill="#151b25" stroke="#c07bff" stroke-width="1.4"/>
+      <text x="410" y="39" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">CRISP-DM structured phases — clear milestones</text>
+      <line x1="410" y1="58" x2="410" y2="80" stroke="#3fb6ff" marker-end="url(#q6)"/>
+
+      <rect x="60" y="82" width="700" height="100" rx="6" fill="#0e1420" stroke="#3fb6ff"/>
+      <text x="410" y="102" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10" letter-spacing="1">AGILE SPRINTS WITHIN EACH PHASE</text>
+      <rect x="90" y="116" width="200" height="50" rx="5" fill="#151b25" stroke="#212b3a"/>
+      <text x="190" y="138" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Sprint 1</text>
+      <text x="190" y="154" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Data explore</text>
+      <rect x="310" y="116" width="200" height="50" rx="5" fill="#151b25" stroke="#212b3a"/>
+      <text x="410" y="138" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Sprint 2</text>
+      <text x="410" y="154" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Feature eng.</text>
+      <rect x="530" y="116" width="200" height="50" rx="5" fill="#151b25" stroke="#212b3a"/>
+      <text x="630" y="138" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Sprint 3</text>
+      <text x="630" y="154" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Model iteration</text>
+    </svg>
+  </div>
+  <p><strong>Hybrid:</strong> ✅ best of both — governance + adaptability, structured milestones + Agile flexibility, medium-fast feedback. Best for enterprise AI and regulated industries.</p>
+
+  <table>
+    <tr><th>Aspect</th><th>CRISP-DM</th><th>Agile</th><th>Hybrid</th></tr>
+    <tr><td>Origin</td><td>Data science methodology</td><td>Software development</td><td>Blend of both</td></tr>
+    <tr><td>Structure</td><td>Linear &amp; phase-based</td><td>Iterative &amp; cyclical</td><td>Structured milestones + Agile sprints</td></tr>
+    <tr><td>Focus</td><td>Comprehensive project phases</td><td>Rapid experimentation &amp; delivery</td><td>Aligning business goals with execution</td></tr>
+    <tr><td>Planning</td><td>Heavy upfront</td><td>Light + sprints</td><td>Initial roadmap + flexible sprints</td></tr>
+    <tr><td>Team interaction</td><td>Key milestones</td><td>Daily stand-ups</td><td>Sprint reviews + milestone check-ins</td></tr>
+    <tr><td>Feedback speed</td><td class="warn">Slow</td><td class="yes">Fast</td><td>Medium-fast</td></tr>
+    <tr><td>Best for</td><td>Structured, fixed-scope</td><td>Rapid prototyping &amp; tuning</td><td>Enterprise AI, regulated industries</td></tr>
+    <tr><td>Risk</td><td>Misalignment with real-time changes</td><td>Lack of structure/documentation</td><td>Combines governance &amp; adaptability</td></tr>
+  </table>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>CRISP-DM gives structure but slow feedback; Agile gives speed but weak documentation; Hybrid takes CRISP-DM's phase gates as the outer skeleton and runs Agile sprints inside each phase — which is why it dominates in regulated, enterprise settings that need both an audit trail and the ability to course-correct quickly.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Choose the framework based on your compliance burden, not team preference — a bank's model risk management office will often mandate CRISP-DM-style phase gates regardless of how the engineering team wants to work; Hybrid is usually the pragmatic answer.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>In Hybrid, the milestone reviews are where you renegotiate scope with executives — treat them as real checkpoints, not rubber-stamp meetings, or you lose the one structural advantage Hybrid has over pure Agile.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 8 ============ -->
+<section class="block" id="t8">
+  <div class="kicker"><span class="num">08</span><span class="layer-tag">Scale</span></div>
+  <h2 class="title">SAFe — Scaled Agile Framework</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Agile works well for a single team. What specifically breaks when you have 10 Agile teams working on the same product?</li>
+    </ol>
+  </div>
+
+  <p>SAFe is a structured methodology for scaling Agile, Lean, and DevOps practices across large enterprises.</p>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 8.1 — AGILE RELEASE TRAIN (ART)</span><span>50–125 people, cross-functional</span></div>
+    <svg viewBox="0 0 820 220" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="q7" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="20" y="10" width="780" height="60" rx="6" fill="#151b25" stroke="#c07bff" stroke-width="1.4"/>
+      <text x="410" y="34" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="700">Agile Release Train (ART)</text>
+      <text x="410" y="54" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">Agile Team 1 · Agile Team 2 · Agile Team 3 · Systems Eng. · Software Eng.</text>
+      <line x1="410" y1="70" x2="410" y2="92" stroke="#3fb6ff" marker-end="url(#q7)"/>
+
+      <rect x="180" y="94" width="460" height="46" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="410" y="122" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11.5">ART Backlog — Features &amp; Stories</text>
+      <line x1="410" y1="140" x2="410" y2="162" stroke="#3fb6ff" marker-end="url(#q7)"/>
+
+      <rect x="180" y="164" width="460" height="46" rx="6" fill="#0e1420" stroke="#5fd9a0"/>
+      <text x="410" y="192" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11.5">Continuous Iterations &amp; Delivery</text>
+    </svg>
+  </div>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">01</div><h4>Alignment</h4><p>All teams work toward common strategic goals, breaking down silos and forming the ART.</p></div>
+    <div class="card"><div class="n">02</div><h4>Faster time to market</h4><p>Synchronized planning, regular delivery of value increments, quick customer feedback loops.</p></div>
+    <div class="card"><div class="n">03</div><h4>Increased productivity</h4><p>Streamlined processes, improved team efficiency, transparency in work progress.</p></div>
+    <div class="card"><div class="n">04</div><h4>Continuous improvement</h4><p>Improvement with every iteration, enhanced collaboration, better risk management.</p></div>
+  </div>
+
+  <p><strong>Core values:</strong> Transparency · Alignment · Relentless Improvement · Respect for People</p>
+  <p><strong>Companies using SAFe:</strong> Spotify, Intel, JP Morgan, and others operating multiple Agile teams at enterprise scale.</p>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>SAFe doesn't replace Agile — it coordinates many Agile teams (an ART of 50-125 people) around one shared backlog and delivery cadence, so ten teams moving independently don't drift into ten incompatible directions. It trades some of small-team Agile's speed for enterprise-scale alignment.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>SAFe is overhead you shouldn't adopt until you actually have the coordination problem it solves — a single 8-person AI team doesn't need an ART; introducing SAFe early just adds ceremony without the scale that justifies it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 9 ============ -->
+<section class="block" id="t9">
+  <div class="kicker"><span class="num">09</span><span class="layer-tag">Risk</span></div>
+  <h2 class="title">Risks &amp; Mitigation</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Of the five risk categories you're about to see, which do you think is most often underestimated at project kickoff?</li>
+    </ol>
+  </div>
+
+  <div class="risk-card">
+    <div class="rtitle">1. Data risks</div>
+    <div class="risk-cols">
+      <div><div class="idtag">⚠ Identify</div><ul><li>Poor quality data</li><li>Insufficient quantity</li><li>Inherent biases</li><li>Privacy concerns / PII exposure</li></ul></div>
+      <div><div class="mtag">🛡 Mitigate</div><ul><li>Thorough data assessment early</li><li>Implement data governance</li><li>Ethical data sourcing</li><li>Data augmentation strategies</li><li>Anonymize personal information</li></ul></div>
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <div class="rtitle">2. Technical feasibility risks</div>
+    <div class="risk-cols">
+      <div><div class="idtag">⚠ Identify</div><ul><li>Model may not achieve required accuracy</li><li>Very high computational cost</li><li>Complex integration challenges</li></ul></div>
+      <div><div class="mtag">🛡 Mitigate</div><ul><li>Start with a Proof of Concept</li><li>Set realistic expectations</li><li>Explore multiple algorithms</li><li>Plan for scalability from day 1</li></ul></div>
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <div class="rtitle">3. Stakeholder alignment risks</div>
+    <div class="risk-cols">
+      <div><div class="idtag">⚠ Identify</div><ul><li>Misunderstanding of the business problem</li><li>Changing expectations</li><li>Lack of buy-in from teams/leadership</li></ul></div>
+      <div><div class="mtag">🛡 Mitigate</div><ul><li>Continuous communication</li><li>Involve stakeholders early and often</li><li>Clearly define success metrics</li><li>Ensure executive sponsorship</li></ul></div>
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <div class="rtitle">4. Operational &amp; deployment risks</div>
+    <div class="risk-cols">
+      <div><div class="idtag">⚠ Identify</div><ul><li>Latency issues</li><li>Scalability problems</li><li>Model drift post-deployment</li><li>Security vulnerabilities</li></ul></div>
+      <div><div class="mtag">🛡 Mitigate</div><ul><li>Implement MLOps early</li><li>Design for production from day 1</li><li>Plan for monitoring &amp; retraining</li><li>Regular security audits</li></ul></div>
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <div class="rtitle">5. Ethical &amp; compliance risks</div>
+    <div class="risk-cols">
+      <div><div class="idtag">⚠ Identify</div><ul><li>Lack of fairness / bias in the model</li><li>Lack of transparency</li><li>Regulatory non-compliance</li></ul></div>
+      <div><div class="mtag">🛡 Mitigate</div><ul><li>Establish ethical guidelines</li><li>Conduct regular bias audits</li><li>Ensure explainability where needed</li><li>Consult legal &amp; compliance teams</li></ul></div>
+    </div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>AI project risk isn't one bucket — it spans data, technical feasibility, stakeholder alignment, operations, and ethics/compliance, and each has its own mitigation playbook. Most of these mitigations share a pattern: do the hard, unglamorous work early (governance, PoCs, stakeholder involvement, MLOps, audits) rather than discovering the risk after launch.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Stakeholder alignment risk is the one that doesn't show up in a technical risk register but sinks the most projects — track it with the same rigor (owner, mitigation plan, review cadence) you'd give a technical risk.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>"Design for production from day 1" is the single highest-leverage line in this list — retrofitting monitoring, drift detection, and security onto a system built only for a notebook demo is far more expensive than building it in from the start.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 10 ============ -->
+<section class="block" id="t10">
+  <div class="kicker"><span class="num">10</span><span class="layer-tag">Success Factors</span></div>
+  <h2 class="title">Ingredients for Success</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Of Technology, People, and Alignment — which one, if missing, is hardest to fix mid-project?</li>
+    </ol>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="n">Technology</div>
+      <h4>Build it right</h4>
+      <ul><li>Data quality</li><li>MLOps pipeline</li><li>Scalable infrastructure</li><li>Tools selection</li></ul>
+    </div>
+    <div class="card">
+      <div class="n">People</div>
+      <h4>Staff it right</h4>
+      <ul><li>Skilled team</li><li>Cross-functional</li><li>Domain experts</li><li>Product managers</li></ul>
+    </div>
+    <div class="card">
+      <div class="n">Alignment</div>
+      <h4>Point it right</h4>
+      <ul><li>Clear vision</li><li>Executive buy-in</li><li>Stakeholder alignment</li><li>Shared goals</li></ul>
+    </div>
+  </div>
+
+  <ul>
+    <li>✅ <strong>Clear business vision &amp; value alignment</strong> — why are we doing this and why does it matter?</li>
+    <li>✅ <strong>Data quality, availability &amp; governance</strong> — data is the lifeblood, no compromise on strategy</li>
+    <li>✅ <strong>Realistic expectations &amp; multi-disciplinary team</strong> — right skills in the right roles</li>
+    <li>✅ <strong>Effective stakeholder management &amp; communication</strong> — keep everyone engaged and informed</li>
+    <li>✅ <strong>Robust MLOps &amp; deployment strategy</strong> — move from prototype to production reliably</li>
+    <li>✅ <strong>Ethical considerations &amp; responsible AI</strong> — build AI that is good for the world</li>
+  </ul>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Success rests on three legs — Technology, People, Alignment — and the checklist underneath them (vision, data governance, team composition, communication, MLOps, ethics) is really just those three legs made concrete and checkable at each project review.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Alignment is the leg that's hardest to repair mid-flight — a technology gap can be patched with a vendor or a sprint, a people gap can be patched with a hire, but a stakeholder who was never truly bought in tends to surface as friction at the worst possible moment, right before launch.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 11 ============ -->
+<section class="block" id="t11">
+  <div class="kicker"><span class="num">11</span><span class="layer-tag">Budgeting</span></div>
+  <h2 class="title">Budgeting &amp; the GPT-4 Case Study</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>For a typical mid-sized AI project, which cost category do you think dominates — infrastructure, talent, or data?</li>
+      <li>Training a frontier model is a one-time cost. What's the ongoing cost called, and why might it matter more over time?</li>
+    </ol>
+  </div>
+
+  <table>
+    <tr><th>Category</th><th>Includes</th><th>Typical range</th></tr>
+    <tr><td>Infrastructure &amp; compute</td><td>Cloud platforms, GPUs (A100/H100), storage &amp; bandwidth</td><td class="mono">$4K – $30K (initial setup)</td></tr>
+    <tr><td>Human resources</td><td>Data scientists, ML engineers, AI PMs, PMs, MLOps engineers</td><td class="mono">$140K – $500K+ per role / yr</td></tr>
+    <tr><td>Software &amp; tools</td><td>TensorFlow/PyTorch, MLflow/Kubeflow, annotation &amp; dev tools</td><td class="mono">$500 – $7K fixed + $150–$1.2K/mo</td></tr>
+    <tr><td>Data acquisition &amp; mgmt</td><td>Licensed datasets, labeling, storage, security</td><td class="mono">$1.5K – $45K fixed + $600–$4.5K/mo</td></tr>
+    <tr><td>Operations &amp; maintenance</td><td>Continuous intake, retraining, testing, monitoring</td><td class="mono">$600 – $4.8K/mo</td></tr>
+    <tr><td>Hidden / unexpected</td><td>Advanced feature eng., legal/ethics review, compliance, upskilling</td><td class="mono">$3K – $20K+</td></tr>
+  </table>
+
+  <div class="panel" style="background:var(--panel-2); border:1px solid var(--line); border-left:3px solid var(--amber); border-radius:var(--radius); padding:16px 18px; margin:16px 0;">
+    <div style="font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--amber); font-weight:700; margin-bottom:6px;">Total project range</div>
+    <p style="margin:0; font-size:16px; color:var(--ink-bright); font-weight:600;">$15,000 – $450,000+ for a medium-sized AI project</p>
+    <p style="margin:6px 0 0 0; font-size:13px;">LLM projects like GPT-4 cost $100M+.</p>
+  </div>
+
+  <h3 class="subtitle">Case study — cost of training GPT-4 (~$100M, per Sam Altman)</h3>
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 11.1 — WHERE THE ~$100M WENT</span><span>approximate breakdown</span></div>
+    <svg viewBox="0 0 820 260" xmlns="http://www.w3.org/2000/svg">
+      <line x1="60" y1="10" x2="60" y2="220" stroke="#212b3a"/>
+      <line x1="60" y1="220" x2="800" y2="220" stroke="#212b3a"/>
+      <rect x="100" y="132" width="90" height="88" fill="#3fb6ff"/>
+      <text x="145" y="122" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">$40M</text>
+      <text x="145" y="236" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">GPU hardware</text>
+
+      <rect x="230" y="90" width="90" height="130" fill="#ffb454"/>
+      <text x="275" y="80" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">$78M</text>
+      <text x="275" y="236" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Compute &amp; training</text>
+
+      <rect x="360" y="140" width="90" height="80" fill="#c07bff"/>
+      <text x="405" y="130" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">30-40%</text>
+      <text x="405" y="236" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Staff / talent</text>
+
+      <rect x="490" y="165" width="90" height="55" fill="#5fd9a0"/>
+      <text x="535" y="155" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">15-22%</text>
+      <text x="535" y="236" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Interconnect/servers</text>
+
+      <rect x="620" y="180" width="90" height="40" fill="#ff6b6b"/>
+      <text x="665" y="170" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">9-13%</text>
+      <text x="665" y="236" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Energy</text>
+    </svg>
+  </div>
+  <p>Inference (running ChatGPT) costs roughly <strong>$700,000/day</strong> for OpenAI — an ongoing operational cost distinct from the one-time training cost.</p>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Budgeting an AI project means pricing six categories, not just compute: infrastructure, people, tools, data, ongoing ops, and a hidden-costs buffer — a typical project lands between $15K and $450K+, dwarfed entirely by frontier-model training (~$100M) and its ongoing inference bill (~$700K/day). Training is a one-time cost; inference is forever, and at scale it can exceed the training cost within months.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Budget inference as an operating expense line, not a footnote to the training capex — for any product with real usage, ongoing inference cost typically dwarfs the one-time training or fine-tuning cost within the first year.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Reserve 10-15% of budget explicitly for the "hidden costs" category (legal, compliance, upskilling) — projects that don't plan for it usually eat that cost out of the operations budget instead, which then looks like a maintenance overrun.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 12 ============ -->
+<section class="block" id="t12">
+  <div class="kicker"><span class="num">12</span><span class="layer-tag">Applied Practice</span></div>
+  <h2 class="title">Applied Practice — Three Scenarios</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>A team of 2 data analysts + 1 engineer wants to ship a fraud-detection MVP in 6 months. Feasible or not — what's your gut call before reading the case?</li>
+    </ol>
+  </div>
+
+  <h3 class="subtitle">Scenario A — UnitedHealth Group: fraud detection AI</h3>
+  <p><strong>Background:</strong> 10M+ claims/year, focus on dental &amp; outpatient claims fraud, team of 2 data analysts + 1 software engineer plus an AI consultant, stack of BigQuery + Google Cloud AutoML + Vertex AI, 6-month timeline, structured data (procedure type, date, amount, provider).</p>
+
+  <table>
+    <tr><th>Dimension</th><th>Verdict</th><th>Why</th></tr>
+    <tr><td>Technical feasibility</td><td class="yes">Yes ✅</td><td>Cloud + BigQuery already in use, AutoML needs no custom code, structured data available</td></tr>
+    <tr><td>Organizational readiness</td><td class="warn">Partial ⚠️</td><td>Team is small; missing PM, data engineer, healthcare domain expert, ML engineer — consultant fills the gap</td></tr>
+    <tr><td>Data availability</td><td class="yes">Yes ✅</td><td>Historical, structured, labeled (fraud vs legitimate), clean, in a modern cloud system</td></tr>
+    <tr><td>Resources</td><td class="yes">Yes ✅</td><td>Existing cloud infra, AutoML reduces dev cost, consultant fills the skills gap</td></tr>
+  </table>
+
+  <div class="two-col">
+    <div class="col-panel in">
+      <div class="ctag">✅ In scope (6-month MVP)</div>
+      <ul>
+        <li>Dental &amp; outpatient claims only</li>
+        <li>Structured tabular data only</li>
+        <li>AutoML — no custom code</li>
+        <li>Flag suspicious claims for human review</li>
+        <li>Weekly batch predictions</li>
+        <li>KPIs: false positive rate &lt; 10%, recall &gt; 90%</li>
+      </ul>
+    </div>
+    <div class="col-panel out">
+      <div class="ctag">❌ Out of scope (future)</div>
+      <ul>
+        <li>Surgical or complex claims</li>
+        <li>Unstructured data (PDFs, scans)</li>
+        <li>Fully autonomous approvals</li>
+        <li>Real-time / streaming scoring</li>
+        <li>Custom model development</li>
+        <li>External data source integration</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="subtitle">Scenario B — Bank loan default prediction: SMART goals across 3 levels</h3>
+  <table>
+    <tr><th>Level</th><th>Goal</th></tr>
+    <tr><td>Model — Accuracy</td><td>Achieve at least 85% accuracy predicting missed payments on the test set within 3 months, via cross-validation and hyperparameter tuning.</td></tr>
+    <tr><td>Model — False positives</td><td>Keep incorrect warnings under 10% during the 3-month pilot so customer service isn't overwhelmed.</td></tr>
+    <tr><td>Model — Recall</td><td>Identify at least 90% of truly risky customers by end of Q2 (recall ≥ 90%) to minimize missed risk.</td></tr>
+    <tr><td>System — Response time</td><td>API response time under 2 seconds for 95% of requests by system launch.</td></tr>
+    <tr><td>System — Uptime</td><td>99.5% uptime during business hours in the first 60 days post-deployment.</td></tr>
+    <tr><td>System — Scalability</td><td>Support 1,000 predictions/hour without degradation by end of month 1.</td></tr>
+    <tr><td>Business — Missed payments</td><td>Reduce missed loan payments by 12% within 3 months of deployment.</td></tr>
+    <tr><td>Business — Outreach</td><td>Increase early outreach calls by 25% in month 1, to proactively help at-risk customers.</td></tr>
+    <tr><td>Business — Cost savings</td><td>Achieve a 10% reduction in collection costs within 6 months via early detection.</td></tr>
+  </table>
+
+  <h3 class="subtitle">Scenario C — Customer support chatbot: role assignment</h3>
+  <table>
+    <tr><th>Task</th><th>Correct role</th></tr>
+    <tr><td>Design overall AI vision, align with business goals</td><td>AI Product Manager</td></tr>
+    <tr><td>Design &amp; train the chatbot's NLP model</td><td>Data Scientist / AI Researcher</td></tr>
+    <tr><td>Validate customer complaint categories with examples</td><td>Industry Domain Expert</td></tr>
+    <tr><td>Set up cloud infrastructure for storage/processing</td><td>Solution Architect</td></tr>
+    <tr><td>Monitor chatbot accuracy &amp; response time in production</td><td>MLOps Architect</td></tr>
+    <tr><td>Ensure fairness, ethics, bias mitigation</td><td>Responsible AI &amp; Ethics Lead</td></tr>
+    <tr><td>Connect chatbot to the CRM system</td><td>Software Engineer</td></tr>
+    <tr><td>Design how users interact with the chatbot</td><td>UX Designer</td></tr>
+    <tr><td>Coordinate timeline, sprints, risk mitigation</td><td>Project Manager</td></tr>
+  </table>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>All three earlier frameworks converge in these scenarios: feasibility assessment and MVP scoping (UnitedHealth), SMART goals across all three metric levels (bank loan), and the stakeholder role map (chatbot) — this is what "Step 1 done properly" looks like applied to real, resource-constrained situations, not idealized ones.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>UnitedHealth's "partial" organizational readiness is the realistic case, not the exception — most teams start understaffed against the full role list from Topic 5. The AI consultant is doing double duty covering multiple missing roles; know exactly which ones before you rely on that arrangement long-term.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Notice the bank loan goals are phased across the timeline (Q1 accuracy, month 1 scalability, month 6 cost savings) rather than all due at once — sequencing SMART goals this way keeps every review checkpoint meaningful instead of one big pass/fail at the end.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 13 : reference ============ -->
+<section class="block" id="t13">
+  <div class="kicker"><span class="layer-tag">Reference</span></div>
+  <h2 class="title">Module Summary &amp; Glossary</h2>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">01</div><h4>Vision &amp; scope</h4><p>Start with clear business value, define a focused MVP to avoid scope creep, ask "why this project?" before investing.</p></div>
+    <div class="card"><div class="n">02</div><h4>SMART goals, 3 levels</h4><p>Model: accuracy, precision, recall, F1. System: latency, uptime, throughput. Business: cost savings, revenue, efficiency.</p></div>
+    <div class="card"><div class="n">03</div><h4>Key roles</h4><p>AI Product Manager (alignment), Data Scientists (models), ML Engineers (productionization), MLOps (monitoring), Domain Experts (context).</p></div>
+    <div class="card"><div class="n">04</div><h4>Management frameworks</h4><p>CRISP-DM: structured phases. Agile: iterative, fast feedback. Hybrid: best of both for enterprise AI. SAFe: scale Agile across large orgs.</p></div>
+    <div class="card"><div class="n">05</div><h4>Budgeting</h4><p>Typical project: $15K–$450K+. LLM training (GPT-4): $100M+. Inference: $700K/day for ChatGPT. Plan infra, talent, tools, data.</p></div>
+    <div class="card"><div class="n">06</div><h4>Risk management</h4><p>Data (quality, bias, privacy), Technical (feasibility, accuracy, scale), Alignment (buy-in, expectations), Operational (latency, drift, security), Ethical (fairness, transparency, compliance).</p></div>
+  </div>
+
+  <h3 class="subtitle">Glossary</h3>
+  <table>
+    <tr><th>Term</th><th>Definition</th></tr>
+    <tr><td class="mono">MVP</td><td>Minimum Viable Product — core features only</td></tr>
+    <tr><td class="mono">Scope creep</td><td>Project expands beyond the original plan</td></tr>
+    <tr><td class="mono">North Star</td><td>Ultimate measure of success — the guiding goal</td></tr>
+    <tr><td class="mono">ROI</td><td>Return on Investment</td></tr>
+    <tr><td class="mono">KPI</td><td>Key Performance Indicator</td></tr>
+    <tr><td class="mono">SMART</td><td>Specific, Measurable, Achievable, Relevant, Time-bound</td></tr>
+    <tr><td class="mono">ART</td><td>Agile Release Train (50–125 people)</td></tr>
+    <tr><td class="mono">SAFe</td><td>Scaled Agile Framework</td></tr>
+    <tr><td class="mono">CRISP-DM</td><td>Cross-Industry Standard Process for Data Mining</td></tr>
+    <tr><td class="mono">ETL</td><td>Extract, Transform, Load</td></tr>
+    <tr><td class="mono">CI/CD</td><td>Continuous Integration / Continuous Delivery</td></tr>
+    <tr><td class="mono">Model drift</td><td>Model performance degrades over time</td></tr>
+    <tr><td class="mono">Inference</td><td>Using a trained model to make predictions</td></tr>
+    <tr><td class="mono">PoC</td><td>Proof of Concept — small-scale test</td></tr>
+  </table>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ The one line to remember</div>
+      <p>"The model is not the product — the solution is." Success comes from proper planning, the right people, and clear alignment — not from a single accuracy number.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ACTIVE RECALL ============ -->
+<section class="block" id="recall">
+  <div class="kicker"><span class="layer-tag">Active Recall</span></div>
+  <h2 class="title">Test yourself — deep thought questions</h2>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">If a model achieves 99% accuracy but takes 5 seconds to respond, is it better than a 95%-accurate model that responds in 100ms? How do you decide?</div>
+    <div class="ra">It depends entirely on the use case's latency budget and error tolerance: a fraud-review queue can tolerate 5 seconds because a human reviews the flag anyway, while a live chat or an autocomplete feature cannot — users will abandon it long before 5 seconds. The right way to decide is to set the system-level SLA (latency, uptime) as a hard constraint up front, then optimize model accuracy within that budget, rather than picking the "best" model on accuracy alone and hoping latency works out.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">In the UnitedHealth case, the team has only 2 data analysts and 1 software engineer. Is the 6-month MVP feasible? What additional support is needed?</div>
+    <div class="ra">It's feasible specifically because the scope was deliberately narrowed to match the team's capacity — structured data only, AutoML instead of custom modeling, human-in-the-loop review instead of full automation — plus an AI consultant supplementing the missing roles (PM, data engineer, domain expert, ML engineer). Without that scope discipline and the consultant, the same team attempting a broader, custom-modeled, real-time system would not be feasible in 6 months.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">CRISP-DM has structured phases, Agile has sprints, Hybrid combines both. Which would you recommend for a highly regulated industry like healthcare or finance, and why?</div>
+    <div class="ra">Hybrid is usually the right default for regulated industries: the CRISP-DM-style phase gates give compliance and risk teams the audit trail and formal sign-off points they require, while the Agile sprints nested inside each phase let the team course-correct on model performance and stakeholder feedback without waiting for the next full phase gate. Pure CRISP-DM is often too slow to adapt to data reality; pure Agile often lacks the documentation trail regulators expect.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">If you have unlimited budget but limited talent, would you build or buy AI solutions? What are the trade-offs?</div>
+    <div class="ra">With genuinely limited talent, buying (pre-trained models, AutoML, vendor platforms) is usually the pragmatic choice regardless of budget, because the bottleneck isn't money — it's the people needed to build, validate, and operate a custom system safely. The trade-off is control and differentiation: bought solutions are faster to deploy and lower-risk operationally, but they rarely provide a defensible competitive advantage and can create vendor lock-in that unlimited budget can't fully offset.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">How do you measure the ROI of an AI project that saves time but doesn't directly generate revenue?</div>
+    <div class="ra">Convert the time savings into a cost-avoidance figure — hours saved × fully-loaded labor cost — and treat that as the return, the same way you'd value any efficiency project. The subtlety is being honest about whether the saved time actually gets redeployed to other value-generating work or just becomes slack; ROI claims for efficiency-only AI projects should specify which of those two outcomes is actually expected, since only the former is real business value.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">When defining scope, how do you decide what goes into the MVP vs. future phases — especially if stakeholders want it all?</div>
+    <div class="ra">Anchor the conversation in the feasibility assessment and the SMART goal's timeline, not in stakeholder preference: anything that can't be delivered with acceptable risk inside the agreed timeline and budget goes into a future phase, full stop, and that list gets written down and signed off (as in the self-driving car example). The self-driving car MVP — highway-only, daylight, good weather — shows the pattern: pick the slice that's both technically achievable and still delivers real business value on its own.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">In SAFe, 50-125 people work in an Agile Release Train. How do you ensure alignment across all teams?</div>
+    <div class="ra">Through a shared ART backlog and synchronized planning cadence rather than through top-down control — every team pulls from the same prioritized feature list and delivers on the same iteration cadence, so their outputs stay compatible even though each team works semi-independently. The core values (transparency, alignment, relentless improvement, respect for people) are the cultural glue that keeps that structural mechanism from becoming just bureaucracy.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">OpenAI spends roughly $700,000/day on inference. How would you optimize this cost while maintaining user experience?</div>
+    <div class="ra">The standard levers are model-side (distillation or smaller models for simpler queries, quantization, caching common responses) and routing-side (a cheap model handles easy requests, an expensive model only handles genuinely hard ones — a "model cascade"). The trade-off to watch is that aggressive cost optimization can silently degrade quality on the queries that matter most, so any optimization needs the same system + model quality metrics from Topic 3 tracked alongside the cost savings, not cost tracked in isolation.</div>
+  </div>
+
+</section>
+
+<footer>ARCHITECTS LAB — Study Note 023 — AI Project Management &amp; Inception — prime, learn, recap, and view it from every seat at the table<br><br>Source: <a href="https://www.udemy.com/course/ai-project-lifecycle-mastery-strategy-to-deployment/" target="_blank" rel="noopener" style="color:var(--blueprint);">AI Project Lifecycle Mastery: Strategy to Deployment — Udemy</a></footer>
+
+</body>
+</html>
