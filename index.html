@@ -442,6 +442,124 @@
       white-space: nowrap;
     }
 
+    /* ── Phase progress tracker (40 / 30 / 30) ───── */
+    .phase-track {
+      display: flex;
+      gap: 4px;
+      margin: 0.9rem 0 0.6rem;
+      height: 10px;
+    }
+
+    .phase-seg {
+      position: relative;
+      height: 100%;
+      border-radius: 5px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--seg-border, rgba(255,255,255,0.1));
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .phase-seg:hover { border-color: var(--seg-color); box-shadow: 0 0 10px var(--seg-glow); }
+
+    .phase-fill {
+      position: absolute; inset: 0 auto 0 0;
+      width: 0%;
+      background: linear-gradient(90deg, var(--seg-color), var(--seg-color-light, var(--seg-color)));
+      box-shadow: 0 0 8px var(--seg-glow);
+      transition: width 0.35s ease;
+    }
+
+    .phase-info {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem 1rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .phase-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .chip-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px currentColor;
+    }
+
+    .phase-pct-label { color: var(--text-muted); }
+
+    .phase-overall {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      color: var(--text-dim);
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+    }
+
+    .phase-overall b { color: var(--text); }
+
+    /* ── Phase legend chip extras (counts / done) ─ */
+    .phase-chip .phase-count { color: var(--text-muted); }
+    .phase-chip .phase-done  { color: var(--text); font-weight: 600; }
+
+    /* ── Per-note phase box-coding ────────────────── */
+    .note-phase-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-left: 0.4rem;
+      opacity: 0.85;
+    }
+
+    .note-check {
+      position: absolute;
+      top: 12px; right: 12px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid var(--chk-color, var(--border));
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      background: rgba(0,0,0,0.15);
+      z-index: 2;
+      font-size: 0.65rem;
+      color: transparent;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+    }
+
+    .note-check:hover {
+      transform: scale(1.1);
+      border-color: var(--chk-color);
+    }
+
+    .note-card.note-checked .note-check {
+      background: var(--chk-color);
+      color: #04121a;
+      box-shadow: 0 0 10px var(--chk-color);
+    }
+
+    .note-card.note-checked .n-title {
+      text-decoration: line-through;
+      text-decoration-color: var(--chk-color);
+      opacity: 0.6;
+    }
+
+    .note-card.note-checked { opacity: 0.72; }
+
     /* ── Section ───────────────────────────────── */
     .section { padding: 1.5rem 2rem; }
 
@@ -3537,6 +3655,154 @@
     btn.addEventListener('click', () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+  })();
+
+  /* ─── 13. Phase progress tracker (40 / 30 / 30) ── */
+  (function () {
+    const PHASES = [
+      { key: 'p1', pct: 40, label: 'Phase 1', tag: 'P1', color: 'var(--primary)', light: '#a5b4fc', glow: 'rgba(99,102,241,0.55)' },
+      { key: 'p2', pct: 30, label: 'Phase 2', tag: 'P2', color: 'var(--amber)',   light: '#fcd34d', glow: 'rgba(245,158,11,0.55)' },
+      { key: 'p3', pct: 30, label: 'Phase 3', tag: 'P3', color: 'var(--emerald)',light: '#6ee7b7', glow: 'rgba(16,185,129,0.55)' }
+    ];
+    const NOTE_PREFIX = 'ai-vault-note:';
+
+    function isChecked(fileKey) {
+      try { return localStorage.getItem(NOTE_PREFIX + fileKey) === '1'; } catch (e) { return false; }
+    }
+    function setChecked(fileKey, val) {
+      try {
+        if (val) localStorage.setItem(NOTE_PREFIX + fileKey, '1');
+        else localStorage.removeItem(NOTE_PREFIX + fileKey);
+      } catch (e) {}
+    }
+
+    // split an ordered list of note-cards into 40/30/30 buckets by count
+    function splitBuckets(total) {
+      const c1 = Math.round(total * 0.4);
+      const c2 = Math.round(total * 0.3);
+      const c3 = Math.max(total - c1 - c2, 0);
+      return { p1: c1, p2: c2, p3: c3 };
+    }
+
+    function build(projectEl) {
+      const projectId = projectEl.id;
+      const meta = projectEl.querySelector('.p-meta');
+      const notes = Array.from(projectEl.querySelectorAll('.note-card'));
+      if (!meta || notes.length === 0) return;
+
+      const bucket = splitBuckets(notes.length);
+      const order = ['p1', 'p2', 'p3'];
+      const counts = { p1: 0, p2: 0, p3: 0 };
+      const doneCounts = { p1: 0, p2: 0, p3: 0 };
+
+      // assign each note-card to a phase in document order, box-code it
+      let idx = 0, bIdx = 0;
+      notes.forEach(card => {
+        while (bIdx < order.length - 1 && idx >= runningTotal(bucket, order, bIdx)) bIdx++;
+        const phaseKey = order[bIdx];
+        idx++;
+        const ph = PHASES.find(p => p.key === phaseKey);
+        counts[phaseKey]++;
+
+        card.dataset.phase = phaseKey;
+        card.style.borderLeft = '4px solid ' + ph.color;
+        card.style.setProperty('--chk-color', ph.color);
+
+        const num = card.querySelector('.n-num');
+        if (num && !num.querySelector('.note-phase-tag')) {
+          const tag = document.createElement('span');
+          tag.className = 'note-phase-tag';
+          tag.style.color = ph.color;
+          tag.textContent = '· ' + ph.tag;
+          num.appendChild(tag);
+        }
+
+        if (!card.querySelector('.note-check')) {
+          const fileKey = card.dataset.file || (projectId + ':' + phaseKey + ':' + counts[phaseKey]);
+          const check = document.createElement('div');
+          check.className = 'note-check';
+          check.title = 'Mark note complete';
+          check.textContent = '✓';
+          card.appendChild(check);
+
+          if (isChecked(fileKey)) { card.classList.add('note-checked'); doneCounts[phaseKey]++; }
+
+          check.addEventListener('click', e => {
+            e.stopPropagation();
+            const nowChecked = !card.classList.contains('note-checked');
+            card.classList.toggle('note-checked', nowChecked);
+            setChecked(fileKey, nowChecked);
+            refresh();
+          });
+        } else if (card.classList.contains('note-checked')) {
+          doneCounts[phaseKey]++;
+        }
+      });
+
+      function runningTotal(b, ord, i) {
+        let t = 0;
+        for (let k = 0; k <= i; k++) t += b[ord[k]];
+        return t;
+      }
+
+      // build the top summary track + info row
+      const track = document.createElement('div');
+      track.className = 'phase-track';
+      const info = document.createElement('div');
+      info.className = 'phase-info';
+      const segEls = {}, pctLabels = {}, doneLabels = {};
+
+      PHASES.forEach(ph => {
+        const seg = document.createElement('div');
+        seg.className = 'phase-seg';
+        seg.style.cursor = 'default';
+        seg.style.flex = ph.pct;
+        seg.style.setProperty('--seg-color', ph.color);
+        seg.style.setProperty('--seg-color-light', ph.light);
+        seg.style.setProperty('--seg-glow', ph.glow);
+        seg.title = ph.label + ': ' + counts[ph.key] + ' notes (' + ph.pct + '% of project)';
+        const fill = document.createElement('div');
+        fill.className = 'phase-fill';
+        track.appendChild(seg); seg.appendChild(fill);
+        segEls[ph.key] = fill;
+
+        const chip = document.createElement('span');
+        chip.className = 'phase-chip';
+        chip.innerHTML =
+          '<span class="chip-dot" style="background:' + ph.color + '; color:' + ph.color + '"></span>' +
+          ph.label + ' · ' + ph.pct + '% ' +
+          '<span class="phase-count">(' + counts[ph.key] + ' notes, <span class="phase-done">0</span> done)</span>';
+        info.appendChild(chip);
+        doneLabels[ph.key] = chip.querySelector('.phase-done');
+      });
+
+      const overall = document.createElement('span');
+      overall.className = 'phase-overall';
+      overall.innerHTML = 'Overall: <b class="overall-pct">0%</b>';
+      info.appendChild(overall);
+
+      meta.appendChild(track);
+      meta.appendChild(info);
+      track.addEventListener('click', e => e.stopPropagation());
+      info.addEventListener('click', e => e.stopPropagation());
+      info.addEventListener('mousedown', e => e.stopPropagation());
+
+      function refresh() {
+        let overallPct = 0;
+        PHASES.forEach(ph => {
+          const total = counts[ph.key];
+          const doneNow = projectEl.querySelectorAll('.note-card[data-phase="' + ph.key + '"].note-checked').length;
+          const pct = total ? Math.round((doneNow / total) * 100) : 0;
+          segEls[ph.key].style.width = pct + '%';
+          doneLabels[ph.key].textContent = doneNow;
+          overallPct += (pct / 100) * ph.pct;
+        });
+        overall.querySelector('.overall-pct').textContent = Math.round(overallPct) + '%';
+      }
+      refresh();
+    }
+
+    document.querySelectorAll('.project').forEach(build);
   })();
 
   /* ─── 8. 3-D tilt on note cards ──────────────────*/
