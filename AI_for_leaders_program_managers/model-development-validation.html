@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Development &amp; Validation · Architects Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0e14; --panel: #10151d; --panel-2: #151b25; --panel-3: #192132;
+    --grid: #1c2430; --line: #212b3a; --ink: #c7d0dc; --ink-dim: #7c8898; --ink-bright: #eef2f7;
+    --blueprint: #3fb6ff; --blueprint-dim: #1f4a63; --amber: #ffb454; --green: #5fd9a0; --red: #ff6b6b; --violet: #c07bff;
+    --radius: 4px;
+    --display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background: linear-gradient(var(--grid) 1px, transparent 1px) 0 0/42px 42px, linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/42px 42px, var(--bg);
+    color:var(--ink); font-family:var(--body); line-height:1.65; padding:0 0 90px 0;
+  }
+  a{color:var(--blueprint);}
+
+  .top-link-banner{
+    max-width:952px; margin:24px auto 0 auto; padding:14px 26px;
+    background:linear-gradient(90deg, rgba(63,182,255,.12), rgba(192,123,255,.08));
+    border:1px solid var(--blueprint); border-radius:var(--radius);
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .top-link-banner .tlb-tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--amber); font-weight:700; white-space:nowrap;}
+  .top-link-banner a{font-family:var(--mono); font-size:13px; color:var(--ink-bright); text-decoration:none; border-bottom:1px dashed var(--blueprint);}
+  .top-link-banner a:hover{color:var(--blueprint);}
+
+  .course-box{
+    margin:10px auto 0 auto; max-width:952px; padding:18px 26px;
+    background:var(--panel-2); border:1px solid var(--blueprint-dim); border-left:4px solid var(--blueprint);
+    border-radius:var(--radius); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px;
+  }
+  .course-box .label{font-family:var(--mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--blueprint);}
+  .course-box .sub{font-family:var(--mono); font-size:12px; color:var(--ink-dim);}
+
+  header.hero{max-width:952px; margin:22px auto 0 auto; padding:44px 26px 24px;}
+  header.hero h1{font-family:var(--display); font-size:clamp(30px,4.4vw,46px); font-weight:700; color:var(--ink-bright); margin:0 0 10px 0; letter-spacing:-.01em; line-height:1.12;}
+  header.hero .tagline{font-family:var(--mono); color:var(--amber); font-size:14px; letter-spacing:.04em; margin-bottom:16px;}
+  header.hero p.lede{max-width:720px; color:var(--ink-dim); font-size:16px;}
+
+  nav.toc{max-width:952px; margin:0 auto 20px; padding:18px 26px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);}
+  nav.toc .cap{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:10px;}
+  nav.toc ol{margin:0; padding-left:20px; columns:2; gap:24px;}
+  nav.toc li{font-size:13.5px; margin-bottom:7px;}
+  nav.toc a{color:var(--ink); text-decoration:none;}
+  nav.toc a:hover{color:var(--blueprint);}
+  .toc-code{font-family:var(--mono); font-size:10px; color:var(--ink-dim); letter-spacing:.04em;}
+
+  section.block{max-width:952px; margin:0 auto; padding:36px 26px; border-top:1px solid var(--line);}
+  .kicker{display:flex; align-items:center; gap:12px; margin-bottom:6px;}
+  .kicker .num{font-family:var(--mono); font-size:12px; color:var(--bg); background:var(--blueprint); padding:3px 9px; border-radius:3px; font-weight:700; letter-spacing:.03em;}
+  .kicker .layer-tag{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-dim);}
+  .kicker .code{margin-left:auto; font-family:var(--mono); font-size:10px; letter-spacing:.06em; color:var(--bg); background:var(--violet); padding:2px 8px; border-radius:3px; font-weight:700;}
+  h2.title{font-family:var(--display); font-size:25px; color:var(--ink-bright); margin:4px 0 14px 0; font-weight:600;}
+  h3.subtitle{font-family:var(--display); font-size:16.5px; color:var(--ink-bright); margin:22px 0 10px 0; font-weight:600;}
+  p{margin:0 0 14px 0; font-size:15.5px;}
+  ul{margin:0 0 14px 0; padding-left:20px;}
+  li{margin-bottom:6px; font-size:15px;}
+  strong{color:var(--ink-bright);}
+  code{font-family:var(--mono); background:var(--panel-3); padding:1px 6px; border-radius:3px; font-size:.87em; color:var(--blueprint); border:1px solid var(--line);}
+
+  .diagram-frame{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 14px 10px; margin:18px 0 22px 0; overflow-x:auto;}
+  .diagram-frame .cap{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); padding:0 6px 12px; display:flex; justify-content:space-between;}
+  .diagram-frame svg{display:block; width:100%; height:auto; min-width:560px;}
+
+  .prime-box{background:linear-gradient(180deg, rgba(192,123,255,.07), transparent); border:1px solid var(--violet); border-radius:var(--radius); padding:16px 18px; margin:6px 0 26px 0;}
+  .prime-box .ptag{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--violet); font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .prime-box .ptag::before{content:"◆"; font-size:9px;}
+  .prime-box ol{margin:0; padding-left:20px;}
+  .prime-box li{font-family:var(--mono); font-size:13px; color:var(--ink); margin-bottom:8px;}
+
+  .recap{background:var(--panel-2); border:1px solid var(--green); border-left:4px solid var(--green); border-radius:var(--radius); padding:16px 20px; margin:26px 0 18px 0;}
+  .recap .rtag{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--green); font-weight:700; margin-bottom:8px;}
+  .recap p{margin:0; font-size:14.5px; color:var(--ink);}
+
+  .persp-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:14px; margin:0 0 8px 0;}
+  .persp-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px;}
+  .persp-card.cto{border-top:3px solid var(--amber);}
+  .persp-card.arch{border-top:3px solid var(--blueprint);}
+  .persp-card.pm{border-top:3px solid var(--violet);}
+  .persp-card .ptitle{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .persp-card.cto .ptitle{color:var(--amber);}
+  .persp-card.arch .ptitle{color:var(--blueprint);}
+  .persp-card.pm .ptitle{color:var(--violet);}
+  .persp-card p{font-size:13.8px; color:var(--ink-dim); margin:0;}
+
+  table{width:100%; border-collapse:collapse; margin:16px 0 22px 0; font-size:13.5px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+  th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--blueprint); background:var(--panel-2);}
+  td{color:var(--ink);}
+  tr:last-child td{border-bottom:none;}
+  td.mono{font-family:var(--mono); font-size:12.5px;}
+  .yes{color:var(--green); font-weight:600;}
+  .no{color:var(--red); font-weight:600;}
+  .warn{color:var(--amber); font-weight:600;}
+
+  .card-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; margin:18px 0;}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px;}
+  .card .n{font-family:var(--mono); color:var(--blueprint); font-size:12px; font-weight:700; margin-bottom:6px;}
+  .card h4{font-family:var(--display); color:var(--ink-bright); font-size:15px; margin:0 0 8px 0;}
+  .card p{font-size:13.8px; color:var(--ink-dim); margin:0;}
+  .card ul{margin:6px 0 0 0; padding-left:16px;}
+  .card li{font-size:12.8px; color:var(--ink-dim); margin-bottom:3px;}
+
+  .callout{background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; margin:16px 0;}
+  .callout.amber{border-left:3px solid var(--amber);}
+  .callout .ctitle{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:6px;}
+  .callout.amber .ctitle{color:var(--amber);}
+
+  .recall{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px 18px; margin:10px 0; cursor:pointer;}
+  .recall .rq{font-family:var(--mono); font-size:13.5px; color:var(--violet); display:flex; align-items:flex-start; gap:8px;}
+  .recall .rq::before{content:"Q ›"; color:var(--ink-dim); flex-shrink:0;}
+  .recall .ra{display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:14px; color:var(--ink-dim);}
+  .recall.open .ra{display:block;}
+  .recall .ra::before{content:"A › "; color:var(--green); font-family:var(--mono);}
+
+  footer{max-width:952px; margin:40px auto 0; padding:22px 26px 0; font-family:var(--mono); font-size:11px; color:var(--ink-dim); letter-spacing:.06em; text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="top-link-banner">
+  <span class="tlb-tag">📎 SOURCE LECTURE</span>
+  <a href="https://www.udemy.com/course/ai-project-lifecycle-mastery-strategy-to-deployment/learn/lecture/50482271#overview" target="_blank" rel="noopener">AI Project Lifecycle Mastery: Strategy to Deployment — Udemy ↗</a>
+</div>
+
+<div class="course-box">
+  <div class="label">Architects Lab · Study Note 025</div>
+  <div class="sub">Domain: Model Development &amp; Validation · Format: Prime → Learn → Recap → Perspective</div>
+</div>
+
+<header class="hero">
+  <div class="tagline">THE MODEL IS THE BRAIN — BUT ONLY AS GOOD AS THE DATA YOU FEED IT</div>
+  <h1>Model Development &amp; Validation</h1>
+  <p class="lede">From "a model is just math" through neural architectures, evaluation metrics, training infrastructure, transfer learning, and choosing the right LLM. Same rhythm throughout: prime with a few questions, learn the concept, recap what stuck, then view it from the CTO's, the Architect's, and the PM's seat.</p>
+</header>
+
+<nav class="toc">
+  <div class="cap">Contents</div>
+  <ol>
+    <li><a href="#t1">Introduction to AI Models &amp; Algorithms</a> <span class="toc-code">P2K8W35</span></li>
+    <li><a href="#t2">Neural Networks &amp; Deep Learning Fundamentals</a> <span class="toc-code">C6R3M79</span></li>
+    <li><a href="#t3">Building a Simple NN — TensorFlow Playground</a> <span class="toc-code">J9D4X61</span></li>
+    <li><a href="#t4">Model Architecture Hierarchy</a> <span class="toc-code">N5T7B28</span></li>
+    <li><a href="#t5">Neural Network Types in Detail</a> <span class="toc-code">G3H6Y94</span></li>
+    <li><a href="#t6">Model Evaluation: Classification Metrics</a> <span class="toc-code">V8L1Q57</span></li>
+    <li><a href="#t7">Model Evaluation: Regression Metrics</a> <span class="toc-code">D4W9F26</span></li>
+    <li><a href="#t8">Training Infrastructure</a> <span class="toc-code">K1M8C73</span></li>
+    <li><a href="#t9">Experiment Tracking &amp; Version Control</a> <span class="toc-code">R7X3H49</span></li>
+    <li><a href="#t10">Transfer Learning</a> <span class="toc-code">B5N2Y86</span></li>
+    <li><a href="#t11">Framework to Choose the Right LLM</a> <span class="toc-code">Q9T4K17</span></li>
+    <li><a href="#t12">LLM Leaderboards &amp; Benchmarks</a> <span class="toc-code">H2C7V38</span></li>
+    <li><a href="#t13">Practice Opportunities</a> <span class="toc-code">M6R1D95</span></li>
+    <li><a href="#t14">Module Summary &amp; Glossary</a> <span class="toc-code">W3G8B42</span></li>
+    <li><a href="#recall">Active Recall Deck</a> <span class="toc-code">X7F5N61</span></li>
+  </ol>
+</nav>
+
+<!-- ============ TOPIC 1 ============ -->
+<section class="block" id="t1">
+  <div class="kicker"><span class="num">01</span><span class="layer-tag">Foundations</span><span class="code">P2K8W35</span></div>
+  <h2 class="title">Introduction to AI Models &amp; Algorithms</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>If a model is "just a mathematical equation," what do you think actually makes it feel intelligent?</li>
+      <li>Guess before reading: how many times has training compute grown since 2010 — 100x? 10,000x? A billion times?</li>
+    </ol>
+  </div>
+
+  <p>A model is a mathematical equation — a bunch of math trained to recognize patterns. The human brain has 86 billion neurons firing electrical and chemical signals; an AI model is an artificial neural network doing the mathematical equivalent. We mimic the brain mathematically, not biologically.</p>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 1.1 — COMPUTE GROWTH SINCE 2010</span><span>doubling every 5–6 months</span></div>
+    <svg viewBox="0 0 820 160" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="m1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <path d="M 40 140 Q 300 138, 500 90 T 780 20" fill="none" stroke="#3fb6ff" stroke-width="2.4" marker-end="url(#m1)"/>
+      <text x="55" y="122" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">2010: ~2,000 params</text>
+      <text x="640" y="45" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Today: GPT-4 ~100 trillion params</text>
+      <text x="410" y="150" text-anchor="middle" fill="#ffb454" font-family="Space Grotesk" font-size="13" font-weight="700">10 BILLION-fold increase in training compute</text>
+    </svg>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>A model's apparent "intelligence" is complex pattern matching expressed as math — millions or trillions of weighted connections mimicking, at a mathematical level, what neurons do biologically. That math has scaled almost unimaginably fast: training compute has grown roughly 10 billion-fold since 2010, doubling every 5-6 months, faster than Moore's Law ever moved for hardware.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>A growth curve doubling every 5-6 months will outrun almost any fixed infrastructure plan — build compute strategy around elastic cloud capacity, not a static hardware purchase sized for today's model.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>The most likely limiting factor isn't hardware — it's energy and data availability. High-quality training data is finite and expensive to generate faster than compute is scaling; plan data strategy (see Study Note 024) as the actual bottleneck, not compute.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 2 ============ -->
+<section class="block" id="t2">
+  <div class="kicker"><span class="num">02</span><span class="layer-tag">Neural Nets</span><span class="code">C6R3M79</span></div>
+  <h2 class="title">Neural Networks &amp; Deep Learning Fundamentals</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>What's the actual difference between an "epoch" and a "batch"? Try to define both before reading on.</li>
+      <li>Why does training need a "backward" pass at all — why can't the network just get it right on the forward pass?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 2.1 — ARTIFICIAL NEURAL NETWORK</span><span>input → hidden layers → output</span></div>
+    <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="m2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <g>
+        <circle cx="70" cy="60" r="14" fill="#151b25" stroke="#3fb6ff" stroke-width="1.6"/>
+        <circle cx="70" cy="100" r="14" fill="#151b25" stroke="#3fb6ff" stroke-width="1.6"/>
+        <circle cx="70" cy="140" r="14" fill="#151b25" stroke="#3fb6ff" stroke-width="1.6"/>
+        <text x="70" y="170" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Input (x)</text>
+      </g>
+      <g>
+        <circle cx="280" cy="40" r="14" fill="#151b25" stroke="#ffb454" stroke-width="1.6"/>
+        <circle cx="280" cy="80" r="14" fill="#151b25" stroke="#ffb454" stroke-width="1.6"/>
+        <circle cx="280" cy="120" r="14" fill="#151b25" stroke="#ffb454" stroke-width="1.6"/>
+        <circle cx="280" cy="160" r="14" fill="#151b25" stroke="#ffb454" stroke-width="1.6"/>
+        <text x="280" y="188" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Hidden 1</text>
+      </g>
+      <g>
+        <circle cx="500" cy="50" r="14" fill="#151b25" stroke="#c07bff" stroke-width="1.6"/>
+        <circle cx="500" cy="100" r="14" fill="#151b25" stroke="#c07bff" stroke-width="1.6"/>
+        <circle cx="500" cy="150" r="14" fill="#151b25" stroke="#c07bff" stroke-width="1.6"/>
+        <text x="500" y="178" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Hidden 2</text>
+      </g>
+      <g>
+        <circle cx="710" cy="80" r="14" fill="#151b25" stroke="#5fd9a0" stroke-width="1.6"/>
+        <circle cx="710" cy="120" r="14" fill="#151b25" stroke="#5fd9a0" stroke-width="1.6"/>
+        <text x="710" y="150" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Output (y)</text>
+      </g>
+      <!-- connections (sample lines, weights) -->
+      <g stroke="#212b3a" stroke-width="1">
+        <line x1="84" y1="60" x2="266" y2="40"/><line x1="84" y1="60" x2="266" y2="80"/><line x1="84" y1="60" x2="266" y2="120"/><line x1="84" y1="60" x2="266" y2="160"/>
+        <line x1="84" y1="100" x2="266" y2="40"/><line x1="84" y1="100" x2="266" y2="80"/><line x1="84" y1="100" x2="266" y2="120"/><line x1="84" y1="100" x2="266" y2="160"/>
+        <line x1="84" y1="140" x2="266" y2="40"/><line x1="84" y1="140" x2="266" y2="80"/><line x1="84" y1="140" x2="266" y2="120"/><line x1="84" y1="140" x2="266" y2="160"/>
+        <line x1="294" y1="40" x2="486" y2="50"/><line x1="294" y1="80" x2="486" y2="50"/><line x1="294" y1="120" x2="486" y2="100"/><line x1="294" y1="160" x2="486" y2="150"/>
+        <line x1="294" y1="40" x2="486" y2="100"/><line x1="294" y1="120" x2="486" y2="50"/><line x1="294" y1="80" x2="486" y2="150"/><line x1="294" y1="160" x2="486" y2="100"/>
+        <line x1="514" y1="50" x2="696" y2="80"/><line x1="514" y1="100" x2="696" y2="80"/><line x1="514" y1="150" x2="696" y2="120"/><line x1="514" y1="50" x2="696" y2="120"/>
+      </g>
+      <text x="410" y="20" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">each line = a WEIGHT · each circle = a NEURON (math equation)</text>
+    </svg>
+  </div>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">01</div><h4>Input layer</h4><p>Receives raw data — images, text, etc.</p></div>
+    <div class="card"><div class="n">02</div><h4>Hidden layers</h4><p>Process data, extract patterns.</p></div>
+    <div class="card"><div class="n">03</div><h4>Output layer</h4><p>Produces the prediction or classification.</p></div>
+    <div class="card"><div class="n">04</div><h4>Weights</h4><p>Learned connection strengths between neurons.</p></div>
+    <div class="card"><div class="n">05</div><h4>Epoch</h4><p>One full pass through the entire dataset.</p></div>
+    <div class="card"><div class="n">06</div><h4>Batch size</h4><p>Number of samples processed at once.</p></div>
+    <div class="card"><div class="n">07</div><h4>Learning rate</h4><p>Speed of weight updates.</p></div>
+    <div class="card"><div class="n">08</div><h4>Loss / error</h4><p>How far predictions are from ground truth.</p></div>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 2.2 — THE TRAINING LOOP</span><span>repeats every epoch</span></div>
+    <svg viewBox="0 0 820 220" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="m3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="20" y="20" width="180" height="56" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="110" y="45" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Initialize weights</text>
+      <text x="110" y="62" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">(random)</text>
+      <line x1="200" y1="48" x2="230" y2="48" stroke="#3fb6ff" marker-end="url(#m3)"/>
+      <rect x="240" y="20" width="170" height="56" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="325" y="45" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Feed forward</text>
+      <line x1="410" y1="48" x2="440" y2="48" stroke="#3fb6ff" marker-end="url(#m3)"/>
+      <rect x="450" y="20" width="170" height="56" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="535" y="45" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Compute loss</text>
+      <text x="535" y="62" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">(error)</text>
+
+      <line x1="620" y1="48" x2="700" y2="48" stroke="#ff6b6b" stroke-width="1.4"/>
+      <line x1="700" y1="48" x2="700" y2="130" stroke="#ff6b6b" stroke-width="1.4" marker-end="url(#m3)"/>
+
+      <rect x="450" y="132" width="170" height="56" rx="6" fill="#151b25" stroke="#ff6b6b"/>
+      <text x="535" y="157" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Backpropagate</text>
+      <line x1="450" y1="160" x2="420" y2="160" stroke="#3fb6ff" marker-end="url(#m3)"/>
+      <rect x="240" y="132" width="170" height="56" rx="6" fill="#151b25" stroke="#ff6b6b"/>
+      <text x="325" y="157" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Calc. gradients</text>
+      <line x1="240" y1="160" x2="210" y2="160" stroke="#3fb6ff" marker-end="url(#m3)"/>
+      <rect x="20" y="132" width="170" height="56" rx="6" fill="#0e1420" stroke="#5fd9a0"/>
+      <text x="105" y="157" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Update weights</text>
+      <text x="105" y="174" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">(optimize)</text>
+
+      <text x="410" y="210" text-anchor="middle" fill="#5fd9a0" font-family="JetBrains Mono" font-size="10.5">↺ repeat for each epoch</text>
+    </svg>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>A neural network is layers of neurons connected by learned weights: an epoch is one full pass through the whole dataset, a batch is the chunk of samples processed before each weight update. Training needs a backward pass because the forward pass alone only produces a guess and a measurable error (loss) — backpropagation is the mechanism that computes how much each individual weight contributed to that error, so the optimizer knows which direction to nudge each one.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Batch size isn't just a training-speed knob — it directly affects memory footprint on the GPU. Architecture decisions about hardware (Topic 8) and batch size are coupled, not independent choices.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 3 ============ -->
+<section class="block" id="t3">
+  <div class="kicker"><span class="num">03</span><span class="layer-tag">Hands-On</span><span class="code">J9D4X61</span></div>
+  <h2 class="title">Building a Simple NN — TensorFlow Playground</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>If a network with 100 hidden neurons performs well, does that automatically mean 100 is the "right" number? What would make you suspect otherwise?</li>
+    </ol>
+  </div>
+
+  <p>TensorFlow Playground is a no-code, browser-based way to build and train a neural network visually — drag layers, adjust hyperparameters, watch weights update live, and see the decision boundary form between two classes in real time.</p>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">Learning rate</div><p>Too high → unstable training. Too low → slow learning.</p></div>
+    <div class="card"><div class="n">Batch size</div><p>Number of samples per weight update.</p></div>
+    <div class="card"><div class="n">Noise</div><p>Amount of randomness injected into the data.</p></div>
+    <div class="card"><div class="n">Train/test split</div><p>50/50, 80/20, etc.</p></div>
+    <div class="card"><div class="n">Architecture</div><p>Number of hidden layers and neurons per layer.</p></div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Playground makes hyperparameter tuning tangible — you can watch a decision boundary form and immediately see the effect of learning rate, noise, or architecture size. A model performing well at 100 neurons doesn't prove 100 is optimal: the right test is whether a smaller network (fewer neurons/layers) achieves comparably good performance — if it does, the larger one was likely overparameterized for the task, wasting compute and risking overfitting.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>"It works" is not the same question as "it's efficiently sized" — unnecessarily large architectures cost more to train and serve indefinitely. Push teams to demonstrate the smallest architecture that hits the target metric, not just any architecture that does.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 4 ============ -->
+<section class="block" id="t4">
+  <div class="kicker"><span class="num">04</span><span class="layer-tag">Hierarchy</span><span class="code">N5T7B28</span></div>
+  <h2 class="title">Model Architecture Hierarchy</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Where do CNNs, Transformers, and GANs sit in the AI → ML → learning-type hierarchy — are they a fourth branch, or do they sit inside the existing three?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 4.1 — AI → ML → LEARNING TYPES → ALGORITHMS</span><span>where deep architectures fit</span></div>
+    <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="m4" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="350" y="10" width="200" height="46" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="450" y="38" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Artificial Intelligence</text>
+      <line x1="450" y1="56" x2="450" y2="76" stroke="#3fb6ff" marker-end="url(#m4)"/>
+      <rect x="350" y="78" width="200" height="46" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="450" y="106" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Machine Learning</text>
+
+      <line x1="450" y1="124" x2="450" y2="140" stroke="#3fb6ff"/>
+      <line x1="450" y1="140" x2="150" y2="140" stroke="#3fb6ff"/>
+      <line x1="450" y1="140" x2="750" y2="140" stroke="#3fb6ff"/>
+      <line x1="150" y1="140" x2="150" y2="156" stroke="#3fb6ff" marker-end="url(#m4)"/>
+      <line x1="450" y1="140" x2="450" y2="156" stroke="#3fb6ff" marker-end="url(#m4)"/>
+      <line x1="750" y1="140" x2="750" y2="156" stroke="#3fb6ff" marker-end="url(#m4)"/>
+
+      <rect x="60" y="158" width="180" height="40" rx="5" fill="#151b25" stroke="#ffb454"/>
+      <text x="150" y="182" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Supervised</text>
+      <rect x="360" y="158" width="180" height="40" rx="5" fill="#151b25" stroke="#5fd9a0"/>
+      <text x="450" y="182" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Unsupervised</text>
+      <rect x="660" y="158" width="180" height="40" rx="5" fill="#151b25" stroke="#c07bff"/>
+      <text x="750" y="182" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Reinforcement</text>
+
+      <text x="150" y="216" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Classification · Regression</text>
+      <text x="450" y="216" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Clustering · Dim. reduction</text>
+      <text x="750" y="216" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Q-learning · Deep Q-networks</text>
+
+      <rect x="130" y="240" width="640" height="46" rx="6" fill="#0e1420" stroke="#3fb6ff" stroke-dasharray="4 3"/>
+      <text x="450" y="268" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">Deep Neural Networks: FNN · CNN · RNN/LSTM · Transformers · GANs · Autoencoders</text>
+    </svg>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>CNNs, RNNs, Transformers, and GANs aren't a separate fourth category — they're specific architectures of deep neural networks, which itself is one implementation approach that can be applied within supervised, unsupervised, or even reinforcement learning depending on how they're trained. A Transformer trained on labeled translation pairs is supervised; a GAN's generator/discriminator setup is its own distinct training dynamic layered on top of that same hierarchy.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>When scoping a project, separate "which learning paradigm" (supervised/unsupervised/RL) from "which architecture" (CNN/Transformer/etc.) — they're independent decisions, and conflating them narrows your options before you've actually reasoned about the problem.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 5 ============ -->
+<section class="block" id="t5">
+  <div class="kicker"><span class="num">05</span><span class="layer-tag">Architectures</span><span class="code">G3H6Y94</span></div>
+  <h2 class="title">Neural Network Types in Detail</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>RNNs process sequentially and "forget" long-term context (vanishing gradient). What problem was LSTM specifically built to fix?</li>
+      <li>Transformers process all tokens in parallel instead of sequentially. Why is that a genuine breakthrough rather than just a speed trick?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 5.1 — RNN: FEEDBACK LOOP</span><span>output depends on input AND previous state</span></div>
+    <svg viewBox="0 0 500 140" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="m5" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="20" y="45" width="100" height="50" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="70" y="75" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Input</text>
+      <line x1="120" y1="70" x2="180" y2="70" stroke="#3fb6ff" marker-end="url(#m5)"/>
+      <rect x="190" y="35" width="120" height="70" rx="6" fill="#151b25" stroke="#ffb454" stroke-width="1.6"/>
+      <text x="250" y="75" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">RNN</text>
+      <line x1="310" y1="70" x2="370" y2="70" stroke="#3fb6ff" marker-end="url(#m5)"/>
+      <rect x="380" y="45" width="100" height="50" rx="6" fill="#0e1420" stroke="#5fd9a0"/>
+      <text x="430" y="75" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Output</text>
+      <path d="M 280 35 C 280 5, 220 5, 220 35" fill="none" stroke="#ff6b6b" stroke-width="1.4" marker-end="url(#m5)"/>
+      <text x="250" y="20" text-anchor="middle" fill="#ff6b6b" font-family="JetBrains Mono" font-size="9.5">feedback (memory)</text>
+    </svg>
+  </div>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">FNN / MLP</div><h4>Feed-forward</h4><p>One-direction flow, simple 1:1 mapping. Use: tabular classification/regression.</p></div>
+    <div class="card"><div class="n">CNN</div><h4>Convolutional</h4><p>Convolution layers extract features, pooling reduces dimensions. Use: image classification, object detection.</p></div>
+    <div class="card"><div class="n">RNN</div><h4>Recurrent</h4><p>Feedback loops — output depends on input and prior state. Use: time series, speech. Problem: vanishing gradient (forgets long-term).</p></div>
+    <div class="card"><div class="n">LSTM</div><h4>Long Short-Term Memory</h4><p>Enhanced RNN with "memory cells" that solve the vanishing gradient problem. Use: stock prediction, translation, text generation.</p></div>
+    <div class="card"><div class="n">Transformers</div><h4>Self-attention</h4><p>Processes all tokens simultaneously, in parallel. Powers ChatGPT, Claude, Gemini, Llama. From "Attention Is All You Need" (Google, 2017).</p></div>
+    <div class="card"><div class="n">GANs</div><h4>Generative Adversarial</h4><p>Two networks compete — Generator creates fakes, Discriminator detects them. Use: image generation, deepfakes, data augmentation.</p></div>
+    <div class="card"><div class="n">Autoencoders</div><h4>Compress &amp; reconstruct</h4><p>Encoder compresses, decoder reconstructs — learns efficient representations. Use: anomaly detection, denoising, dimensionality reduction.</p></div>
+  </div>
+
+  <table>
+    <tr><th>Architecture</th><th>Key feature</th><th>Best use cases</th></tr>
+    <tr><td>Feed-Forward (MLP)</td><td>One-way flow, simple</td><td>Tabular data, basic classification/regression</td></tr>
+    <tr><td>CNN</td><td>Feature extraction via convolution</td><td>Image recognition, object detection</td></tr>
+    <tr><td>RNN</td><td>Feedback loops (memory)</td><td>Time series, speech — but forgets long-term</td></tr>
+    <tr><td>LSTM</td><td>Long-term memory cells</td><td>Stock prediction, translation, text generation</td></tr>
+    <tr><td>Transformers</td><td>Self-attention, parallel</td><td>LLMs, chatbots, translation, NLP</td></tr>
+    <tr><td>GANs</td><td>Two networks competing</td><td>Image generation, deepfakes, augmentation</td></tr>
+    <tr><td>Autoencoders</td><td>Compression &amp; reconstruction</td><td>Anomaly detection, denoising, compression</td></tr>
+  </table>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>LSTM was purpose-built to fix RNN's vanishing gradient problem — its memory cells preserve long-term dependencies that a plain RNN loses over long sequences. Transformers' parallelism is a genuine breakthrough, not just speed: processing sequentially forces RNN-style models to compress everything through a bottleneck one token at a time, while self-attention lets every token directly reference every other token at once, which is both faster to train and better at capturing long-range relationships.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Match the architecture to the data's actual structure, not the current trend — Transformers dominate NLP headlines, but a CNN is still usually the right, cheaper choice for pure image classification, and a plain FNN is fine for a tabular regression problem.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 6 ============ -->
+<section class="block" id="t6">
+  <div class="kicker"><span class="num">06</span><span class="layer-tag">Evaluation</span><span class="code">V8L1Q57</span></div>
+  <h2 class="title">Model Evaluation: Classification Metrics</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>A fraud model hits 99% accuracy but the fraud rate is only 1%. Should you be impressed? Why or why not?</li>
+      <li>For a self-driving car's pedestrian detector, would you rather minimize false positives or false negatives?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 6.1 — CONFUSION MATRIX</span><span>the foundation of every classification metric</span></div>
+    <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg">
+      <text x="380" y="20" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5" letter-spacing="1">PREDICTED</text>
+      <text x="300" y="40" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Positive</text>
+      <text x="460" y="40" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Negative</text>
+      <text x="70" y="120" fill="#7c8898" font-family="JetBrains Mono" font-size="10" transform="rotate(-90 70 120)" text-anchor="middle">ACTUAL</text>
+
+      <rect x="220" y="50" width="150" height="70" fill="#152a22" stroke="#5fd9a0"/>
+      <text x="295" y="80" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="12" font-weight="700">TP</text>
+      <text x="295" y="98" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">True Positive</text>
+
+      <rect x="380" y="50" width="150" height="70" fill="#301818" stroke="#ff6b6b"/>
+      <text x="455" y="80" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="12" font-weight="700">FN</text>
+      <text x="455" y="98" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">False Negative</text>
+
+      <rect x="220" y="120" width="150" height="70" fill="#301818" stroke="#ff6b6b"/>
+      <text x="295" y="150" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="12" font-weight="700">FP</text>
+      <text x="295" y="168" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">False Positive</text>
+
+      <rect x="380" y="120" width="150" height="70" fill="#152a22" stroke="#5fd9a0"/>
+      <text x="455" y="150" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="12" font-weight="700">TN</text>
+      <text x="455" y="168" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">True Negative</text>
+
+      <text x="130" y="90" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Positive</text>
+      <text x="130" y="160" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Negative</text>
+    </svg>
+  </div>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">Accuracy</div><h4>(TP+TN) / Total</h4><p>Overall correctness. Good for balanced data, misleading for imbalanced data.</p></div>
+    <div class="card"><div class="n">Precision</div><h4>TP / (TP+FP)</h4><p>"Of all positive predictions, how many were correct?" Minimizes false positives. E.g. spam detection.</p></div>
+    <div class="card"><div class="n">Recall</div><h4>TP / (TP+FN)</h4><p>"Of all actual positives, how many did we catch?" Minimizes false negatives. E.g. disease detection.</p></div>
+    <div class="card"><div class="n">F1-Score</div><h4>Harmonic mean</h4><p>2·(P·R)/(P+R). Balances precision and recall — best for imbalanced datasets.</p></div>
+  </div>
+
+  <h3 class="subtitle">Practical example: fraud detection (bank, 1,000 transactions)</h3>
+  <table>
+    <tr><th></th><th>Predicted fraud</th><th>Predicted not fraud</th></tr>
+    <tr><td>Actual fraud</td><td class="mono yes">70 (TP)</td><td class="mono no">30 (FN)</td></tr>
+    <tr><td>Actual not fraud</td><td class="mono no">50 (FP)</td><td class="mono yes">850 (TN)</td></tr>
+  </table>
+  <table>
+    <tr><th>Metric</th><th>Calculation</th><th>Value</th></tr>
+    <tr><td>Accuracy</td><td class="mono">(70+850)/1000</td><td class="mono">92%</td></tr>
+    <tr><td>Precision</td><td class="mono">70/(70+50)</td><td class="mono">58.3%</td></tr>
+    <tr><td>Recall</td><td class="mono">70/(70+30)</td><td class="mono">70%</td></tr>
+  </table>
+  <div class="callout amber">
+    <div class="ctitle">💡 Which metric matters most?</div>
+    The bank prioritizes precision — false positives block legitimate transactions and frustrate customers (e.g. a card declined abroad), which is a direct customer-experience cost even though it looks like "only" a 92% accuracy story.
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Every classification metric is built from the same four confusion-matrix cells. Accuracy alone is dangerous on imbalanced data — a 99%-accurate fraud model could just be predicting "not fraud" every time if fraud is rare, catching zero real cases while still scoring well. Precision and recall trade off against each other, and which one to prioritize is a business decision, not a technical one: a spam filter favors precision (don't block real email), a disease or pedestrian detector favors recall (don't miss a real positive).</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Never let a team report "99% accuracy" as the headline metric without also stating the class balance — on a 1%-positive-rate problem, that number alone tells you almost nothing about whether the model works.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Get the precision/recall trade-off written into the success metrics before modeling starts (see the SMART goals topic in the PM notes) — deciding it after seeing the results invites the team to rationalize whichever number came out better.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 7 ============ -->
+<section class="block" id="t7">
+  <div class="kicker"><span class="num">07</span><span class="layer-tag">Evaluation</span><span class="code">D4W9F26</span></div>
+  <h2 class="title">Model Evaluation: Regression Metrics</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>If RMSE is $27,000 for house price predictions, does that mean every single prediction is off by exactly $27K?</li>
+      <li>What's the actual difference between R-squared and accuracy — are they measuring the same thing in different units?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 7.1 — LINEAR REGRESSION</span><span>y = mx + b, residuals are the errors</span></div>
+    <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg">
+      <line x1="50" y1="20" x2="50" y2="190" stroke="#212b3a"/>
+      <line x1="50" y1="190" x2="570" y2="190" stroke="#212b3a"/>
+      <text x="20" y="105" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10" transform="rotate(-90 20 105)">Price</text>
+      <text x="310" y="212" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Size</text>
+      <line x1="70" y1="170" x2="540" y2="40" stroke="#3fb6ff" stroke-width="2"/>
+      <circle cx="120" cy="150" r="5" fill="#ffb454"/>
+      <circle cx="180" cy="110" r="5" fill="#ffb454"/>
+      <circle cx="230" cy="130" r="5" fill="#ffb454"/>
+      <circle cx="290" cy="90" r="5" fill="#ffb454"/>
+      <circle cx="350" cy="100" r="5" fill="#ffb454"/>
+      <circle cx="400" cy="70" r="5" fill="#ffb454"/>
+      <circle cx="460" cy="55" r="5" fill="#ffb454"/>
+      <line x1="230" y1="130" x2="230" y2="112" stroke="#ff6b6b" stroke-width="1.2" stroke-dasharray="3 2"/>
+      <text x="250" y="122" fill="#ff6b6b" font-family="JetBrains Mono" font-size="9">residual</text>
+      <text x="500" y="200" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">y = mx + b</text>
+    </svg>
+  </div>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">MAE</div><h4>Mean Absolute Error</h4><p>Average magnitude of errors. Easy to interpret, robust to outliers.</p></div>
+    <div class="card"><div class="n">MSE</div><h4>Mean Squared Error</h4><p>Penalizes large errors heavily. Not in original units, sensitive to outliers.</p></div>
+    <div class="card"><div class="n">RMSE</div><h4>√MSE</h4><p>Interpretable in the same units as output — "on average, off by $X." Best for business communication.</p></div>
+    <div class="card"><div class="n">R²</div><h4>Variance explained</h4><p>0 to 1, higher is better. 80% = 80% of output variation explained by the input(s).</p></div>
+  </div>
+
+  <h3 class="subtitle">Practical example: house price prediction</h3>
+  <table>
+    <tr><th>House</th><th>Actual</th><th>Predicted</th><th>Error</th><th>Error²</th></tr>
+    <tr><td>A</td><td class="mono">300,000</td><td class="mono">310,000</td><td class="mono">−10,000</td><td class="mono">100M</td></tr>
+    <tr><td>B</td><td class="mono">450,000</td><td class="mono">440,000</td><td class="mono">10,000</td><td class="mono">100M</td></tr>
+    <tr><td>C</td><td class="mono">500,000</td><td class="mono">475,000</td><td class="mono">25,000</td><td class="mono">625M</td></tr>
+    <tr><td>D</td><td class="mono">600,000</td><td class="mono">620,000</td><td class="mono">−20,000</td><td class="mono">400M</td></tr>
+    <tr><td>E</td><td class="mono">550,000</td><td class="mono">500,000</td><td class="mono">50,000</td><td class="mono">2.5B</td></tr>
+  </table>
+  <table>
+    <tr><th>Metric</th><th>Value</th></tr>
+    <tr><td>MAE</td><td class="mono">$23,000</td></tr>
+    <tr><td>MSE</td><td class="mono">745M</td></tr>
+    <tr><td>RMSE</td><td class="mono">$27,300 — "off by ~$27K on average"</td></tr>
+  </table>
+  <div class="callout amber">
+    <div class="ctitle">💡 Best metric for stakeholders</div>
+    RMSE — it's the one that translates directly into a sentence a VP can repeat: "the model forecasts within about $27K on average."
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>RMSE of $27,000 is an average, not a per-prediction guarantee — individual errors range from $10K to $50K in the example, and RMSE (because it squares errors before averaging) is pulled upward by the larger ones more than MAE would be. R-squared is not the same thing as accuracy: accuracy counts correct classifications, while R² measures how much of the output's variance the model explains — an 80% R² means the model accounts for 80% of the pattern in price variation, not that 80% of predictions were "correct" in any classification sense.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>When reporting model performance upward, lead with RMSE in the metric's real units, not R² or MSE — a VP can act on "off by $27K" immediately; "R² of 0.8" requires a follow-up explanation every time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 8 ============ -->
+<section class="block" id="t8">
+  <div class="kicker"><span class="num">08</span><span class="layer-tag">Infrastructure</span><span class="code">K1M8C73</span></div>
+  <h2 class="title">Training Infrastructure</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Why is a GPU better than a CPU for training neural networks — what's the actual structural reason, not just "it's faster"?</li>
+      <li>TPUs are Google-only. What's the real trade-off in choosing them over GPUs?</li>
+    </ol>
+  </div>
+
+  <table>
+    <tr><th>Compute</th><th>What it's for</th></tr>
+    <tr><td>CPU</td><td>General-purpose processor. Good for basic tasks, I/O, data prep. Not ideal for deep learning — sequential.</td></tr>
+    <tr><td>GPU</td><td>Optimized for parallel compute — thousands of cores for matrix operations. Best for training neural networks. Examples: NVIDIA A100, H100, RTX 4090.</td></tr>
+    <tr><td>TPU</td><td>Google's custom chip, purpose-built for TensorFlow and AI workloads. Available on Google Cloud only.</td></tr>
+  </table>
+
+  <table>
+    <tr><th>Aspect</th><th>Local</th><th>Cloud</th></tr>
+    <tr><td>Setup time</td><td>Manual, time-consuming</td><td class="yes">Fast (minutes)</td></tr>
+    <tr><td>Cost</td><td class="no">High upfront (capex)</td><td class="yes">Pay-as-you-go</td></tr>
+    <tr><td>Compute power</td><td>Limited to hardware</td><td class="yes">Unlimited (scale)</td></tr>
+    <tr><td>Scalability</td><td class="no">Hard to scale</td><td class="yes">Easily scalable</td></tr>
+    <tr><td>Maintenance</td><td>You maintain everything</td><td>Provider does</td></tr>
+    <tr><td>Collaboration</td><td>Limited (single user)</td><td class="yes">Easy (shared)</td></tr>
+    <tr><td>Data privacy</td><td class="yes">High (on-premise)</td><td>Secure (encrypted)</td></tr>
+    <tr><td>Internet</td><td class="yes">Not required</td><td>Required</td></tr>
+  </table>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">AWS</div><h4>Amazon Web Services</h4><p>SageMaker (ML platform), Bedrock (GenAI API service).</p></div>
+    <div class="card"><div class="n">GCP</div><h4>Google Cloud Platform</h4><p>Vertex AI (ML platform), TPUs available.</p></div>
+    <div class="card"><div class="n">Azure</div><h4>Microsoft Azure</h4><p>Azure Machine Learning (ML platform), Azure OpenAI Service.</p></div>
+  </div>
+
+  <div class="callout amber">
+    <div class="ctitle">🐳 Docker — containerization for reproducibility</div>
+    Packages code, libraries, and dependencies into a container that runs identically everywhere — avoiding "it works on my machine" and enabling reproducible, easy deployment.
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>CPUs are built for fast sequential logic; GPUs are built with thousands of simpler cores that execute the same operation across a huge grid in parallel — which is exactly the shape of the matrix multiplications neural network training is made of, so the architectural fit, not just raw speed, is why GPUs dominate. TPUs push that specialization even further for TensorFlow workloads specifically, at the cost of vendor lock-in to Google Cloud — a real trade-off between performance and platform flexibility, not a free upgrade.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Cloud's pay-as-you-go model is usually the right default for training (bursty, high peak demand); local/on-prem can make sense for inference at steady, predictable volume where the capex pays back. Don't apply one model to both phases by default.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 9 ============ -->
+<section class="block" id="t9">
+  <div class="kicker"><span class="num">09</span><span class="layer-tag">Reproducibility</span><span class="code">R7X3H49</span></div>
+  <h2 class="title">Experiment Tracking &amp; Version Control</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>If you don't track experiments, what's the actual failure mode — not just "disorganization," but something concrete that costs money?</li>
+    </ol>
+  </div>
+
+  <p>AI development is inherently experimental — which architecture, how many neurons, what learning rate, which features, how much data? Hundreds of combinations to test. Without tracking: chaos, lost progress, confusion. With tracking: reproducibility, collaboration, insight.</p>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">Weights &amp; Biases</div><h4>Real-time tracking</h4><p>Visualization dashboards, collaboration, hyperparameter comparison, model versioning.</p></div>
+    <div class="card"><div class="n">MLflow</div><h4>Open source</h4><p>Tracks experiments, parameters, metrics. Model registry and deployment support.</p></div>
+    <div class="card"><div class="n">Comet ML</div><h4>W&amp;B alternative</h4><p>Similar feature set, free tier available.</p></div>
+    <div class="card"><div class="n">Git</div><h4>Code version control</h4><p>Track code changes, enable collaboration, rollback to previous versions.</p></div>
+  </div>
+
+  <table>
+    <tr><th>Run</th><th>Config</th><th>Accuracy</th><th>Loss</th></tr>
+    <tr><td>1</td><td class="mono">lr=0.01</td><td class="mono">85%</td><td class="mono">0.23</td></tr>
+    <tr><td>2</td><td class="mono">lr=0.001</td><td class="mono yes">88% ← close</td><td class="mono">0.18</td></tr>
+    <tr><td>3</td><td class="mono">lr=0.1</td><td class="mono no">70%</td><td class="mono">0.45</td></tr>
+    <tr><td>4</td><td class="mono">5 layers</td><td class="mono yes">90% ← best</td><td class="mono">0.15</td></tr>
+    <tr><td>5</td><td class="mono">10 layers</td><td class="mono">87%</td><td class="mono">0.20</td></tr>
+  </table>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>The concrete failure mode without tracking is re-running experiments you've already tried — including ones that already failed — burning real compute cost and calendar time to rediscover a result someone already had. A tracking tool turns "which of the hundred combinations did we try" from institutional memory (which leaves when a team member does) into a queryable, comparable log.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>For a small project, a disciplined spreadsheet (config, metric, date, who ran it) genuinely can be enough — the value isn't the tool, it's the discipline of logging every run. Don't over-invest in W&amp;B/MLflow tooling before the team has proven it'll actually use a spreadsheet consistently.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 10 ============ -->
+<section class="block" id="t10">
+  <div class="kicker"><span class="num">10</span><span class="layer-tag">Efficiency</span><span class="code">B5N2Y86</span></div>
+  <h2 class="title">Transfer Learning</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>If you're detecting tumors in X-rays and the pre-trained model only ever saw everyday photos, would transfer learning still help — or is the domain gap too big?</li>
+    </ol>
+  </div>
+
+  <p><strong>Definition:</strong> reusing a model trained on one task as a starting point for another, similar task.</p>
+  <p><strong>Analogy:</strong> if you can skate, you can learn skiing faster — you already have balance, comfort on slippery surfaces, and weight distribution instincts. That knowledge transfers to a similar-but-different task.</p>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 10.1 — TRANSFER LEARNING WITH A CNN</span><span>freeze the feature extractor, train only the classifier</span></div>
+    <svg viewBox="0 0 820 170" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="m6" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="20" y="20" width="260" height="56" rx="6" fill="#151b25" stroke="#3fb6ff" stroke-dasharray="4 3"/>
+      <text x="150" y="43" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Conv layers (FROZEN)</text>
+      <text x="150" y="62" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">pre-trained on ImageNet, 1M+ imgs</text>
+      <line x1="280" y1="48" x2="330" y2="48" stroke="#3fb6ff" marker-end="url(#m6)"/>
+      <rect x="340" y="20" width="220" height="56" rx="6" fill="#151b25" stroke="#5fd9a0" stroke-width="1.6"/>
+      <text x="450" y="43" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">New FC layers</text>
+      <text x="450" y="62" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">trained on YOUR data</text>
+
+      <text x="450" y="110" text-anchor="middle" fill="#ffb454" font-family="JetBrains Mono" font-size="11">Only the final classifier layers get updated</text>
+      <text x="450" y="135" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Example: ResNet + 10K cat/dog images → ~95% accuracy in minutes</text>
+    </svg>
+  </div>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">Speed</div><p>Training time drops from hours to minutes.</p></div>
+    <div class="card"><div class="n">Data</div><p>Requires far less data — the feature extractor already learned good general features.</p></div>
+    <div class="card"><div class="n">Compute</div><p>Less compute needed — no need to retrain everything from scratch.</p></div>
+    <div class="card"><div class="n">Performance</div><p>Often better, because the base model was pre-trained on a massive dataset.</p></div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Transfer learning works by freezing the general-purpose feature extractor from a pre-trained model and training only new final layers on your specific data — dramatically cutting time, data, and compute needs. The tumor/X-ray case is exactly the edge case worth flagging: when the target domain is very different from the source (medical imaging vs. everyday photos), the low-level features (edges, textures) still often transfer usefully, but you may need to unfreeze and fine-tune more layers than usual, or accept a smaller benefit than a same-domain transfer would give.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>How many layers to unfreeze is a spectrum, not binary — start with only the final layer trainable; if performance is insufficient, progressively unfreeze earlier layers with a lower learning rate, watching for overfitting as you go, rather than defaulting to fine-tuning the whole network.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 11 ============ -->
+<section class="block" id="t11">
+  <div class="kicker"><span class="num">11</span><span class="layer-tag">LLM Selection</span><span class="code">Q9T4K17</span></div>
+  <h2 class="title">Framework to Choose the Right LLM</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Before reading — do you think classification tasks (like spam detection) actually need an LLM at all?</li>
+    </ol>
+  </div>
+
+  <h3 class="subtitle">Step 1 — Define your needs</h3>
+  <p>Core task? Input/output format? Data privacy requirements? Latency needs (real-time vs batch)? Time to market? Budget (build vs buy)? Inference cost constraints?</p>
+
+  <h3 class="subtitle">Step 2 — Choose model type: do you even need an LLM?</h3>
+  <table>
+    <tr><th>Task</th><th>LLM required?</th></tr>
+    <tr><td>Classification</td><td class="no">No — use classical ML</td></tr>
+    <tr><td>Named Entity Recognition</td><td class="no">No — use specialized models</td></tr>
+    <tr><td>Retrieval</td><td class="no">No — use search</td></tr>
+    <tr><td>Summarization</td><td class="yes">Yes</td></tr>
+    <tr><td>Text generation</td><td class="yes">Yes</td></tr>
+    <tr><td>Translation</td><td class="yes">Yes</td></tr>
+    <tr><td>Chatbots</td><td class="yes">Yes</td></tr>
+    <tr><td>Reasoning</td><td class="yes">Yes</td></tr>
+  </table>
+
+  <h3 class="subtitle">Step 3 — Choose model size</h3>
+  <table>
+    <tr><th></th><th>Small/medium LLM (&lt;50B)</th><th>Large LLM (&gt;50B)</th></tr>
+    <tr><td>Cost &amp; speed</td><td class="yes">Lower cost, faster, lower latency</td><td class="no">Expensive, higher latency</td></tr>
+    <tr><td>Deployment</td><td class="yes">Easier to deploy</td><td class="no">Harder to deploy and maintain</td></tr>
+    <tr><td>Reasoning</td><td class="warn">May lack deep reasoning; can pair with RAG</td><td class="yes">Better reasoning &amp; understanding</td></tr>
+    <tr><td>Environmental</td><td class="yes">Lower footprint</td><td class="no">Higher carbon footprint</td></tr>
+    <tr><td>Example</td><td class="mono">DeepSeek (1.5B)</td><td class="mono">GPT-4 (~100T)</td></tr>
+  </table>
+
+  <h3 class="subtitle">Step 4 — Select sourcing option</h3>
+  <table>
+    <tr><th></th><th>Open source</th><th>Proprietary</th></tr>
+    <tr><td>Cost</td><td>Free / low</td><td>Subscription / usage fees</td></tr>
+    <tr><td>Time to deploy</td><td class="no">High — needs expertise</td><td class="yes">Low — ready-to-use APIs</td></tr>
+    <tr><td>Data provenance</td><td class="warn">Often unknown</td><td class="yes">Rigorous checks</td></tr>
+    <tr><td>Support</td><td>Community, irregular</td><td class="yes">Professional, continuous</td></tr>
+  </table>
+
+  <h3 class="subtitle">Step 5 — Scaling &amp; operations</h3>
+  <ul>
+    <li>Data residency requirements (local storage laws)</li>
+    <li>Expected data volume and traffic (API limits)</li>
+    <li>Skills needed — prompt engineering vs full training</li>
+    <li>End-to-end cost — training + inference</li>
+    <li>Build vs buy decision</li>
+  </ul>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Most tasks people reach for an LLM to solve don't actually need one — classification, entity recognition, and retrieval are typically faster, cheaper, and more accurate with classical ML or search. The five-step framework (needs → type → size → sourcing → scaling) forces that question first, before the much more expensive downstream decisions of model size and build-vs-buy even come into play.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>"We need an LLM for this" should trigger Step 2's table before any vendor conversation starts — a huge share of LLM cost overruns trace back to using a generative model for a task a classifier would have solved for a fraction of the inference cost.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Open-source's "low cost" is a trap if you don't have in-house expertise to operate it — the true cost includes the hiring or consulting needed to run it reliably, which can exceed a proprietary API's subscription fee.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 12 ============ -->
+<section class="block" id="t12">
+  <div class="kicker"><span class="num">12</span><span class="layer-tag">Benchmarks</span><span class="code">H2C7V38</span></div>
+  <h2 class="title">LLM Leaderboards &amp; Benchmarks</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>If a model scores 98% on professional medicine exams, would you trust it to diagnose patients unsupervised? What's the gap between a benchmark score and real-world readiness?</li>
+    </ol>
+  </div>
+
+  <table>
+    <tr><th>Old benchmarks (now near-obsolete, models &gt;80%+)</th><th>Description</th></tr>
+    <tr><td>DROP</td><td>Discrete Reasoning over Paragraphs — reading comprehension</td></tr>
+    <tr><td>HellaSwag</td><td>Common sense reasoning</td></tr>
+    <tr><td>MMLU</td><td>Massive Multitask Language Understanding — 57 subjects</td></tr>
+    <tr><td>ARC</td><td>Scientific reasoning</td></tr>
+    <tr><td>TruthfulQA</td><td>Resists false/misleading answers</td></tr>
+    <tr><td>HumanEval</td><td>Code generation (Python)</td></tr>
+  </table>
+
+  <table>
+    <tr><th>New, harder benchmarks (current leaderboard)</th><th>Description</th></tr>
+    <tr><td>Humanity's Last Exam</td><td>2,500 hardest-for-humanity questions — best models score only ~35%</td></tr>
+    <tr><td>GPQA</td><td>Graduate-level, Google-proof Q&amp;A — PhD-level science</td></tr>
+    <tr><td>MATH</td><td>Competition-level math problems</td></tr>
+    <tr><td>BBH</td><td>Big Bench Hard — challenging tasks</td></tr>
+    <tr><td>IF-Eval</td><td>Instruction-following evaluation</td></tr>
+  </table>
+
+  <table>
+    <tr><th>Model</th><th>Size</th><th>MATH</th><th>GPQA</th></tr>
+    <tr><td>Qwen 72B</td><td class="mono">72B</td><td class="mono yes">41%</td><td class="mono yes">20.7% (highest avg)</td></tr>
+    <tr><td>Llama 3 70B</td><td class="mono">70B</td><td class="mono">18%</td><td class="mono">~10%</td></tr>
+  </table>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 12.1 — ACCURACY vs LATENCY</span><span>Phi-3 finds the balance</span></div>
+    <svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+      <line x1="60" y1="20" x2="60" y2="200" stroke="#212b3a"/>
+      <line x1="60" y1="200" x2="650" y2="200" stroke="#212b3a"/>
+      <text x="20" y="110" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10" transform="rotate(-90 20 110)">Accuracy</text>
+      <text x="350" y="222" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Latency →</text>
+
+      <circle cx="560" cy="45" r="8" fill="#c07bff"/><text x="560" y="30" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10">Qwen 72B</text>
+      <circle cx="470" cy="70" r="8" fill="#3fb6ff"/><text x="470" y="55" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10">Llama 3 70B</text>
+      <circle cx="150" cy="90" r="9" fill="#5fd9a0"/><text x="150" y="75" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5" font-weight="700">Phi-3</text>
+      <text x="150" y="112" text-anchor="middle" fill="#5fd9a0" font-family="JetBrains Mono" font-size="9">best balance</text>
+    </svg>
+  </div>
+
+  <table>
+    <tr><th>Medical leaderboard</th><th>Accuracy</th></tr>
+    <tr><td>Clinical knowledge</td><td class="mono">91%</td></tr>
+    <tr><td>Genetics</td><td class="mono">98%</td></tr>
+    <tr><td>Professional medicine</td><td class="mono">98.9%</td></tr>
+    <tr><td>Anatomy</td><td class="mono">98%</td></tr>
+  </table>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>As models saturated the older benchmarks (MMLU, HellaSwag) above 90%, the field moved to genuinely harder tests (Humanity's Last Exam, GPQA) where even top models only clear ~35%. A model's benchmark rank also depends on what you're optimizing for — Qwen beats Llama on raw MATH/GPQA scores, but Phi-3 wins on the accuracy-vs-latency trade-off that matters for real-time applications, so "best" is only meaningful relative to your specific constraint. The medical benchmark scores are the clearest case of the gap: 98.9% on a professional medicine exam measures recall of medical knowledge, not clinical judgment, patient communication, or accountability for a wrong diagnosis — which is exactly what's missing from the number.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Pick the benchmark that matches your actual deployment constraint (accuracy-vs-latency for a real-time product, raw reasoning score for an offline research tool) — never adopt a model based on a leaderboard rank that optimizes for a dimension you don't actually care about.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 13 ============ -->
+<section class="block" id="t13">
+  <div class="kicker"><span class="num">13</span><span class="layer-tag">Applied Practice</span><span class="code">M6R1D95</span></div>
+  <h2 class="title">Practice Opportunities</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>A spiral-shaped dataset is much harder to separate than two circles. What's your first instinct to fix a model that's failing on it — more epochs, or a bigger architecture?</li>
+    </ol>
+  </div>
+
+  <h3 class="subtitle">TensorFlow Playground — spiral dataset</h3>
+  <ul>
+    <li>A harder dataset (spiral) requires more model capacity to fit</li>
+    <li>Increase hidden layers/neurons for a better fit</li>
+    <li>Tune the learning rate for stability</li>
+    <li>More epochs alone won't fix it if the architecture itself is too small</li>
+  </ul>
+
+  <h3 class="subtitle">Mapping architectures to problems</h3>
+  <table>
+    <tr><th>Problem</th><th>Best architecture</th></tr>
+    <tr><td>Electricity consumption forecasting</td><td>LSTM (time series)</td></tr>
+    <tr><td>Handwritten digit recognition</td><td>CNN (images)</td></tr>
+    <tr><td>Generate synthetic faces</td><td>GANs (generation)</td></tr>
+    <tr><td>Anomaly detection</td><td>Autoencoder</td></tr>
+    <tr><td>English → French translation</td><td>Transformers (NLP)</td></tr>
+  </table>
+
+  <h3 class="subtitle">Classification metrics — fraud detection recap</h3>
+  <p>Accuracy 92% (misleading, imbalanced), Precision 58.3% (many false positives), Recall 70% (missing 30% of fraud) — the bank prioritizes precision for customer experience.</p>
+
+  <h3 class="subtitle">Regression metrics — Walmart sales forecasting</h3>
+  <table>
+    <tr><th>Metric</th><th>Value</th></tr>
+    <tr><td>MAE</td><td class="mono">$70,000 average error</td></tr>
+    <tr><td>MSE</td><td class="mono">5.13 × 10⁹ (large, hard to interpret)</td></tr>
+    <tr><td>RMSE</td><td class="mono">$71,000 — "off by $71K on average"</td></tr>
+  </table>
+  <p>For a VP: "The model forecasts sales with roughly $70K accuracy" — this is the sentence RMSE was built for.</p>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>These four practice scenarios are Topics 3, 5, 6, and 7 applied concretely: a hard dataset needs more capacity, not just more epochs; problem shape (sequential, visual, generative, anomaly, translation) maps predictably to architecture family; and both the fraud and Walmart examples confirm the same lesson — the "best" metric is the one that reflects the real business cost, and it needs to be translated into a plain-language sentence a non-technical stakeholder can act on.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>When a model underperforms on a genuinely hard dataset (like the spiral), diagnose capacity vs. training time separately — plot training loss vs. epoch; if loss plateaus early and high, that's a capacity problem (fix the architecture), not a training-duration problem (more epochs won't help).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 14 : reference ============ -->
+<section class="block" id="t14">
+  <div class="kicker"><span class="layer-tag">Reference</span><span class="code">W3G8B42</span></div>
+  <h2 class="title">Module Summary &amp; Glossary</h2>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">01</div><h4>Models are math</h4><p>Neural networks mimic the brain mathematically. Training = optimizing weights. Compute grew 10 billion-fold since 2010.</p></div>
+    <div class="card"><div class="n">02</div><h4>Architecture choice matters</h4><p>CNN: images. RNN/LSTM: sequential. Transformers: NLP, state-of-the-art. GANs: generation. Autoencoders: anomaly detection.</p></div>
+    <div class="card"><div class="n">03</div><h4>Evaluation metrics</h4><p>Classification: accuracy, precision, recall, F1. Regression: MAE, MSE, RMSE, R². Choose based on business impact.</p></div>
+    <div class="card"><div class="n">04</div><h4>Training infrastructure</h4><p>CPU: general purpose. GPU: best for neural nets. TPU: Google's AI chip. Cloud &gt; local for scalability.</p></div>
+    <div class="card"><div class="n">05</div><h4>Experiment tracking</h4><p>Track params, metrics, code versions. Tools: W&amp;B, MLflow, Comet ML. Ensures reproducibility.</p></div>
+    <div class="card"><div class="n">06</div><h4>Transfer learning</h4><p>Reuse pre-trained models for similar tasks. Saves time, data, compute. Fine-tune final layers.</p></div>
+    <div class="card"><div class="n">07</div><h4>Choosing the right LLM</h4><p>Define needs → choose type → choose size → open/closed source → plan scaling. Use leaderboards carefully.</p></div>
+  </div>
+
+  <h3 class="subtitle">Glossary</h3>
+  <table>
+    <tr><th>Term</th><th>Definition</th></tr>
+    <tr><td class="mono">Neural network</td><td>Computational model inspired by the brain</td></tr>
+    <tr><td class="mono">Weight</td><td>Connection strength between neurons</td></tr>
+    <tr><td class="mono">Epoch</td><td>One full pass through training data</td></tr>
+    <tr><td class="mono">Batch size</td><td>Number of samples processed per update</td></tr>
+    <tr><td class="mono">Learning rate</td><td>Speed of weight updates</td></tr>
+    <tr><td class="mono">Loss / error</td><td>Difference between prediction and truth</td></tr>
+    <tr><td class="mono">Backpropagation</td><td>Algorithm to update weights via gradients</td></tr>
+    <tr><td class="mono">CNN</td><td>Convolutional Neural Network (images)</td></tr>
+    <tr><td class="mono">RNN</td><td>Recurrent Neural Network (sequential)</td></tr>
+    <tr><td class="mono">LSTM</td><td>Long Short-Term Memory (enhanced RNN)</td></tr>
+    <tr><td class="mono">Transformer</td><td>Architecture using self-attention</td></tr>
+    <tr><td class="mono">GAN</td><td>Generative Adversarial Network</td></tr>
+    <tr><td class="mono">Autoencoder</td><td>Compresses &amp; reconstructs data</td></tr>
+    <tr><td class="mono">Transfer learning</td><td>Reuse a pre-trained model for a new task</td></tr>
+    <tr><td class="mono">Fine-tuning</td><td>Retrain final layers on new data</td></tr>
+    <tr><td class="mono">Accuracy</td><td>(TP+TN)/Total — overall correctness</td></tr>
+    <tr><td class="mono">Precision</td><td>TP/(TP+FP) — correct positive predictions</td></tr>
+    <tr><td class="mono">Recall</td><td>TP/(TP+FN) — capturing actual positives</td></tr>
+    <tr><td class="mono">F1-Score</td><td>Harmonic mean of precision &amp; recall</td></tr>
+    <tr><td class="mono">MAE</td><td>Mean Absolute Error (regression)</td></tr>
+    <tr><td class="mono">MSE</td><td>Mean Squared Error (regression)</td></tr>
+    <tr><td class="mono">RMSE</td><td>Root Mean Squared Error (regression)</td></tr>
+    <tr><td class="mono">R-squared</td><td>Proportion of variance explained</td></tr>
+    <tr><td class="mono">GPU</td><td>Graphics Processing Unit (parallel compute)</td></tr>
+    <tr><td class="mono">TPU</td><td>Tensor Processing Unit (Google AI chip)</td></tr>
+  </table>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ The one line to remember</div>
+      <p>"The model is the brain, but it's only as good as the data you feed it." Choose the right architecture, evaluate with the right metrics, and track everything for reproducibility.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ACTIVE RECALL ============ -->
+<section class="block" id="recall">
+  <div class="kicker"><span class="layer-tag">Active Recall</span><span class="code">X7F5N61</span></div>
+  <h2 class="title">Test yourself — deep thought questions</h2>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">If a neural network with 100 neurons performs as well as one with 1000, which should you choose? What factors matter besides accuracy?</div>
+    <div class="ra">Choose the smaller one, all else equal — it trains faster, costs less to serve at inference time, and is less prone to overfitting on future data. Beyond accuracy, weigh training/inference cost, latency requirements, interpretability (smaller models are often easier to inspect), and how much headroom you need for the model to keep performing as real-world data drifts from the training distribution.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">Transformers process all tokens in parallel with no recurrence. Does that mean they're "less intelligent" than RNNs, which process sequentially?</div>
+    <div class="ra">No — sequential processing isn't a proxy for intelligence, it's just one architectural strategy for handling order. Transformers actually capture long-range dependencies better than RNNs precisely because self-attention lets every token reference every other token directly, rather than passing information through a compressed hidden state one step at a time. Parallelism is a training/inference efficiency and modeling-power advantage, not a step down in capability.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">In fraud detection, the bank prioritizes precision over recall. But what if the bank is losing millions to undetected fraud? Should they shift to recall?</div>
+    <div class="ra">The right answer depends on quantifying both costs directly — the dollar cost of missed fraud (false negatives) versus the cost of blocked legitimate transactions and customer churn (false positives) — and choosing the threshold that minimizes total expected cost, not defaulting to either metric by habit. If undetected fraud losses genuinely exceed the customer-experience cost of more false positives, that's a signal to shift the decision threshold toward recall, ideally validated with real financial data rather than intuition.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">Transfer learning works well when domains are similar. What if you're detecting tumors in X-rays and the pre-trained model was trained on natural images? Would transfer learning still help?</div>
+    <div class="ra">Usually yes, but with a caveat — the earliest CNN layers learn very general features (edges, textures, gradients) that transfer reasonably well even across very different domains like natural photos and X-rays. The benefit shrinks the deeper you go, since later layers encode increasingly domain-specific patterns (like "dog ear" shapes) that don't apply to medical imaging — so the practical approach is to keep early layers frozen, unfreeze and fine-tune more of the later layers, and expect a smaller boost than a same-domain transfer would give.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">Open-source LLMs are free but require expertise. Proprietary LLMs are paid but easier. For a non-tech company, which is more cost-effective long-term?</div>
+    <div class="ra">For most non-tech companies, proprietary APIs are more cost-effective — the "free" cost of open source is misleading once you account for the ML engineering and MLOps expertise needed to deploy, secure, and maintain it reliably, expertise a non-tech company typically doesn't have in-house and would need to hire or consult for. The calculus flips only at genuinely large, predictable usage volumes where the API's per-token cost eventually exceeds the cost of an internal team.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">LLM benchmarks show models scoring &gt;90% on medical exams. But can they replace doctors? What's missing from benchmark evaluations?</div>
+    <div class="ra">Benchmarks measure recall of medical knowledge under exam conditions — they don't measure clinical judgment under uncertainty, physical examination, reading a patient's non-verbal cues, taking legal and ethical accountability for a decision, or handling the countless edge cases and comorbidities that don't fit neatly into an exam question. A high exam score is a necessary but nowhere near sufficient signal for replacing the actual practice of medicine.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">Compute doubles every 5-6 months. What happens when we have effectively infinite compute? Will we just build larger models forever?</div>
+    <div class="ra">Almost certainly not indefinitely — data availability, energy costs, and diminishing returns on scale (each further doubling has historically bought smaller capability gains) are more likely to bind before compute itself runs out. The field has already started shifting some effort toward efficiency (smaller models matching larger ones, per Topic 3's "quality over size" theme) rather than purely chasing scale, suggesting compute won't be the only lever pulled going forward.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">GANs can generate realistic fake images. How can we distinguish real from fake? Should we develop detection systems or focus on regulation?</div>
+    <div class="ra">Both, and neither alone is sufficient — detection systems (often themselves ML models trained to spot generation artifacts) are in a constant arms race with generators that improve specifically to evade them, so detection alone degrades over time. Regulation (mandatory content provenance/watermarking, disclosure requirements) addresses the incentive structure rather than trying to win a technical arms race, which is why most serious proposals combine both: technical detection as a first line of defense, and policy/provenance standards as the more durable backstop.</div>
+  </div>
+
+</section>
+
+<footer>ARCHITECTS LAB — Study Note 025 — Model Development &amp; Validation — prime, learn, recap, and view it from every seat at the table<br><br>Source: <a href="https://www.udemy.com/course/ai-project-lifecycle-mastery-strategy-to-deployment/learn/lecture/50482271#overview" target="_blank" rel="noopener" style="color:var(--blueprint);">AI Project Lifecycle Mastery: Strategy to Deployment — Udemy</a></footer>
+
+</body>
+</html>

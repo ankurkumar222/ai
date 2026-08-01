@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Strategy &amp; Preparation · Architects Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0e14;
+    --panel: #10151d;
+    --panel-2: #151b25;
+    --panel-3: #192132;
+    --grid: #1c2430;
+    --line: #212b3a;
+    --ink: #c7d0dc;
+    --ink-dim: #7c8898;
+    --ink-bright: #eef2f7;
+    --blueprint: #3fb6ff;
+    --blueprint-dim: #1f4a63;
+    --amber: #ffb454;
+    --green: #5fd9a0;
+    --red: #ff6b6b;
+    --violet: #c07bff;
+    --radius: 4px;
+    --display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/42px 42px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/42px 42px,
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.65;
+    padding:0 0 90px 0;
+  }
+  a{color:var(--blueprint);}
+
+  .top-link-banner{
+    max-width:952px; margin:24px auto 0 auto; padding:14px 26px;
+    background:linear-gradient(90deg, rgba(63,182,255,.12), rgba(192,123,255,.08));
+    border:1px solid var(--blueprint); border-radius:var(--radius);
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .top-link-banner .tlb-tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--amber); font-weight:700; white-space:nowrap;}
+  .top-link-banner a{font-family:var(--mono); font-size:13px; color:var(--ink-bright); text-decoration:none; border-bottom:1px dashed var(--blueprint);}
+  .top-link-banner a:hover{color:var(--blueprint);}
+
+  .course-box{
+    margin:10px auto 0 auto; max-width:952px; padding:18px 26px;
+    background:var(--panel-2); border:1px solid var(--blueprint-dim); border-left:4px solid var(--blueprint);
+    border-radius:var(--radius); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px;
+  }
+  .course-box .label{font-family:var(--mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--blueprint);}
+  .course-box .sub{font-family:var(--mono); font-size:12px; color:var(--ink-dim);}
+
+  header.hero{max-width:952px; margin:22px auto 0 auto; padding:44px 26px 24px;}
+  header.hero h1{font-family:var(--display); font-size:clamp(30px,4.4vw,46px); font-weight:700; color:var(--ink-bright); margin:0 0 10px 0; letter-spacing:-.01em; line-height:1.12;}
+  header.hero .tagline{font-family:var(--mono); color:var(--amber); font-size:14px; letter-spacing:.04em; margin-bottom:16px;}
+  header.hero p.lede{max-width:720px; color:var(--ink-dim); font-size:16px;}
+
+  nav.toc{max-width:952px; margin:0 auto 20px; padding:18px 26px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);}
+  nav.toc .cap{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:10px;}
+  nav.toc ol{margin:0; padding-left:20px; columns:2; gap:24px;}
+  nav.toc li{font-size:13.5px; margin-bottom:7px;}
+  nav.toc a{color:var(--ink); text-decoration:none;}
+  nav.toc a:hover{color:var(--blueprint);}
+  .toc-code{font-family:var(--mono); font-size:10px; color:var(--ink-dim); letter-spacing:.04em;}
+
+  section.block{max-width:952px; margin:0 auto; padding:36px 26px; border-top:1px solid var(--line);}
+  .kicker{display:flex; align-items:center; gap:12px; margin-bottom:6px;}
+  .kicker .num{font-family:var(--mono); font-size:12px; color:var(--bg); background:var(--blueprint); padding:3px 9px; border-radius:3px; font-weight:700; letter-spacing:.03em;}
+  .kicker .layer-tag{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-dim);}
+  .kicker .code{margin-left:auto; font-family:var(--mono); font-size:10px; letter-spacing:.06em; color:var(--bg); background:var(--violet); padding:2px 8px; border-radius:3px; font-weight:700;}
+  h2.title{font-family:var(--display); font-size:25px; color:var(--ink-bright); margin:4px 0 14px 0; font-weight:600;}
+  h3.subtitle{font-family:var(--display); font-size:16.5px; color:var(--ink-bright); margin:22px 0 10px 0; font-weight:600;}
+  p{margin:0 0 14px 0; font-size:15.5px;}
+  ul{margin:0 0 14px 0; padding-left:20px;}
+  li{margin-bottom:6px; font-size:15px;}
+  strong{color:var(--ink-bright);}
+  code{font-family:var(--mono); background:var(--panel-3); padding:1px 6px; border-radius:3px; font-size:.87em; color:var(--blueprint); border:1px solid var(--line);}
+
+  .diagram-frame{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 14px 10px; margin:18px 0 22px 0; overflow-x:auto;}
+  .diagram-frame .cap{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); padding:0 6px 12px; display:flex; justify-content:space-between;}
+  .diagram-frame svg{display:block; width:100%; height:auto; min-width:560px;}
+
+  .prime-box{background:linear-gradient(180deg, rgba(192,123,255,.07), transparent); border:1px solid var(--violet); border-radius:var(--radius); padding:16px 18px; margin:6px 0 26px 0;}
+  .prime-box .ptag{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--violet); font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .prime-box .ptag::before{content:"◆"; font-size:9px;}
+  .prime-box ol{margin:0; padding-left:20px;}
+  .prime-box li{font-family:var(--mono); font-size:13px; color:var(--ink); margin-bottom:8px;}
+  .prime-box .hint{font-size:12.5px; color:var(--ink-dim); font-style:italic; margin-top:6px;}
+
+  .recap{background:var(--panel-2); border:1px solid var(--green); border-left:4px solid var(--green); border-radius:var(--radius); padding:16px 20px; margin:26px 0 18px 0;}
+  .recap .rtag{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--green); font-weight:700; margin-bottom:8px;}
+  .recap p{margin:0; font-size:14.5px; color:var(--ink);}
+
+  .persp-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:14px; margin:0 0 8px 0;}
+  .persp-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px;}
+  .persp-card.cto{border-top:3px solid var(--amber);}
+  .persp-card.arch{border-top:3px solid var(--blueprint);}
+  .persp-card.pm{border-top:3px solid var(--violet);}
+  .persp-card .ptitle{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .persp-card.cto .ptitle{color:var(--amber);}
+  .persp-card.arch .ptitle{color:var(--blueprint);}
+  .persp-card.pm .ptitle{color:var(--violet);}
+  .persp-card p{font-size:13.8px; color:var(--ink-dim); margin:0;}
+
+  table{width:100%; border-collapse:collapse; margin:16px 0 22px 0; font-size:13.5px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+  th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--blueprint); background:var(--panel-2);}
+  td{color:var(--ink);}
+  tr:last-child td{border-bottom:none;}
+  td.mono{font-family:var(--mono); font-size:12.5px;}
+  .yes{color:var(--green); font-weight:600;}
+  .no{color:var(--red); font-weight:600;}
+  .warn{color:var(--amber); font-weight:600;}
+
+  .card-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; margin:18px 0;}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px;}
+  .card .n{font-family:var(--mono); color:var(--blueprint); font-size:12px; font-weight:700; margin-bottom:6px;}
+  .card h4{font-family:var(--display); color:var(--ink-bright); font-size:15px; margin:0 0 8px 0;}
+  .card p{font-size:13.8px; color:var(--ink-dim); margin:0;}
+  .card ul{margin:6px 0 0 0; padding-left:16px;}
+  .card li{font-size:12.8px; color:var(--ink-dim); margin-bottom:3px;}
+
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0;}
+  @media (max-width:640px){.two-col{grid-template-columns:1fr;}}
+  .col-panel{border-radius:var(--radius); padding:16px 18px; border:1px solid var(--line); background:var(--panel);}
+  .col-panel.in{border-left:3px solid var(--green);}
+  .col-panel.out{border-left:3px solid var(--red);}
+  .col-panel .ctag{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; margin-bottom:8px;}
+  .col-panel.in .ctag{color:var(--green);}
+  .col-panel.out .ctag{color:var(--red);}
+  .col-panel ul{margin:0; padding-left:18px;}
+  .col-panel li{font-size:13.5px; margin-bottom:5px;}
+
+  .callout{background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; margin:16px 0;}
+  .callout.amber{border-left:3px solid var(--amber);}
+  .callout .ctitle{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:6px;}
+  .callout.amber .ctitle{color:var(--amber);}
+
+  .recall{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px 18px; margin:10px 0; cursor:pointer;}
+  .recall .rq{font-family:var(--mono); font-size:13.5px; color:var(--violet); display:flex; align-items:flex-start; gap:8px;}
+  .recall .rq::before{content:"Q ›"; color:var(--ink-dim); flex-shrink:0;}
+  .recall .ra{display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:14px; color:var(--ink-dim);}
+  .recall.open .ra{display:block;}
+  .recall .ra::before{content:"A › "; color:var(--green); font-family:var(--mono);}
+
+  footer{max-width:952px; margin:40px auto 0; padding:22px 26px 0; font-family:var(--mono); font-size:11px; color:var(--ink-dim); letter-spacing:.06em; text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="top-link-banner">
+  <span class="tlb-tag">📎 SOURCE LECTURE</span>
+  <a href="https://www.udemy.com/course/ai-project-lifecycle-mastery-strategy-to-deployment/learn/lecture/50482271#overview" target="_blank" rel="noopener">AI Project Lifecycle Mastery: Strategy to Deployment — Udemy ↗</a>
+</div>
+
+<div class="course-box">
+  <div class="label">Architects Lab · Study Note 024</div>
+  <div class="sub">Domain: Data Strategy &amp; Preparation · Format: Prime → Learn → Recap → Perspective</div>
+</div>
+
+<header class="hero">
+  <div class="tagline">GARBAGE IN = GARBAGE OUT — DATA IS THE FUEL OF AI</div>
+  <h1>Data Strategy &amp; Preparation</h1>
+  <p class="lede">From why data strategy matters down to Pandas code cleaning a real client dataset — the module that explains why 80% of an AI project's time goes here. Same rhythm throughout: prime with a few questions, learn the concept, recap what stuck, then view it from the CTO's, the Architect's, and the PM's seat.</p>
+</header>
+
+<nav class="toc">
+  <div class="cap">Contents</div>
+  <ol>
+    <li><a href="#t1">The Critical Role of Data in AI</a> <span class="toc-code">Z5W9R14</span></li>
+    <li><a href="#t2">What Is a Data Strategy?</a> <span class="toc-code">Q8T3M67</span></li>
+    <li><a href="#t3">9 Key Components of a Data Strategy</a> <span class="toc-code">H1D6X92</span></li>
+    <li><a href="#t4">Structured vs Unstructured Data</a> <span class="toc-code">K7N4B35</span></li>
+    <li><a href="#t5">Labeled vs Unlabeled Data</a> <span class="toc-code">V3F8L20</span></li>
+    <li><a href="#t6">Supervised, Unsupervised &amp; Reinforcement Learning</a> <span class="toc-code">R9C2Y58</span></li>
+    <li><a href="#t7">Data Sources</a> <span class="toc-code">M4J7H16</span></li>
+    <li><a href="#t8">Data Quality Assessment</a> <span class="toc-code">B6P1W83</span></li>
+    <li><a href="#t9">Data Wrangling &amp; Feature Engineering</a> <span class="toc-code">N2X5T94</span></li>
+    <li><a href="#t10">Practical Example: Pandas Case Study</a> <span class="toc-code">D8G3K61</span></li>
+    <li><a href="#t11">Data Labeling: Process &amp; Cost</a> <span class="toc-code">W5R7Q42</span></li>
+    <li><a href="#t12">Data Storage: DB vs Warehouse vs Lake</a> <span class="toc-code">Y1H9C38</span></li>
+    <li><a href="#t13">Pipelines, Security &amp; Governance</a> <span class="toc-code">F3M6V75</span></li>
+    <li><a href="#t14">Summary, Research Insight &amp; Glossary</a> <span class="toc-code">L9B2N40</span></li>
+    <li><a href="#recall">Active Recall Deck</a> <span class="toc-code">X4T8D26</span></li>
+  </ol>
+</nav>
+
+<!-- ============ TOPIC 1 ============ -->
+<section class="block" id="t1">
+  <div class="kicker"><span class="num">01</span><span class="layer-tag">Foundations</span><span class="code">Z5W9R14</span></div>
+  <h2 class="title">The Critical Role of Data in AI</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>If Data, Model, and Compute are equally important ingredients, why does data specifically get called "the fuel"?</li>
+      <li>Guess before reading: what percentage of an AI project's time is spent on data preparation vs. actual model training?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 1.1 — THREE INGREDIENTS, ONE IS THE FUEL</span><span>garbage in = garbage out</span></div>
+    <svg viewBox="0 0 820 180" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="20" width="230" height="140" rx="6" fill="#151b25" stroke="#3fb6ff" stroke-width="1.8"/>
+      <text x="135" y="52" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="14" font-weight="700">DATA</text>
+      <text x="135" y="76" text-anchor="middle" fill="#ffb454" font-family="JetBrains Mono" font-size="11" font-weight="700">= FUEL</text>
+      <text x="135" y="100" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">without it, nothing</text>
+      <text x="135" y="116" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">else moves</text>
+      <text x="290" y="100" fill="#c7d0dc" font-family="Space Grotesk" font-size="20" font-weight="700">+</text>
+
+      <rect x="315" y="20" width="230" height="140" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="430" y="52" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="14" font-weight="700">MODEL</text>
+      <text x="430" y="76" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Algorithm</text>
+      <text x="430" y="94" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Math · Patterns</text>
+      <text x="585" y="100" fill="#c7d0dc" font-family="Space Grotesk" font-size="20" font-weight="700">+</text>
+
+      <rect x="610" y="20" width="190" height="140" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="705" y="52" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="14" font-weight="700">COMPUTE</text>
+      <text x="705" y="76" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">GPUs / TPUs</text>
+      <text x="705" y="94" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">Cloud resources</text>
+    </svg>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 1.2 — THE 80/20 RULE OF DATA SCIENCE</span><span>where the time actually goes</span></div>
+    <svg viewBox="0 0 820 130" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="30" width="640" height="50" fill="#3fb6ff"/>
+      <rect x="660" y="30" width="160" height="50" fill="#212b3a"/>
+      <text x="340" y="60" text-anchor="middle" fill="#0a0e14" font-family="Space Grotesk" font-size="14" font-weight="700">80% — Data prep, cleaning, wrangling</text>
+      <text x="740" y="60" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">20% Model</text>
+      <text x="420" y="106" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">the part nobody's job posting mentions is the part that eats the calendar</text>
+    </svg>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Data, Model, and Compute are equally necessary, but data alone is called "the fuel" because a great algorithm and unlimited GPUs produce nothing without it — and that dependency shows up directly in how time gets spent: roughly 80% of a real AI project goes into preparing data, only 20% into training and tuning the model itself.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>If your team's time allocation doesn't roughly match 80/20, that's a signal worth investigating — either the data pipeline is unusually mature, or (far more likely) data quality problems are about to surface downstream in evaluation or production.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Timeline estimates that don't explicitly budget 80% of the schedule for data work are the single most common reason AI project timelines slip — pad the data phase, not the modeling phase.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 2 ============ -->
+<section class="block" id="t2">
+  <div class="kicker"><span class="num">02</span><span class="layer-tag">Strategy</span><span class="code">Q8T3M67</span></div>
+  <h2 class="title">What Is a Data Strategy?</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>What's the difference between "having data" and "having a data strategy"?</li>
+      <li>Which regulation carries a fine of up to 4% of global revenue — and why would that make data strategy a board-level topic?</li>
+    </ol>
+  </div>
+
+  <p><strong>Definition:</strong> a comprehensive plan that defines how an organization will collect, manage, govern, share, and use data to support AI projects.</p>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">01</div><h4>Enables reliable model training</h4><p>Without a strategy, models are built on quicksand.</p></div>
+    <div class="card"><div class="n">02</div><h4>Reduces bias, privacy &amp; governance risk</h4><p>Prevents reputational damage and legal exposure.</p></div>
+    <div class="card"><div class="n">03</div><h4>Ensures reusability across teams</h4><p>Data becomes an asset, not a one-time cost.</p></div>
+    <div class="card"><div class="n">04</div><h4>Supports regulatory compliance</h4><p>GDPR fines: up to €20M or 4% of global revenue. HIPAA: health data protection requirements.</p></div>
+    <div class="card"><div class="n">05</div><h4>Aligns AI with business goals</h4><p>Translates data capabilities into business value and KPIs.</p></div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Having data isn't the same as having a data strategy — a strategy is the deliberate plan for how data gets collected, governed, shared, and reused across the organization. It matters for five concrete reasons, and one of them (GDPR's 4%-of-global-revenue fine) turns data strategy from an engineering concern into a board-level risk conversation.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Treat data governance failures the same way you'd treat a security breach in your risk register — a GDPR fine at 4% of global revenue can dwarf the cost of the AI project it was supporting.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 3 ============ -->
+<section class="block" id="t3">
+  <div class="kicker"><span class="num">03</span><span class="layer-tag">Components</span><span class="code">H1D6X92</span></div>
+  <h2 class="title">9 Key Components of a Data Strategy</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Before reading — list 3 things you think a complete data strategy has to cover beyond "collect data."</li>
+    </ol>
+  </div>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">1</div><h4>Data discovery &amp; audit</h4><p>Identify existing sources, evaluate availability/quality/gaps — what do we already have?</p></div>
+    <div class="card"><div class="n">2</div><h4>Data collection plan</h4><p>How will we collect it — sensors, APIs, manual, logs? What frequency — real-time, daily, batch?</p></div>
+    <div class="card"><div class="n">3</div><h4>Data quality management</h4><p>Define quality metrics: accuracy, completeness, consistency, timeliness, validity.</p></div>
+    <div class="card"><div class="n">4</div><h4>Data governance</h4><p>Define roles and responsibilities, implement versioning — who owns and manages the data?</p></div>
+    <div class="card"><div class="n">5</div><h4>Data privacy &amp; compliance</h4><p>Adhere to GDPR/HIPAA, anonymize PII, implement consent management.</p></div>
+    <div class="card"><div class="n">6</div><h4>Data storage &amp; access</h4><p>Data lake vs warehouse, access levels via principle of least privilege.</p></div>
+    <div class="card"><div class="n">7</div><h4>Data labeling</h4><p>For supervised learning — labeling guidelines, cost ($0.08–$3.00/object), quality control.</p></div>
+    <div class="card"><div class="n">8</div><h4>Data integration</h4><p>Merge datasets from multiple sources, build ETL pipelines, ensure consistent formatting.</p></div>
+    <div class="card"><div class="n">9</div><h4>Data strategy KPIs</h4><p>Model accuracy improvements, time-to-insight reduction, data accessibility scores.</p></div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>A complete data strategy spans nine components, from discovery all the way to KPIs that prove it's working — and notably, "collect the data" is only one of nine, with governance, privacy, storage, and labeling each demanding just as much deliberate planning.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Components 4-6 (governance, privacy, storage) are the ones that need to be architected before data starts flowing — retrofitting access control and PII anonymization onto a live data lake is far more disruptive than designing them in from component 1.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 4 ============ -->
+<section class="block" id="t4">
+  <div class="kicker"><span class="num">04</span><span class="layer-tag">Data Types</span><span class="code">K7N4B35</span></div>
+  <h2 class="title">Structured vs Unstructured Data</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Most of the world's data is unstructured, yet enterprise data strategy is still dominated by structured databases. Why the gap?</li>
+    </ol>
+  </div>
+
+  <table>
+    <tr><th>Structured data</th><th>Unstructured data</th></tr>
+    <tr><td>Organized in a predefined schema — rows/columns. Easy to store, access, analyze. Examples: Excel, CSV, SQL tables, Pandas DataFrames.</td><td>No predefined data model. Requires pre-processing to extract features. Examples: text, images, audio, video. Formats: JSON, MP4, MP3, PDF.</td></tr>
+  </table>
+
+  <table>
+    <tr><th>ID</th><th>Name</th><th>Age</th><th>City</th><th>Advisor</th></tr>
+    <tr><td class="mono">101</td><td>Alice</td><td>34</td><td>New York</td><td>John</td></tr>
+    <tr><td class="mono">102</td><td>Bob</td><td>45</td><td>Chicago</td><td>Sarah</td></tr>
+    <tr><td class="mono">103</td><td>Carol</td><td>29</td><td>Austin</td><td>Mike</td></tr>
+  </table>
+  <p><strong>Unstructured examples:</strong> free text ("The patient reported chest pain and shortness of breath"), raw image pixel data with no schema, or semi-structured JSON like <code>{"patient_id": 123, "symptoms": ["chest_pain", "fatigue"]}</code>.</p>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Structured data fits neatly into rows and columns and is cheap to query; unstructured data — text, images, audio, video — carries no schema and needs pre-processing before a model can use it. Traditional databases still dominate enterprise strategy mostly because structured data is cheaper and faster to govern and query, even though unstructured data is the larger and faster-growing share of what organizations actually generate.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Design storage by data type, not by department — structured data belongs in a warehouse for fast queries, unstructured belongs in a lake, and a system that forces both through the same schema-on-write store will bottleneck on the unstructured side.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 5 ============ -->
+<section class="block" id="t5">
+  <div class="kicker"><span class="num">05</span><span class="layer-tag">Labels</span><span class="code">V3F8L20</span></div>
+  <h2 class="title">Labeled vs Unlabeled Data</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Why is labeled data described as "higher quality but limited scale" while unlabeled is "abundant but less structured"?</li>
+    </ol>
+  </div>
+
+  <table>
+    <tr><th>Labeled data</th><th>Unlabeled data</th></tr>
+    <tr><td>Data WITH associated tags/labels. Required for supervised learning. Expensive to create (human labeling). Higher quality, limited scale.</td><td>Data WITHOUT tags/labels. Used for unsupervised learning. Easy to access, no manual labeling. Abundant but less structured.</td></tr>
+  </table>
+
+  <div class="two-col">
+    <div class="col-panel in">
+      <div class="ctag">Labeled examples</div>
+      <ul>
+        <li>🖼️ Image of a dog → label: "Dog"</li>
+        <li>📧 "Win free iPhone" → label: "Spam"</li>
+        <li>🏦 $500 transaction → label: "Legitimate"</li>
+      </ul>
+    </div>
+    <div class="col-panel out">
+      <div class="ctag">Unlabeled examples</div>
+      <ul>
+        <li>🖼️ Image → no label</li>
+        <li>📧 "Meeting at 3pm" → no label</li>
+        <li>🏦 $1,000,000 transfer → no label</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>The trade-off is direct: labeling requires human effort, so labeled datasets are smaller and pricier but power supervised learning's precision; unlabeled data costs nothing extra to collect, so it's abundant and feeds unsupervised methods that find structure without being told the answer in advance.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Before committing to a supervised approach, check whether the labeled data actually exists or has to be created — that decision alone can move a project's budget by 10x (see the labeling cost topic later).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 6 ============ -->
+<section class="block" id="t6">
+  <div class="kicker"><span class="num">06</span><span class="layer-tag">Learning Types</span><span class="code">R9C2Y58</span></div>
+  <h2 class="title">Supervised, Unsupervised &amp; Reinforcement Learning</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>A baby learning not to touch fire isn't shown thousands of labeled "hot/not hot" examples. What kind of learning is that instead?</li>
+      <li>What do clustering and dimensionality reduction have in common that puts them both under "unsupervised"?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 6.1 — SUPERVISED LEARNING</span><span>input → model → known-type output</span></div>
+    <svg viewBox="0 0 820 130" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="d1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="20" y="35" width="220" height="60" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="130" y="62" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Input (x): image of dog</text>
+      <text x="130" y="80" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">labels required</text>
+      <line x1="240" y1="65" x2="290" y2="65" stroke="#3fb6ff" marker-end="url(#d1)"/>
+      <rect x="300" y="35" width="180" height="60" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="390" y="70" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Model</text>
+      <line x1="480" y1="65" x2="530" y2="65" stroke="#3fb6ff" marker-end="url(#d1)"/>
+      <rect x="540" y="35" width="260" height="60" rx="6" fill="#0e1420" stroke="#5fd9a0"/>
+      <text x="670" y="62" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Output (y): "Dog"</text>
+      <text x="670" y="80" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">classification / regression</text>
+    </svg>
+  </div>
+  <p>Use cases: email spam detection, fraud detection, diabetes risk prediction.</p>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 6.2 — UNSUPERVISED LEARNING</span><span>find structure with no labels given</span></div>
+    <svg viewBox="0 0 820 190" xmlns="http://www.w3.org/2000/svg">
+      <text x="30" y="30" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">unlabeled points in</text>
+      <circle cx="120" cy="70" r="9" fill="#3fb6ff"/><circle cx="180" cy="60" r="9" fill="#3fb6ff"/><circle cx="150" cy="100" r="9" fill="#3fb6ff"/>
+      <circle cx="380" cy="65" r="9" fill="#ffb454"/><circle cx="430" cy="90" r="9" fill="#ffb454"/><circle cx="400" cy="115" r="9" fill="#ffb454"/>
+      <circle cx="640" cy="75" r="9" fill="#5fd9a0"/><circle cx="690" cy="60" r="9" fill="#5fd9a0"/><circle cx="670" cy="105" r="9" fill="#5fd9a0"/>
+      <ellipse cx="150" cy="80" rx="55" ry="45" fill="none" stroke="#3fb6ff" stroke-dasharray="4 3"/>
+      <ellipse cx="405" cy="90" rx="55" ry="45" fill="none" stroke="#ffb454" stroke-dasharray="4 3"/>
+      <ellipse cx="665" cy="85" rx="55" ry="45" fill="none" stroke="#5fd9a0" stroke-dasharray="4 3"/>
+      <text x="410" y="165" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">clusters discovered — no ground truth given</text>
+    </svg>
+  </div>
+  <p>Use cases: customer segmentation, anomaly detection, dimensionality reduction.</p>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 6.3 — REINFORCEMENT LEARNING</span><span>learn by trial and error, maximize cumulative reward</span></div>
+    <svg viewBox="0 0 820 190" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="d2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="300" y="15" width="220" height="50" rx="6" fill="#151b25" stroke="#c07bff"/>
+      <text x="410" y="46" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Environment</text>
+      <rect x="300" y="130" width="220" height="50" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="410" y="161" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Agent</text>
+
+      <line x1="300" y1="55" x2="200" y2="130" stroke="#ffb454" stroke-width="1.4" marker-end="url(#d2)"/>
+      <text x="180" y="95" text-anchor="middle" fill="#ffb454" font-family="JetBrains Mono" font-size="10">Reward</text>
+      <text x="180" y="108" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9">(good/bad)</text>
+
+      <line x1="520" y1="130" x2="620" y2="55" stroke="#3fb6ff" stroke-width="1.4" marker-end="url(#d2)"/>
+      <text x="650" y="95" text-anchor="middle" fill="#3fb6ff" font-family="JetBrains Mono" font-size="10">Action</text>
+      <text x="650" y="108" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9">(move, brake)</text>
+    </svg>
+  </div>
+  <p><strong>Example:</strong> a baby learning not to touch fire — touch fire → −10 (penalty), drink milk → +10 (reward); the agent learns to maximize cumulative reward. Use cases: game playing, robotics, self-driving cars.</p>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Supervised learning needs labels to map input to a known output; unsupervised learning finds structure — clusters, reduced dimensions — in data with no labels at all; reinforcement learning needs neither, learning instead from a reward signal generated by interacting with an environment. The baby-and-fire example is RL because there's no pre-labeled dataset of "hot" and "not hot" — the feedback (pain) arrives after the action, exactly like a reward signal.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>The learning type you choose constrains your data strategy long before modeling starts — committing to supervised learning means committing to a labeling budget and pipeline; committing to RL means building a safe simulation environment before any real-world trial and error is acceptable.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 7 ============ -->
+<section class="block" id="t7">
+  <div class="kicker"><span class="num">07</span><span class="layer-tag">Sources</span><span class="code">M4J7H16</span></div>
+  <h2 class="title">Data Sources</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Free, open datasets (Hugging Face, Kaggle) vs. paid, proprietary feeds (Bloomberg) — what's the actual trade-off beyond price?</li>
+    </ol>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="n">Hugging Face</div>
+      <h4>Datasets hub</h4>
+      <ul><li>400,000+ datasets and growing</li><li>Text, image, audio, video</li><li>Free and open source</li><li>Built-in exploration tools</li></ul>
+    </div>
+    <div class="card">
+      <div class="n">Kaggle</div>
+      <h4>Competitions &amp; community</h4>
+      <ul><li>50,000+ public datasets</li><li>ML competition focus</li><li>Real-world company data</li><li>Notebooks &amp; community sharing</li></ul>
+    </div>
+    <div class="card">
+      <div class="n">Bloomberg API</div>
+      <h4>Financial market data</h4>
+      <ul><li>Real-time pricing, news, analytics</li><li>Enterprise-grade for financial AI</li><li>REST API access</li><li>Expensive, but high quality</li></ul>
+    </div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Free sources like Hugging Face and Kaggle are excellent for learning, benchmarking, and general-purpose models, but paid enterprise feeds like Bloomberg exist because certain domains — real-time financial data especially — need freshness, accuracy guarantees, and licensing terms that open datasets simply don't provide.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Budget for data licensing the same way you'd budget for a SaaS subscription — Bloomberg-tier data sources are recurring costs, not one-time acquisitions, and that belongs in the ongoing operations line from the budgeting topic in the PM module.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 8 ============ -->
+<section class="block" id="t8">
+  <div class="kicker"><span class="num">08</span><span class="layer-tag">Quality</span><span class="code">B6P1W83</span></div>
+  <h2 class="title">Data Quality Assessment</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Between 100,000 low-quality samples and 10,000 high-quality samples, which would you bet on — and why?</li>
+      <li>A model tests well on biased test data. How would you even detect that the good score is misleading?</li>
+    </ol>
+  </div>
+
+  <table>
+    <tr><th>Dimension</th><th>Good data</th><th>Bad data</th></tr>
+    <tr><td>Relevance</td><td class="yes">Directly related to the problem</td><td class="no">Unrelated or unnecessary</td></tr>
+    <tr><td>Representation</td><td class="yes">Covers all expected scenarios</td><td class="no">Misses key groups/conditions</td></tr>
+    <tr><td>Accuracy</td><td class="yes">Correct labels, error-free</td><td class="no">Mislabels, errors present</td></tr>
+    <tr><td>Completeness</td><td class="yes">Minimal missing values</td><td class="no">Many missing entries</td></tr>
+    <tr><td>Balance</td><td class="yes">All classes well represented</td><td class="no">One class dominates</td></tr>
+    <tr><td>Consistency</td><td class="yes">Uniform formatting/labeling</td><td class="no">Mixed formats, inconsistent</td></tr>
+    <tr><td>Timeliness</td><td class="yes">Up-to-date, current patterns</td><td class="no">Outdated, stale</td></tr>
+    <tr><td>Privacy/ethics</td><td class="yes">Responsibly collected, anonymized</td><td class="no">Contains PII, harmful biases</td></tr>
+    <tr><td>Signal-to-noise</td><td class="yes">High signal, low noise</td><td class="no">Lots of noise, random entries</td></tr>
+  </table>
+
+  <h3 class="subtitle">Practical example: spam classification</h3>
+  <div class="two-col">
+    <div class="col-panel in">
+      <div class="ctag">✅ Good data</div>
+      <ul>
+        <li>"Win a free iPhone now!" → spam ✅</li>
+        <li>"Meeting agenda attached" → not_spam ✅</li>
+        <li>"Get cheap meds online" → spam ✅</li>
+        <li>"Your Amazon order shipped" → not_spam ✅</li>
+      </ul>
+      <p style="margin-top:8px; font-size:13px;">50/50 balance, correct labels, no duplicates.</p>
+    </div>
+    <div class="col-panel out">
+      <div class="ctag">❌ Bad data</div>
+      <ul>
+        <li>"Win a free iPhone now!" → not_spam ❌ (wrong)</li>
+        <li>"Meeting agenda attached" → spam ❌ (wrong)</li>
+        <li>"Your Amazon order shipped" → not_spam (duplicate row)</li>
+        <li>NULL → NULL ❌ (missing)</li>
+      </ul>
+      <p style="margin-top:8px; font-size:13px;">Unbalanced (2 spam / 4 not_spam), wrong labels, missing data.</p>
+    </div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Data quality isn't one property — it's nine dimensions (relevance, representation, accuracy, completeness, balance, consistency, timeliness, privacy, signal-to-noise), and the spam example shows how a dataset can fail on several at once: wrong labels, a duplicate row, a missing entry, and a class imbalance, all in six rows. Hidden bias is dangerous specifically because it can pass a test set that shares the same bias — which is why representation and balance need to be checked against real-world distribution, not just against the test split.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Research increasingly shows quality beats quantity (see Topic 14) — don't default to "collect more data" as the fix for a struggling model without first auditing against these nine dimensions.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Bias hidden in both train and test sets is invisible to standard evaluation — the mitigation is an independent, out-of-distribution validation set or real-world A/B testing, not just a bigger held-out split from the same source.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 9 ============ -->
+<section class="block" id="t9">
+  <div class="kicker"><span class="num">09</span><span class="layer-tag">Preparation</span><span class="code">N2X5T94</span></div>
+  <h2 class="title">Data Wrangling &amp; Feature Engineering</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>What's the difference between "wrangling" and "feature engineering" — is it just two names for the same cleanup work?</li>
+    </ol>
+  </div>
+
+  <h3 class="subtitle">Data wrangling — cleaning and organizing raw data</h3>
+  <ol>
+    <li>Read raw data from multiple sources</li>
+    <li>Handle missing values (drop or impute)</li>
+    <li>Remove duplicates</li>
+    <li>Fix inconsistent formatting</li>
+    <li>Merge/join datasets</li>
+    <li>Convert data types</li>
+    <li>Validate data quality</li>
+  </ol>
+
+  <h3 class="subtitle">Feature engineering — transforming features to improve model performance</h3>
+  <div class="card-grid">
+    <div class="card"><div class="n">1</div><h4>Feature selection</h4><p>Remove irrelevant/noisy columns; drop highly correlated features (&gt;0.95).</p></div>
+    <div class="card"><div class="n">2</div><h4>Feature scaling</h4><p>Normalize Age (20-80) to 0-1; standardize Income ($0-$1M) to mean=0, σ=1.</p></div>
+    <div class="card"><div class="n">3</div><h4>Feature creation</h4><p>BMI = Weight/Height². Debt-to-Income = Loan/Income. Age Group = Young/Middle/Senior.</p></div>
+    <div class="card"><div class="n">4</div><h4>Encoding categorical data</h4><p>One-hot encoding: City → [NY, CHI, SF]. Label encoding: Risk → [Low, Med, High].</p></div>
+  </div>
+
+  <h3 class="subtitle">Before / after: cleaning messy data</h3>
+  <table>
+    <tr><th>ID</th><th>Name</th><th>Age</th><th>City</th><th>Income</th><th>Risk</th></tr>
+    <tr><td>1</td><td>John</td><td>35</td><td>NYC</td><td>$85,000</td><td>Low</td></tr>
+    <tr><td>2</td><td>Jane</td><td>25</td><td>CHICAGO</td><td>$65,000</td><td>medium</td></tr>
+    <tr><td>3</td><td>Bob</td><td class="no">−5</td><td>SF</td><td>$95,000</td><td>High</td></tr>
+    <tr><td>4</td><td>Mary</td><td>45</td><td class="no">NaN</td><td>$45,000</td><td>Medium</td></tr>
+    <tr><td>5</td><td>Alex</td><td>30</td><td>NYC</td><td>$55,000</td><td>Low</td></tr>
+    <tr><td>6</td><td>Jane</td><td>25</td><td>CHICAGO</td><td>$65,000</td><td class="no">medium (dup.)</td></tr>
+  </table>
+  <p><strong>After wrangling:</strong> row 3 removed (negative age), row 4's missing city filled with the mode (New York), row 6's duplicate removed, currency symbols stripped from Income, Risk encoded (Low=0, Medium=1, High=2), city names standardized.</p>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Wrangling and feature engineering are sequential, not interchangeable: wrangling makes raw, messy data usable at all (fix errors, remove duplicates, handle missing values), while feature engineering takes that clean data and reshapes it specifically to help a model learn better (scaling, encoding, creating derived features like BMI). You wrangle first, then engineer.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Correlation-based feature selection (dropping features &gt;0.95 correlated) needs to happen after wrangling, not before — correlations computed on dirty data (with the negative-age row still in) can be misleading.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 10 ============ -->
+<section class="block" id="t10">
+  <div class="kicker"><span class="num">10</span><span class="layer-tag">Case Study</span><span class="code">D8G3K61</span></div>
+  <h2 class="title">Practical Example: Pandas Case Study</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Two datasets share a Client_ID column. What's the standard Pandas operation to combine them into one table?</li>
+    </ol>
+  </div>
+
+  <p><strong>Problem:</strong> merge client demographics with client financials to analyze the combined dataset.</p>
+
+  <table>
+    <tr><th>Client_ID</th><th>Name</th><th>Age</th><th>City</th><th>Advisor</th></tr>
+    <tr><td class="mono">101</td><td>Alice</td><td>34</td><td>New York</td><td>John</td></tr>
+    <tr><td class="mono">102</td><td>Bob</td><td>45</td><td>Chicago</td><td>Sarah</td></tr>
+    <tr><td class="mono">105</td><td>Eve</td><td class="warn">NaN</td><td>Miami</td><td>Mike</td></tr>
+    <tr><td class="mono">106</td><td>Frank</td><td>38</td><td class="warn">NaN</td><td>Sarah</td></tr>
+  </table>
+
+  <table>
+    <tr><th>Client_ID</th><th>Credit Score</th><th>Tenure</th><th>Loan Amt</th><th>Portfolio</th><th>Risk</th></tr>
+    <tr><td class="mono">101</td><td>720</td><td>5</td><td>50,000</td><td>150,000</td><td>Low</td></tr>
+    <tr><td class="mono">102</td><td>650</td><td>3</td><td>75,000</td><td>100,000</td><td>Med</td></tr>
+    <tr><td class="mono">106</td><td>700</td><td>6</td><td>45,000</td><td>120,000</td><td class="warn">NaN</td></tr>
+  </table>
+
+  <h3 class="subtitle">Wrangling steps</h3>
+  <ol>
+    <li><strong>Handle missing values:</strong> <code>df['Age'].fillna(df['Age'].mean())</code>, <code>df['City'].fillna(df['City'].mode())</code>, <code>df['Risk'].fillna(df['Risk'].mode())</code></li>
+    <li><strong>Merge on Client_ID:</strong> <code>pd.merge(df_demographics, df_financials, on='Client_ID', how='inner')</code></li>
+    <li><strong>Analyze:</strong> <code>df.describe()</code>, filter portfolio &gt; $150K, <code>sort_values('Portfolio', ascending=False)</code></li>
+    <li><strong>Visualize:</strong> scatter of Age vs Portfolio, histogram of Age, correlation heatmap</li>
+  </ol>
+
+  <table>
+    <tr><th>Result</th><th>Value</th></tr>
+    <tr><td>Age missing → filled with</td><td class="mono">mean (39.44)</td></tr>
+    <tr><td>City missing → filled with</td><td class="mono">mode (New York)</td></tr>
+    <tr><td>Risk missing → filled with</td><td class="mono">mode (Medium)</td></tr>
+    <tr><td>Clients merged</td><td class="mono">6 → combined dataset</td></tr>
+    <tr><td>High net worth (&gt;$150K)</td><td class="mono">2 clients</td></tr>
+    <tr><td>Correlation: Age vs Portfolio</td><td class="mono">0.57 (positive)</td></tr>
+  </table>
+
+  <div class="callout amber">
+    <div class="ctitle">💡 Worth noting</div>
+    ChatGPT can do all of this — imputation, merging, filtering, visualization — from simple natural-language prompts, without hand-writing the Pandas code yourself.
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>This case study is the wrangling checklist from Topic 9 applied end-to-end: fill missing values with the right statistic (mean for continuous Age, mode for categorical City/Risk), merge on a shared key, then analyze and visualize. The 0.57 positive correlation between Age and Portfolio is a concrete, checkable output — exactly the kind of thing a stakeholder can validate against domain intuition.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Because ChatGPT can execute this whole workflow from prompts, the bottleneck shifts from "who can write Pandas" to "who understands the data well enough to sanity-check the output" — hire and staff for the domain judgment, not just the syntax.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 11 ============ -->
+<section class="block" id="t11">
+  <div class="kicker"><span class="num">11</span><span class="layer-tag">Labeling</span><span class="code">W5R7Q42</span></div>
+  <h2 class="title">Data Labeling: Process &amp; Cost</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Guess before reading: is labeling a simple image classification cheaper or more expensive than labeling for semantic segmentation? By roughly how many times?</li>
+    </ol>
+  </div>
+
+  <p>Data labeling is the process of annotating raw data with relevant information — required for supervised learning.</p>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">Image</div><h4>Classification, detection, segmentation</h4><p>Cat or dog? Bounding boxes. Pixel-level semantic segmentation.</p></div>
+    <div class="card"><div class="n">Text</div><h4>Sentiment, entities, classification</h4><p>Positive/negative/neutral. Person/org/location. Spam or not spam.</p></div>
+    <div class="card"><div class="n">Audio</div><h4>Transcription &amp; classification</h4><p>Speech-to-text. Sound classification (applause, laughter). Speaker ID.</p></div>
+    <div class="card"><div class="n">Video</div><h4>Tracking &amp; recognition</h4><p>Frame-by-frame object tracking. Action recognition. Event detection.</p></div>
+  </div>
+
+  <table>
+    <tr><th>Labeling type</th><th>Cost per object</th></tr>
+    <tr><td>Image classification</td><td class="mono">$0.012</td></tr>
+    <tr><td>Text classification</td><td class="mono">$0.012</td></tr>
+    <tr><td>Named entity recognition</td><td class="mono">$0.024</td></tr>
+    <tr><td>Bounding boxes</td><td class="mono">$0.036</td></tr>
+    <tr><td>Semantic segmentation</td><td class="mono warn">$0.840 (expensive)</td></tr>
+    <tr><td>3D point cloud</td><td class="mono no">$3.00 / frame (very expensive)</td></tr>
+    <tr><td>Reviewed objects (&lt;50K)</td><td class="mono">$0.08 / object</td></tr>
+  </table>
+
+  <div class="callout amber">
+    <div class="ctitle">⚠️ Reality check</div>
+    Self-driving car labeling costs tens of millions of dollars — semantic segmentation and 3D point cloud labeling at scale, across millions of frames, adds up fast.
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 11.1 — AWS SAGEMAKER GROUND TRUTH WORKFLOW</span><span>upload → label → review → quality check</span></div>
+    <svg viewBox="0 0 820 170" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="d3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="20" y="20" width="180" height="56" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="110" y="53" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Upload raw data</text>
+      <line x1="200" y1="48" x2="230" y2="48" stroke="#3fb6ff" marker-end="url(#d3)"/>
+      <rect x="240" y="20" width="180" height="56" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="330" y="53" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Setup workflow</text>
+      <line x1="420" y1="48" x2="450" y2="48" stroke="#3fb6ff" marker-end="url(#d3)"/>
+      <rect x="460" y="20" width="180" height="56" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="550" y="53" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">AI-powered labeling</text>
+
+      <line x1="550" y1="76" x2="550" y2="94" stroke="#3fb6ff"/>
+      <line x1="550" y1="94" x2="330" y2="94" stroke="#3fb6ff"/>
+      <line x1="330" y1="94" x2="330" y2="112" stroke="#3fb6ff" marker-end="url(#d3)"/>
+
+      <rect x="240" y="114" width="180" height="46" rx="6" fill="#0e1420" stroke="#5fd9a0"/>
+      <text x="330" y="142" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Expert review</text>
+      <line x1="240" y1="137" x2="200" y2="137" stroke="#3fb6ff" marker-end="url(#d3)"/>
+      <rect x="20" y="114" width="180" height="46" rx="6" fill="#0e1420" stroke="#5fd9a0"/>
+      <text x="110" y="142" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Quality checks</text>
+    </svg>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Labeling cost scales dramatically with task complexity — a simple classification label runs about a cent, while pixel-level semantic segmentation runs nearly a dollar and 3D point cloud data hits $3 per frame, a 250x spread. At self-driving-car scale, that spread is the difference between a manageable budget and tens of millions of dollars.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Before committing to a labeling-heavy task type (segmentation, point cloud), price it out at your expected data volume first — the per-object cost multiplier can single-handedly make or break a project's budget.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Active learning and semi-supervised approaches (label only the most informative samples, let the model bootstrap the rest) are the standard cost-reduction lever here — worth evaluating before defaulting to labeling the entire dataset.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 12 ============ -->
+<section class="block" id="t12">
+  <div class="kicker"><span class="num">12</span><span class="layer-tag">Storage</span><span class="code">Y1H9C38</span></div>
+  <h2 class="title">Data Storage: DB vs Warehouse vs Lake</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>A data lake with no governance is jokingly called a "data swamp." What do you think causes that?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 12.1 — DATABASE → DATA WAREHOUSE → DASHBOARDS</span><span>the analytics path</span></div>
+    <svg viewBox="0 0 820 220" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="d4" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="20" y="20" width="180" height="46" rx="5" fill="#151b25" stroke="#212b3a"/><text x="110" y="47" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Database (CRM)</text>
+      <rect x="320" y="20" width="180" height="46" rx="5" fill="#151b25" stroke="#212b3a"/><text x="410" y="47" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Database (ERP)</text>
+      <rect x="620" y="20" width="180" height="46" rx="5" fill="#151b25" stroke="#212b3a"/><text x="710" y="47" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Database (Sales)</text>
+
+      <line x1="110" y1="66" x2="380" y2="100" stroke="#3fb6ff"/>
+      <line x1="410" y1="66" x2="400" y2="100" stroke="#3fb6ff"/>
+      <line x1="710" y1="66" x2="420" y2="100" stroke="#3fb6ff" marker-end="url(#d4)"/>
+
+      <rect x="260" y="102" width="300" height="50" rx="6" fill="#151b25" stroke="#ffb454" stroke-width="1.4"/>
+      <text x="410" y="132" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Data Warehouse (analytics layer)</text>
+
+      <line x1="410" y1="152" x2="410" y2="174" stroke="#3fb6ff" marker-end="url(#d4)"/>
+      <rect x="260" y="176" width="300" height="40" rx="6" fill="#0e1420" stroke="#5fd9a0"/>
+      <text x="410" y="200" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10.5">Tableau / Power BI dashboards</text>
+    </svg>
+  </div>
+
+  <table>
+    <tr><th>Feature</th><th>Database</th><th>Data warehouse</th><th>Data lake</th></tr>
+    <tr><td>Data type</td><td>Structured</td><td>Structured</td><td>All types</td></tr>
+    <tr><td>Users</td><td>Operations</td><td>Analysts</td><td>Data scientists</td></tr>
+    <tr><td>Use case</td><td>OLTP</td><td>OLAP / BI</td><td>ML / AI / analytics</td></tr>
+    <tr><td>Schema</td><td>Fixed</td><td>Fixed</td><td>Schema-on-read</td></tr>
+    <tr><td>Cost</td><td>Lower</td><td>Medium</td><td>Higher at scale</td></tr>
+    <tr><td>Speed</td><td>Very fast</td><td>Fast</td><td>Slower (batch)</td></tr>
+    <tr><td>Examples</td><td>MySQL, PostgreSQL, Oracle</td><td>Snowflake, Redshift, BigQuery</td><td>Amazon S3, Azure Data Lake</td></tr>
+  </table>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>The three storage layers optimize for different jobs: databases for fast transactional reads/writes, warehouses for structured analytics and BI reporting, and lakes for holding every data type — structured, text, images, audio, video — for ML and AI work. A "data swamp" happens when a lake accumulates data of every type with no governance, catalog, or ownership, so nobody can find, trust, or safely use what's in it anymore.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>The minimum governance that keeps a lake from becoming a swamp: a data catalog (what's here, who owns it), consistent naming/partitioning conventions, and access control from day one — retrofitting a catalog onto years of ungoverned data is a multi-month project on its own.</p>
+    </div>
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Choosing lake vs warehouse isn't either/or for most orgs — the common pattern is a lake for raw/all-type storage feeding a warehouse for the structured, analytics-ready subset. Budget and architect for both, not one instead of the other.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 13 ============ -->
+<section class="block" id="t13">
+  <div class="kicker"><span class="num">13</span><span class="layer-tag">Pipelines &amp; Security</span><span class="code">F3M6V75</span></div>
+  <h2 class="title">Pipelines, Security &amp; Governance</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>If a company stores PII in a data lake without encryption and a breach occurs, who do you think is actually liable — the data engineer, the architect, or the CEO?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 13.1 — END-TO-END DATA PIPELINE</span><span>raw data to monitored model</span></div>
+    <svg viewBox="0 0 820 260" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="d5" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="20" y="20" width="170" height="56" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="105" y="53" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Raw data (sources)</text>
+      <line x1="190" y1="48" x2="220" y2="48" stroke="#3fb6ff" marker-end="url(#d5)"/>
+      <rect x="230" y="20" width="160" height="56" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="310" y="46" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Extract (E)</text>
+      <text x="310" y="62" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">collect from sources</text>
+      <line x1="390" y1="48" x2="420" y2="48" stroke="#3fb6ff" marker-end="url(#d5)"/>
+      <rect x="430" y="20" width="170" height="56" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="515" y="46" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Transform (T)</text>
+      <text x="515" y="62" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">clean, encode, normalize</text>
+
+      <line x1="515" y1="76" x2="515" y2="98" stroke="#3fb6ff" marker-end="url(#d5)"/>
+      <rect x="330" y="100" width="370" height="42" rx="6" fill="#151b25" stroke="#c07bff"/>
+      <text x="515" y="126" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">Load (L) — into Data Lake / Warehouse</text>
+
+      <line x1="515" y1="142" x2="515" y2="164" stroke="#3fb6ff" marker-end="url(#d5)"/>
+      <rect x="330" y="166" width="370" height="42" rx="6" fill="#0e1420" stroke="#5fd9a0"/>
+      <text x="515" y="192" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Model training — clean data feeds AI models</text>
+
+      <line x1="515" y1="208" x2="515" y2="230" stroke="#3fb6ff" marker-end="url(#d5)"/>
+      <rect x="330" y="232" width="370" height="26" rx="6" fill="#0e1420" stroke="#ff6b6b"/>
+      <text x="515" y="249" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="10">Monitoring &amp; feedback — quality, drift, performance</text>
+    </svg>
+  </div>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">1</div><h4>Access control</h4><p>Principle of least privilege, RBAC, multi-factor authentication.</p></div>
+    <div class="card"><div class="n">2</div><h4>Data encryption</h4><p>At-rest encryption, in-transit encryption (TLS/SSL).</p></div>
+    <div class="card"><div class="n">3</div><h4>Data quality monitoring</h4><p>Track missing values over time, monitor drift, validate schema changes.</p></div>
+    <div class="card"><div class="n">4</div><h4>Data lineage</h4><p>Track origin, track transformations applied, audit trail for compliance.</p></div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>The ETL pipeline (Extract, Transform, Load) is the backbone that moves raw data into a trained, monitored model, and security/governance wraps around every stage of it — access control and encryption protect the data itself, while quality monitoring and lineage protect your ability to trust and audit it later. Liability for a PII breach in practice spreads across roles (the architect who designed access, the engineer who implemented it, leadership accountable for governance) rather than resting on one person — which is exactly why governance needs to be a named, owned responsibility, not an assumption.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>"Who's liable" is the wrong first question — the better one is "who owns encryption-at-rest as a checklist item before launch." Assign that ownership explicitly; don't let it default to whoever happens to touch the data lake last.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Data lineage is the component teams skip under time pressure and regret first during an audit or an incident — build it into the pipeline from day one, since retrofitting lineage tracking onto years of untracked transformations is close to impossible.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 14 : reference ============ -->
+<section class="block" id="t14">
+  <div class="kicker"><span class="layer-tag">Reference</span><span class="code">L9B2N40</span></div>
+  <h2 class="title">Summary, Research Insight &amp; Glossary</h2>
+
+  <div class="card-grid">
+    <div class="card"><div class="n">01</div><h4>Data strategy is foundational</h4><p>9 components from discovery to KPIs. Aligns AI with business goals. Ensures compliance (GDPR: €20M fines).</p></div>
+    <div class="card"><div class="n">02</div><h4>Data requirements</h4><p>Structured vs unstructured. Labeled vs unlabeled. Supervised, unsupervised, reinforcement learning.</p></div>
+    <div class="card"><div class="n">03</div><h4>80% of time = preparation</h4><p>Wrangling: clean, merge, handle missing. Feature engineering: select, scale, create. Quality &gt; quantity.</p></div>
+    <div class="card"><div class="n">04</div><h4>Labeling is expensive</h4><p>$0.012–$3.00 per object. Self-driving cars: millions of dollars. Guidelines are critical for quality.</p></div>
+    <div class="card"><div class="n">05</div><h4>Storage choices</h4><p>Database: transactional (OLTP). Warehouse: analytics/BI (OLAP). Lake: all data types for ML/AI.</p></div>
+    <div class="card"><div class="n">06</div><h4>Sources are abundant</h4><p>Hugging Face: 400K+ free datasets. Kaggle: 50K+ for competitions. Bloomberg: paid financial data.</p></div>
+    <div class="card"><div class="n">07</div><h4>Pandas covers wrangling</h4><p>Read, clean, merge, analyze, visualize — and ChatGPT can do all of it from simple prompts.</p></div>
+  </div>
+
+  <h3 class="subtitle">Research insight: quality vs quantity</h3>
+  <p>From "The Coming Revolution" research report — a 1.5B-parameter LLM compared on full data vs 30% pruned (highest-quality) data:</p>
+  <table>
+    <tr><th>Task</th><th>Full data</th><th>30% pruned data</th></tr>
+    <tr><td>Sentiment analysis</td><td class="mono">87.5%</td><td class="mono yes">87.8% (better)</td></tr>
+    <tr><td>Semantic similarity</td><td class="mono">84.2%</td><td class="mono yes">84.5%</td></tr>
+    <tr><td>Text classification</td><td class="mono">86.1%</td><td class="mono yes">86.3%</td></tr>
+    <tr><td>Question answering</td><td class="mono">82.3%</td><td class="mono">82.0% (≈ same)</td></tr>
+  </table>
+  <div class="callout amber">
+    <div class="ctitle">💡 Key insight</div>
+    High-quality pruned data can match or outperform larger, noisier datasets. Quality &gt; quantity.
+  </div>
+
+  <h3 class="subtitle">Glossary</h3>
+  <table>
+    <tr><th>Term</th><th>Definition</th></tr>
+    <tr><td class="mono">Structured data</td><td>Organized in rows/columns (CSV, SQL)</td></tr>
+    <tr><td class="mono">Unstructured data</td><td>No predefined schema (text, images)</td></tr>
+    <tr><td class="mono">Labeled data</td><td>Data with associated tags/targets</td></tr>
+    <tr><td class="mono">Unlabeled data</td><td>Data without tags — noisy, abundant</td></tr>
+    <tr><td class="mono">Supervised</td><td>Learn from labeled data to predict outputs</td></tr>
+    <tr><td class="mono">Unsupervised</td><td>Find patterns in data without labels</td></tr>
+    <tr><td class="mono">Reinforcement</td><td>Learn through trial &amp; error with rewards</td></tr>
+    <tr><td class="mono">ETL</td><td>Extract, Transform, Load — data pipeline</td></tr>
+    <tr><td class="mono">Data wrangling</td><td>Cleaning and organizing raw data</td></tr>
+    <tr><td class="mono">Feature engineering</td><td>Creating/selecting features for ML</td></tr>
+    <tr><td class="mono">Data lake</td><td>Stores all data types, raw + processed</td></tr>
+    <tr><td class="mono">Data warehouse</td><td>Stores structured data for analytics (BI)</td></tr>
+    <tr><td class="mono">Database</td><td>Stores structured data for transactions</td></tr>
+    <tr><td class="mono">PII</td><td>Personally Identifiable Information</td></tr>
+    <tr><td class="mono">GDPR</td><td>General Data Protection Regulation</td></tr>
+    <tr><td class="mono">HIPAA</td><td>Health Insurance Portability &amp; Accountability Act</td></tr>
+    <tr><td class="mono">One-hot encoding</td><td>Convert categories to binary columns</td></tr>
+    <tr><td class="mono">Imputation</td><td>Fill missing values (mean, median, mode)</td></tr>
+    <tr><td class="mono">Model drift</td><td>Model performance degrades over time</td></tr>
+  </table>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ The one line to remember</div>
+      <p>"A model is only as good as the data it's trained on. Prioritize data quality, governance, and strategy from day 1."</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ACTIVE RECALL ============ -->
+<section class="block" id="recall">
+  <div class="kicker"><span class="layer-tag">Active Recall</span><span class="code">X4T8D26</span></div>
+  <h2 class="title">Test yourself — deep thought questions</h2>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">If data quality is so critical, why do most companies still treat data as a "cost center" rather than a "strategic asset"? What would it take to change this?</div>
+    <div class="ra">Data work is largely invisible in a P&amp;L — cleaning and governance don't show up as a line item the way a new product feature does, so it gets funded reactively (after a failure) rather than proactively. Changing this usually requires tying data quality metrics directly to a business KPI the leadership team already tracks (e.g. "data completeness → model accuracy → conversion rate"), so the asset's value becomes visible in the same language as the rest of the business.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">In the self-driving car case, we need to label millions of images. At $0.08 per reviewed object, how can we reduce costs — active learning? semi-supervised?</div>
+    <div class="ra">Both help, and they compound: active learning has the model flag the examples it's most uncertain about, so humans only label the highest-value samples instead of everything; semi-supervised learning then lets the model bootstrap from a smaller labeled set plus a much larger unlabeled pool. In practice, teams also use pre-trained foundation models to auto-label first drafts and have humans only correct errors, which is far cheaper than labeling from scratch.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">Structured data is easy to analyze but unstructured data is exploding. How should companies balance their data strategy between the two?</div>
+    <div class="ra">Rather than picking one, most mature strategies route by use case: keep structured data in a warehouse for fast, governed BI queries, and route unstructured data into a lake feeding ML pipelines that can extract structure from it (embeddings, entity extraction) on the way in. The balance point is usually "extract structure at ingestion where cheap, leave it raw where extraction cost isn't justified yet."</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">GDPR fines can be 4% of global revenue. If a company stores PII in a Data Lake without encryption, who's liable — the Data Engineer, the Data Architect, or the CEO?</div>
+    <div class="ra">Legally, GDPR liability generally attaches to the organization (the "data controller"), and regulators pursue the company rather than an individual employee in most cases — but internally, accountability typically traces to whoever owned the governance decision, which is usually the Data Architect's design and leadership's sign-off on risk acceptance, not the engineer who implemented what they were told to build. This is exactly why governance ownership needs to be explicit and documented, not assumed.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">Research shows 30% high-quality data can match 100% noisy data. Does this mean we should stop collecting more data and focus only on quality? What's the trade-off?</div>
+    <div class="ra">Not entirely — the finding is that quality can substitute for quantity up to a point, not that quantity has zero value. More diverse, high-quality data still helps with edge cases and rare scenarios that a smaller pruned set may simply not contain. The practical trade-off is diminishing returns: past a certain quality threshold, additional volume yields less benefit than the cost of curating it better, so the right move is usually "prune aggressively first, then decide if more collection is still worth it" rather than an absolute stop.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">If AI models are built on historical data, are they inherently conservative — reinforcing the past? How can we intentionally inject novelty?</div>
+    <div class="ra">Largely yes, for the same reason discussed in the AI Lifecycle notes — a model's outputs are bounded by the patterns in its training distribution. Injecting novelty deliberately usually means synthetic data generation, deliberately oversampling underrepresented or emerging patterns, or human-in-the-loop curation that intentionally includes edge cases the historical data underrepresents, rather than hoping novelty emerges on its own.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">In reinforcement learning, the agent learns by trial and error. In the real world, trial and error can be dangerous (e.g. self-driving cars). How do we balance exploration vs safety?</div>
+    <div class="ra">The standard approach is to do the dangerous exploration in simulation first — training the agent through millions of trial-and-error cycles in a safe virtual environment — and only deploy a heavily constrained version to the real world, often with a rule-based safety layer that can override the learned policy in high-risk situations. Real-world "exploration" then becomes narrow and supervised (e.g. controlled test tracks with a safety driver) rather than open-ended trial and error.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">Data lakes promise to store "everything," but without governance they become "data swamps." What's the minimum governance needed for a functional data lake?</div>
+    <div class="ra">At minimum: a data catalog documenting what exists and who owns each dataset, consistent naming and partitioning conventions so data can actually be found, and access control tied to the principle of least privilege. Without at least the catalog and ownership piece, a lake accumulates data nobody can locate, trust, or safely reuse — which is the defining symptom of a swamp.</div>
+  </div>
+
+</section>
+
+<footer>ARCHITECTS LAB — Study Note 024 — Data Strategy &amp; Preparation — prime, learn, recap, and view it from every seat at the table<br><br>Source: <a href="https://www.udemy.com/course/ai-project-lifecycle-mastery-strategy-to-deployment/learn/lecture/50482271#overview" target="_blank" rel="noopener" style="color:var(--blueprint);">AI Project Lifecycle Mastery: Strategy to Deployment — Udemy</a></footer>
+
+</body>
+</html>
