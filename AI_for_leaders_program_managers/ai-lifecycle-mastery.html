@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Lifecycle Mastery · Architects Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0e14;
+    --panel: #10151d;
+    --panel-2: #151b25;
+    --panel-3: #192132;
+    --grid: #1c2430;
+    --line: #212b3a;
+    --ink: #c7d0dc;
+    --ink-dim: #7c8898;
+    --ink-bright: #eef2f7;
+    --blueprint: #3fb6ff;
+    --blueprint-dim: #1f4a63;
+    --amber: #ffb454;
+    --green: #5fd9a0;
+    --red: #ff6b6b;
+    --violet: #c07bff;
+    --radius: 4px;
+    --display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/42px 42px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/42px 42px,
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.65;
+    padding:0 0 90px 0;
+  }
+  a{color:var(--blueprint);}
+
+  .course-box{
+    margin:28px auto 0 auto;
+    max-width:952px;
+    padding:18px 26px;
+    background:var(--panel-2);
+    border:1px solid var(--blueprint-dim);
+    border-left:4px solid var(--blueprint);
+    border-radius:var(--radius);
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px;
+  }
+  .course-box .label{font-family:var(--mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--blueprint);}
+  .course-box .sub{font-family:var(--mono); font-size:12px; color:var(--ink-dim);}
+
+  .source-box{
+    max-width:952px; margin:10px auto 0 auto; padding:11px 26px;
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  .source-box .src-tag{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--amber); font-weight:700;}
+  .source-box a{font-family:var(--mono); font-size:12.5px; color:var(--blueprint); text-decoration:none; border-bottom:1px dashed var(--blueprint-dim);}
+  .source-box a:hover{color:var(--ink-bright); border-bottom-color:var(--blueprint);}
+
+  header.hero{max-width:952px; margin:22px auto 0 auto; padding:44px 26px 24px;}
+  header.hero h1{font-family:var(--display); font-size:clamp(30px,4.4vw,46px); font-weight:700; color:var(--ink-bright); margin:0 0 10px 0; letter-spacing:-.01em; line-height:1.12;}
+  header.hero .tagline{font-family:var(--mono); color:var(--amber); font-size:14px; letter-spacing:.04em; margin-bottom:16px;}
+  header.hero p.lede{max-width:720px; color:var(--ink-dim); font-size:16px;}
+
+  nav.toc{
+    max-width:952px; margin:0 auto 20px; padding:18px 26px;
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  }
+  nav.toc .cap{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:10px;}
+  nav.toc ol{margin:0; padding-left:20px; columns:2; gap:24px;}
+  nav.toc li{font-size:13.5px; margin-bottom:7px;}
+  nav.toc a{color:var(--ink); text-decoration:none;}
+  nav.toc a:hover{color:var(--blueprint);}
+
+  section.block{max-width:952px; margin:0 auto; padding:36px 26px; border-top:1px solid var(--line);}
+  .kicker{display:flex; align-items:center; gap:12px; margin-bottom:6px;}
+  .kicker .num{font-family:var(--mono); font-size:12px; color:var(--bg); background:var(--blueprint); padding:3px 9px; border-radius:3px; font-weight:700; letter-spacing:.03em;}
+  .kicker .layer-tag{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-dim);}
+  h2.title{font-family:var(--display); font-size:25px; color:var(--ink-bright); margin:4px 0 14px 0; font-weight:600;}
+  h3.subtitle{font-family:var(--display); font-size:16.5px; color:var(--ink-bright); margin:22px 0 10px 0; font-weight:600;}
+  p{margin:0 0 14px 0; font-size:15.5px;}
+  ul{margin:0 0 14px 0; padding-left:20px;}
+  li{margin-bottom:6px; font-size:15px;}
+  strong{color:var(--ink-bright);}
+  code{font-family:var(--mono); background:var(--panel-3); padding:1px 6px; border-radius:3px; font-size:.87em; color:var(--blueprint); border:1px solid var(--line);}
+
+  .diagram-frame{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 14px 10px; margin:18px 0 22px 0; overflow-x:auto;}
+  .diagram-frame .cap{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); padding:0 6px 12px; display:flex; justify-content:space-between;}
+  .diagram-frame svg{display:block; width:100%; height:auto; min-width:560px;}
+
+  /* ---- priming question box (asked BEFORE the topic) ---- */
+  .prime-box{
+    background:linear-gradient(180deg, rgba(192,123,255,.07), transparent);
+    border:1px solid var(--violet);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin:6px 0 26px 0;
+  }
+  .prime-box .ptag{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--violet); font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .prime-box .ptag::before{content:"◆"; font-size:9px;}
+  .prime-box ol{margin:0; padding-left:20px;}
+  .prime-box li{font-family:var(--mono); font-size:13px; color:var(--ink); margin-bottom:8px;}
+  .prime-box .hint{font-size:12.5px; color:var(--ink-dim); font-style:italic; margin-top:6px;}
+
+  /* ---- recap: what we just learned ---- */
+  .recap{
+    background:var(--panel-2);
+    border:1px solid var(--green);
+    border-left:4px solid var(--green);
+    border-radius:var(--radius);
+    padding:16px 20px;
+    margin:26px 0 18px 0;
+  }
+  .recap .rtag{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--green); font-weight:700; margin-bottom:8px;}
+  .recap p{margin:0; font-size:14.5px; color:var(--ink);}
+
+  /* ---- perspective cards ---- */
+  .persp-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:14px; margin:0 0 8px 0;}
+  .persp-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px;}
+  .persp-card.cto{border-top:3px solid var(--amber);}
+  .persp-card.arch{border-top:3px solid var(--blueprint);}
+  .persp-card.pm{border-top:3px solid var(--violet);}
+  .persp-card .ptitle{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .persp-card.cto .ptitle{color:var(--amber);}
+  .persp-card.arch .ptitle{color:var(--blueprint);}
+  .persp-card.pm .ptitle{color:var(--violet);}
+  .persp-card p{font-size:13.8px; color:var(--ink-dim); margin:0;}
+
+  table{width:100%; border-collapse:collapse; margin:16px 0 22px 0; font-size:13.5px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+  th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);}
+  th{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--blueprint); background:var(--panel-2);}
+  td{color:var(--ink);}
+  tr:last-child td{border-bottom:none;}
+  td.mono{font-family:var(--mono); font-size:12.5px;}
+
+  .card-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; margin:18px 0;}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px;}
+  .card .n{font-family:var(--mono); color:var(--blueprint); font-size:12px; font-weight:700; margin-bottom:6px;}
+  .card h4{font-family:var(--display); color:var(--ink-bright); font-size:15px; margin:0 0 8px 0;}
+  .card p{font-size:13.8px; color:var(--ink-dim); margin:0;}
+
+  .timeline{display:flex; flex-direction:column; gap:0; margin:18px 0;}
+  .tl-row{display:grid; grid-template-columns:150px 1fr; gap:16px; padding:12px 0; border-bottom:1px solid var(--line);}
+  .tl-row:last-child{border-bottom:none;}
+  .tl-week{font-family:var(--mono); font-size:12px; color:var(--amber); font-weight:700;}
+  .tl-desc{font-size:14.5px; color:var(--ink);}
+
+  .recall{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px 18px; margin:10px 0; cursor:pointer;}
+  .recall .rq{font-family:var(--mono); font-size:13.5px; color:var(--violet); display:flex; align-items:flex-start; gap:8px;}
+  .recall .rq::before{content:"Q ›"; color:var(--ink-dim); flex-shrink:0;}
+  .recall .ra{display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:14px; color:var(--ink-dim);}
+  .recall.open .ra{display:block;}
+  .recall .ra::before{content:"A › "; color:var(--green); font-family:var(--mono);}
+
+  footer{max-width:952px; margin:40px auto 0; padding:22px 26px 0; font-family:var(--mono); font-size:11px; color:var(--ink-dim); letter-spacing:.06em; text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="course-box">
+  <div class="label">Architects Lab · Study Note 022</div>
+  <div class="sub">Domain: AI Lifecycle &amp; Systems Thinking · Format: Prime → Learn → Recap → Perspective</div>
+</div>
+
+<div class="source-box">
+  <span class="src-tag">SOURCE COURSE</span>
+  <a href="https://www.udemy.com/course/ai-project-lifecycle-mastery-strategy-to-deployment/learn/lecture/50482271#overview" target="_blank" rel="noopener">AI Project Lifecycle Mastery: Strategy to Deployment — Udemy ↗</a>
+</div>
+
+<header class="hero">
+  <div class="tagline">MINDSET OF AN AI EXPERT &amp; ARCHITECT</div>
+  <h1>AI Lifecycle Mastery</h1>
+  <p class="lede">Every topic below follows the same rhythm: prime yourself with a few recall questions before you read, work through the concept, then close the loop with a recap and — where it actually changes a decision — the CTO, Architect, and Project Manager view of the same idea.</p>
+</header>
+
+<nav class="toc">
+  <div class="cap">Contents</div>
+  <ol>
+    <li><a href="#t1">AI, Gen AI &amp; AI Agents — the three layers</a></li>
+    <li><a href="#t1b">AI vs Gen AI vs AI Agents — the hierarchy</a></li>
+    <li><a href="#t2">The 7-Step AI Project Lifecycle</a></li>
+    <li><a href="#t3">Three Ingredients: Data + Model + Compute</a></li>
+    <li><a href="#t4">Training Process &amp; Hyperparameters</a></li>
+    <li><a href="#t5">Deep Research Agents in Action</a></li>
+    <li><a href="#t6">Key Challenges in AI Development</a></li>
+    <li><a href="#t7">Narrow AI → AGI → ASI</a></li>
+    <li><a href="#t8">Applied Practice: Diabetes Risk Prediction</a></li>
+    <li><a href="#t9">Course Map, Tooling &amp; Reference</a></li>
+    <li><a href="#recall">Active Recall Deck</a></li>
+  </ol>
+</nav>
+
+<!-- ============ TOPIC 1 ============ -->
+<section class="block" id="t1">
+  <div class="kicker"><span class="num">01</span><span class="layer-tag">Fundamentals</span></div>
+  <h2 class="title">AI, Gen AI &amp; AI Agents — the three layers</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>What's the actual difference between "AI" and "Generative AI" — is Gen AI a separate technology or a subset?</li>
+      <li>What three things does an LLM need bolted on before it can be called an "agent" rather than just a chatbot?</li>
+      <li>Can you name one everyday product for each of the three layers without looking ahead?</li>
+    </ol>
+    <div class="hint">Hold your answers loosely — you'll check them against the recap at the end of this section.</div>
+  </div>
+
+  <p>AI is the broad umbrella: <strong>"the science that empowers machines to learn from experience, make decisions, and perform human-like tasks."</strong> Nearly everything below is a narrower slice of that umbrella.</p>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 1.1 — AI IS EVERYWHERE</span><span>three familiar surfaces</span></div>
+    <svg viewBox="0 0 820 220" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="p1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="320" y="14" width="180" height="46" rx="6" fill="#151b25" stroke="#3fb6ff" stroke-width="1.4"/>
+      <text x="410" y="42" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">AI is everywhere</text>
+      <line x1="410" y1="60" x2="410" y2="86" stroke="#3fb6ff"/>
+      <line x1="410" y1="86" x2="120" y2="86" stroke="#3fb6ff"/>
+      <line x1="410" y1="86" x2="700" y2="86" stroke="#3fb6ff"/>
+      <line x1="120" y1="86" x2="120" y2="104" stroke="#3fb6ff" marker-end="url(#p1)"/>
+      <line x1="410" y1="86" x2="410" y2="104" stroke="#3fb6ff" marker-end="url(#p1)"/>
+      <line x1="700" y1="86" x2="700" y2="104" stroke="#3fb6ff" marker-end="url(#p1)"/>
+
+      <rect x="30" y="106" width="180" height="90" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="120" y="132" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">ChatGPT</text>
+      <text x="120" y="154" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">Content</text>
+      <text x="120" y="170" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">generation</text>
+
+      <rect x="320" y="106" width="180" height="90" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="410" y="132" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Siri / Alexa</text>
+      <text x="410" y="154" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">Voice</text>
+      <text x="410" y="170" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">assistants</text>
+
+      <rect x="610" y="106" width="180" height="90" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="700" y="132" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Netflix / Amazon</text>
+      <text x="700" y="154" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">Recommender</text>
+      <text x="700" y="170" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">systems</text>
+    </svg>
+  </div>
+
+  <h3 class="subtitle">Generative AI — creates, doesn't just classify</h3>
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 1.2 — GENERATIVE AI: INPUT → MODEL → NEW OUTPUT</span><span>never existed before</span></div>
+    <svg viewBox="0 0 820 140" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="p2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="20" y="30" width="220" height="70" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="130" y="58" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">Prompt</text>
+      <text x="130" y="78" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">"city in the year 2500"</text>
+      <line x1="240" y1="65" x2="290" y2="65" stroke="#3fb6ff" marker-end="url(#p2)"/>
+
+      <rect x="300" y="30" width="200" height="70" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="400" y="70" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">AI Model</text>
+      <line x1="500" y1="65" x2="550" y2="65" stroke="#3fb6ff" marker-end="url(#p2)"/>
+
+      <rect x="560" y="30" width="240" height="70" rx="6" fill="#151b25" stroke="#5fd9a0"/>
+      <text x="680" y="58" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">Brand-new output</text>
+      <text x="680" y="78" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">image / text / music / video</text>
+    </svg>
+  </div>
+  <p><strong>Key insight:</strong> traditional AI recognizes patterns and classifies; Gen AI generates entirely new content that didn't exist before the prompt.</p>
+
+  <h3 class="subtitle">AI agents — the next frontier</h3>
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 1.3 — LLM + TOOLS + MEMORY + ACTIONS = AGENT</span><span>autonomous over extended periods</span></div>
+    <svg viewBox="0 0 820 250" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="p3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="290" y="14" width="240" height="56" rx="6" fill="#151b25" stroke="#c07bff" stroke-width="1.4"/>
+      <text x="410" y="48" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13.5" font-weight="600">Large Language Model (Brain)</text>
+
+      <line x1="410" y1="70" x2="410" y2="96" stroke="#3fb6ff"/>
+      <line x1="410" y1="96" x2="120" y2="96" stroke="#3fb6ff"/>
+      <line x1="410" y1="96" x2="700" y2="96" stroke="#3fb6ff"/>
+      <line x1="120" y1="96" x2="120" y2="114" stroke="#3fb6ff" marker-end="url(#p3)"/>
+      <line x1="410" y1="96" x2="410" y2="114" stroke="#3fb6ff" marker-end="url(#p3)"/>
+      <line x1="700" y1="96" x2="700" y2="114" stroke="#3fb6ff" marker-end="url(#p3)"/>
+
+      <rect x="30" y="116" width="180" height="110" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="120" y="140" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Tools</text>
+      <text x="50" y="164" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Database access</text>
+      <text x="50" y="182" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Search internet</text>
+
+      <rect x="320" y="116" width="180" height="110" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="410" y="140" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Memory</text>
+      <text x="340" y="164" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Extended</text>
+      <text x="340" y="180" fill="#7c8898" font-family="JetBrains Mono" font-size="10">  conversations</text>
+
+      <rect x="610" y="116" width="180" height="110" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="700" y="140" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Actions</text>
+      <text x="630" y="164" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Book trips</text>
+      <text x="630" y="180" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Make payments</text>
+      <text x="630" y="196" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Send emails</text>
+    </svg>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>AI is the umbrella science of machines that learn and decide. Generative AI is a subset focused specifically on producing new content rather than just classifying existing content. AI Agents go a layer further — an LLM becomes an agent only once it's wired up with tools (to act on the world), memory (to persist context), and the ability to take actions, letting it operate autonomously over extended periods instead of one-shot replying.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Agents change the risk profile, not just the tech stack — an LLM that can only talk is a content risk; one that can pay, email, or write to a database is an operational risk. Budget for guardrails and audit trails before the first agent touches a production credential.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Design the tool boundary deliberately: which tools an agent can call, with what scopes, and what's logged on every call. Treat "tools" as a permission surface, the same way you'd treat a microservice's API contract.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>"We're adding an AI agent" is not one line item — it's Gen AI capability plus tool integrations plus a memory/session design. Scope and estimate each piece separately, they don't ship together.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 1B — COMPARISON ============ -->
+<section class="block" id="t1b">
+  <div class="kicker"><span class="layer-tag">Fundamentals · Side by Side</span></div>
+  <h2 class="title">AI vs Gen AI vs AI Agents — the hierarchy</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Are Gen AI and AI Agents siblings under the AI umbrella, or is one built on top of the other?</li>
+      <li>Give one example task each system could NOT do that the next one over could.</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 1B.1 — THE AI HIERARCHY</span><span>one umbrella, three capability tiers</span></div>
+    <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="pc" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="180" y="10" width="540" height="56" rx="6" fill="#151b25" stroke="#3fb6ff" stroke-width="1.4"/>
+      <text x="450" y="36" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="14" font-weight="700">Artificial Intelligence — the broad umbrella</text>
+      <text x="450" y="54" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">machines that learn, decide, and perform human-like tasks</text>
+
+      <line x1="450" y1="66" x2="450" y2="88" stroke="#3fb6ff"/>
+      <line x1="450" y1="88" x2="130" y2="88" stroke="#3fb6ff"/>
+      <line x1="450" y1="88" x2="770" y2="88" stroke="#3fb6ff"/>
+      <line x1="130" y1="88" x2="130" y2="106" stroke="#3fb6ff" marker-end="url(#pc)"/>
+      <line x1="450" y1="88" x2="450" y2="106" stroke="#3fb6ff" marker-end="url(#pc)"/>
+      <line x1="770" y1="88" x2="770" y2="106" stroke="#3fb6ff" marker-end="url(#pc)"/>
+
+      <rect x="20" y="108" width="220" height="150" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="130" y="134" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Traditional AI</text>
+      <text x="40" y="158" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Recognize patterns</text>
+      <text x="40" y="176" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Make decisions</text>
+      <text x="40" y="194" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Classification</text>
+
+      <rect x="340" y="108" width="220" height="150" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="450" y="134" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Generative AI</text>
+      <text x="360" y="158" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Create NEW content</text>
+      <text x="360" y="176" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Text, images, music</text>
+      <text x="360" y="194" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Video generation</text>
+
+      <rect x="660" y="108" width="220" height="150" rx="6" fill="#151b25" stroke="#c07bff"/>
+      <text x="770" y="134" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">AI Agents</text>
+      <text x="680" y="158" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Autonomous operation</text>
+      <text x="680" y="176" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Use tools</text>
+      <text x="680" y="194" fill="#7c8898" font-family="JetBrains Mono" font-size="10">• Memory + actions</text>
+    </svg>
+  </div>
+
+  <table>
+    <tr><th>Tier</th><th>Example task</th></tr>
+    <tr><td>Traditional AI</td><td>Identify whether an image is a cat or a dog</td></tr>
+    <tr><td>Generative AI</td><td>Generate a brand-new image of a cat that never existed before</td></tr>
+    <tr><td>AI Agent</td><td>Research, plan, and book a vacation based on your preferences, budget, and schedule</td></tr>
+  </table>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>All three sit under one umbrella, but each tier adds a capability the one before it didn't have: Traditional AI recognizes and classifies; Generative AI creates net-new content; AI Agents take that generative capability and wrap it in autonomy — tools, memory, and the ability to act — so it can complete a multi-step task on its own rather than produce a single output.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>These aren't three separate systems to choose between — they're often layered in one product. A recommendation engine (traditional AI) might feed context to a Gen AI summarizer, which an agent then acts on. Map which tier each component of your system actually belongs to before you design its interfaces.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 2 ============ -->
+<section class="block" id="t2">
+  <div class="kicker"><span class="num">02</span><span class="layer-tag">Lifecycle</span></div>
+  <h2 class="title">The 7-Step AI Project Lifecycle</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>Before you look at the 7 steps — how many stages would you guess a real AI project needs, start to finish?</li>
+      <li>Which step do you think fails most often in practice: data, modeling, or deployment?</li>
+      <li>Is this lifecycle a straight line or a loop? Why would it need to be one or the other?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 2.1 — SEVEN-STEP LIFECYCLE</span><span>iterative, not linear</span></div>
+    <svg viewBox="0 0 700 620" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="p4" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <!-- steps -->
+      <g font-family="JetBrains Mono">
+      <!-- step boxes generated -->
+      </g>
+      <!-- 1 -->
+      <rect x="180" y="10" width="340" height="60" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="200" y="34" fill="#3fb6ff" font-family="JetBrains Mono" font-size="11" font-weight="700">STEP 1</text>
+      <text x="200" y="54" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Problem Scoping</text>
+      <text x="480" y="44" text-anchor="end" fill="#7c8898" font-family="JetBrains Mono" font-size="10">"what problem are we solving?"</text>
+      <line x1="350" y1="70" x2="350" y2="92" stroke="#3fb6ff" marker-end="url(#p4)"/>
+      <!-- 2 -->
+      <rect x="180" y="94" width="340" height="60" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="200" y="118" fill="#3fb6ff" font-family="JetBrains Mono" font-size="11" font-weight="700">STEP 2</text>
+      <text x="200" y="138" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Data Acquisition</text>
+      <text x="480" y="128" text-anchor="end" fill="#7c8898" font-family="JetBrains Mono" font-size="10">"where do we get the data?"</text>
+      <line x1="350" y1="154" x2="350" y2="176" stroke="#3fb6ff" marker-end="url(#p4)"/>
+      <!-- 3 -->
+      <rect x="180" y="178" width="340" height="60" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="200" y="202" fill="#3fb6ff" font-family="JetBrains Mono" font-size="11" font-weight="700">STEP 3</text>
+      <text x="200" y="222" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Data Exploration &amp; Prep</text>
+      <text x="480" y="212" text-anchor="end" fill="#7c8898" font-family="JetBrains Mono" font-size="10">"is it clean? features?"</text>
+      <line x1="350" y1="238" x2="350" y2="260" stroke="#3fb6ff" marker-end="url(#p4)"/>
+      <!-- 4 -->
+      <rect x="180" y="262" width="340" height="60" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="200" y="286" fill="#ffb454" font-family="JetBrains Mono" font-size="11" font-weight="700">STEP 4</text>
+      <text x="200" y="306" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Modeling</text>
+      <text x="480" y="296" text-anchor="end" fill="#7c8898" font-family="JetBrains Mono" font-size="10">"which algorithm to use?"</text>
+      <line x1="350" y1="322" x2="350" y2="344" stroke="#3fb6ff" marker-end="url(#p4)"/>
+      <!-- 5 -->
+      <rect x="180" y="346" width="340" height="60" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="200" y="370" fill="#ffb454" font-family="JetBrains Mono" font-size="11" font-weight="700">STEP 5</text>
+      <text x="200" y="390" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Evaluation</text>
+      <text x="480" y="380" text-anchor="end" fill="#7c8898" font-family="JetBrains Mono" font-size="10">"how well does it perform?"</text>
+      <line x1="350" y1="406" x2="350" y2="428" stroke="#3fb6ff" marker-end="url(#p4)"/>
+      <!-- 6 -->
+      <rect x="180" y="430" width="340" height="60" rx="6" fill="#151b25" stroke="#5fd9a0"/>
+      <text x="200" y="454" fill="#5fd9a0" font-family="JetBrains Mono" font-size="11" font-weight="700">STEP 6</text>
+      <text x="200" y="474" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Deployment</text>
+      <text x="480" y="464" text-anchor="end" fill="#7c8898" font-family="JetBrains Mono" font-size="10">"into production"</text>
+      <line x1="350" y1="490" x2="350" y2="512" stroke="#3fb6ff" marker-end="url(#p4)"/>
+      <!-- 7 -->
+      <rect x="180" y="514" width="340" height="60" rx="6" fill="#151b25" stroke="#5fd9a0"/>
+      <text x="200" y="538" fill="#5fd9a0" font-family="JetBrains Mono" font-size="11" font-weight="700">STEP 7</text>
+      <text x="200" y="558" fill="#eef2f7" font-family="Space Grotesk" font-size="13" font-weight="600">Maintenance &amp; Monitoring</text>
+      <text x="480" y="548" text-anchor="end" fill="#7c8898" font-family="JetBrains Mono" font-size="10">"monitor and update over time"</text>
+
+      <!-- loop back -->
+      <path d="M 180 544 C 60 544, 60 40, 180 40" fill="none" stroke="#c07bff" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#p4)"/>
+      <text x="60" y="292" fill="#c07bff" font-family="JetBrains Mono" font-size="10" transform="rotate(-90 60 292)" text-anchor="middle">ITERATIVE LOOP</text>
+    </svg>
+  </div>
+
+  <h3 class="subtitle">Detailed breakdown — healthcare example</h3>
+  <table>
+    <tr><th>Step</th><th>Action</th><th>Key question</th><th>Diabetes-risk example</th></tr>
+    <tr><td class="mono">1</td><td>Problem Scoping</td><td>What / why important?</td><td>Predict diabetes risk from patient health data</td></tr>
+    <tr><td class="mono">2</td><td>Data Acquisition</td><td>What data, from where?</td><td>Records, lab results, lifestyle data</td></tr>
+    <tr><td class="mono">3</td><td>Data Exploration</td><td>Clean? Missing values?</td><td>Handle missing values, normalize measurements</td></tr>
+    <tr><td class="mono">4</td><td>Modeling</td><td>Which model/architecture?</td><td>Neural network, decision tree, random forest</td></tr>
+    <tr><td class="mono">5</td><td>Evaluation</td><td>Accuracy? Precision? Recall?</td><td>Test on unseen patients, measure F1</td></tr>
+    <tr><td class="mono">6</td><td>Deployment</td><td>Where / how / API / edge?</td><td>Hospital EMR system integration</td></tr>
+    <tr><td class="mono">7</td><td>Maintenance</td><td>Drift? Retrain?</td><td>Regular performance checks, retraining</td></tr>
+  </table>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>An AI project runs through seven stages from problem scoping to maintenance — but the arrow at the end loops back to the start. It's not a waterfall you complete once; it's a cycle you keep re-entering as data, models, and business needs drift over time.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Steps 6 and 7 are where most AI initiatives quietly die — teams get a working notebook (steps 1–5) and stop funding before deployment and monitoring. Budget deployment and maintenance as first-class line items, not an afterthought.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Design the retraining loop before you ship v1 — where does new labeled data land, what triggers a retrain, how does a new model get promoted. If that pipeline doesn't exist on day one, step 7 becomes manual firefighting.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Because it's iterative, "done" needs a definition per cycle, not per project. Scope each loop (v1, v2…) with its own success criteria rather than treating the whole lifecycle as one deliverable with one deadline.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 3 ============ -->
+<section class="block" id="t3">
+  <div class="kicker"><span class="num">03</span><span class="layer-tag">Building Blocks</span></div>
+  <h2 class="title">Three Ingredients: Data + Model + Compute</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>If you had to drop one of Data, Model, or Compute to cut cost, which would hurt least — and why might that instinct be wrong?</li>
+      <li>Can a brilliant model with poor data still ship a usable product?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 3.1 — THREE EQUAL INGREDIENTS</span><span>none substitutes for another</span></div>
+    <svg viewBox="0 0 820 190" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="20" width="230" height="150" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="135" y="52" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="14" font-weight="700">DATA</text>
+      <text x="135" y="78" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">Foundation —</text>
+      <text x="135" y="94" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">large quantities</text>
+      <text x="135" y="110" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">required</text>
+      <text x="270" y="102" fill="#c7d0dc" font-family="Space Grotesk" font-size="20" font-weight="700">+</text>
+
+      <rect x="295" y="20" width="230" height="150" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="410" y="52" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="14" font-weight="700">MODEL</text>
+      <text x="410" y="78" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">Algorithm —</text>
+      <text x="410" y="94" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">math that processes</text>
+      <text x="410" y="110" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">patterns</text>
+      <text x="545" y="102" fill="#c7d0dc" font-family="Space Grotesk" font-size="20" font-weight="700">+</text>
+
+      <rect x="570" y="20" width="230" height="150" rx="6" fill="#151b25" stroke="#5fd9a0"/>
+      <text x="685" y="52" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="14" font-weight="700">COMPUTE</text>
+      <text x="685" y="78" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">GPUs / TPUs —</text>
+      <text x="685" y="94" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">cloud resources</text>
+    </svg>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Data, Model, and Compute are equally load-bearing — a great model on bad data underperforms a simple model on great data, and neither ships without enough compute to train and serve it. Treat all three as one budget line, not three separate ones you can trade off freely.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Compute cost is the one that surprises finance teams — a training run and its ongoing inference cost should be modeled before the project is greenlit, not discovered after the first cloud bill.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Data quality debt compounds like technical debt — bad labels or missing governance early on shows up as unexplainable model behavior two lifecycle loops later. Invest in data pipeline design as seriously as model architecture.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 4 ============ -->
+<section class="block" id="t4">
+  <div class="kicker"><span class="num">04</span><span class="layer-tag">Training</span></div>
+  <h2 class="title">Training Process &amp; Hyperparameters</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>What do you think happens if the learning rate is set way too high — does training just get slower, or something worse?</li>
+      <li>Is more epochs always better? What's the failure mode of training for too long?</li>
+      <li>Batch size 16 vs batch size 128 — which trains faster per epoch, and which uses more memory?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 4.1 — TRAINING FLOW</span><span>upload → train → evaluate</span></div>
+    <svg viewBox="0 0 820 150" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="p5" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="10" y="35" width="170" height="66" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="95" y="62" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">Upload Data</text>
+      <text x="95" y="80" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">images per class</text>
+      <line x1="180" y1="68" x2="210" y2="68" stroke="#3fb6ff" marker-end="url(#p5)"/>
+
+      <rect x="220" y="35" width="170" height="66" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="305" y="62" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">Feed Model</text>
+      <text x="305" y="80" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">data → algorithm</text>
+      <line x1="390" y1="68" x2="420" y2="68" stroke="#3fb6ff" marker-end="url(#p5)"/>
+
+      <rect x="430" y="20" width="220" height="96" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="540" y="42" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">Train: Epochs × Batches</text>
+      <text x="450" y="62" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Epoch 1 → batch 1, 2, ...</text>
+      <text x="450" y="78" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">Epoch 2 → batch 1, 2, ...</text>
+      <text x="450" y="94" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">... Epoch 50</text>
+      <line x1="650" y1="68" x2="680" y2="68" stroke="#3fb6ff" marker-end="url(#p5)"/>
+
+      <rect x="690" y="35" width="130" height="66" rx="6" fill="#151b25" stroke="#5fd9a0"/>
+      <text x="755" y="62" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">Evaluate</text>
+      <text x="755" y="80" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="9.5">unseen data</text>
+    </svg>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="n">Epochs</div>
+      <h4>Complete passes through the dataset</h4>
+      <p>50 is a common Teachable Machine default. More epochs generally means better learning — up to the point of overfitting.</p>
+    </div>
+    <div class="card">
+      <div class="n">Batch Size</div>
+      <h4>Samples processed per update</h4>
+      <p>Common values: 16, 32, 64, 128. Small batches → more frequent updates, slower training. Large batches → faster per epoch, more memory.</p>
+    </div>
+    <div class="card">
+      <div class="n">Learning Rate</div>
+      <h4>How aggressively the model adjusts</h4>
+      <p>Like a gas pedal: too little and training crawls, too much and it never converges. Just right lands on stable, efficient learning.</p>
+    </div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Training loops the dataset through the model epoch by epoch, batch by batch, and every pass adjusts the model according to the learning rate. Get the learning rate wrong and the model either learns too slowly or never stabilizes; run too many epochs on the same data and the model starts memorizing instead of generalizing — which is exactly what the held-out test set at the end is there to catch.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Hyperparameter search is a compute-cost multiplier — a naive grid search can burn 10-100x the training budget of a single run. Approve a search budget explicitly, don't let it happen by default.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Log every hyperparameter with every experiment run. Without that, "why did v3 outperform v2" becomes archaeology instead of a lookup.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 5 ============ -->
+<section class="block" id="t5">
+  <div class="kicker"><span class="num">05</span><span class="layer-tag">Agents</span></div>
+  <h2 class="title">Deep Research Agents in Action</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>A human researcher takes 1-2 days on a competitor analysis. What would an agent need to do differently to get it done in minutes, not just faster typing?</li>
+      <li>What's the biggest risk in trusting a 10-minute agent-generated report over a 2-day human one?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 5.1 — DEEP RESEARCH AGENT WORKFLOW</span><span>"research Tesla competitors"</span></div>
+    <svg viewBox="0 0 820 260" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="p6" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="290" y="10" width="240" height="46" rx="6" fill="#151b25" stroke="#c07bff"/>
+      <text x="410" y="38" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">AI Agent</text>
+      <line x1="410" y1="56" x2="410" y2="80" stroke="#3fb6ff"/>
+      <line x1="410" y1="80" x2="120" y2="80" stroke="#3fb6ff"/>
+      <line x1="410" y1="80" x2="700" y2="80" stroke="#3fb6ff"/>
+      <line x1="120" y1="80" x2="120" y2="98" stroke="#3fb6ff" marker-end="url(#p6)"/>
+      <line x1="410" y1="80" x2="410" y2="98" stroke="#3fb6ff" marker-end="url(#p6)"/>
+      <line x1="700" y1="80" x2="700" y2="98" stroke="#3fb6ff" marker-end="url(#p6)"/>
+
+      <rect x="30" y="100" width="180" height="60" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="120" y="134" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Search 100+ sites</text>
+
+      <rect x="320" y="100" width="180" height="60" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="410" y="134" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Read every resource</text>
+
+      <rect x="610" y="100" width="180" height="60" rx="6" fill="#151b25" stroke="#212b3a"/>
+      <text x="700" y="134" text-anchor="middle" fill="#eef2f7" font-family="JetBrains Mono" font-size="11">Compile summary</text>
+
+      <line x1="120" y1="160" x2="120" y2="180" stroke="#5fd9a0"/>
+      <line x1="410" y1="160" x2="410" y2="180" stroke="#5fd9a0"/>
+      <line x1="700" y1="160" x2="700" y2="180" stroke="#5fd9a0"/>
+      <line x1="120" y1="180" x2="700" y2="180" stroke="#5fd9a0"/>
+      <line x1="410" y1="180" x2="410" y2="198" stroke="#5fd9a0" marker-end="url(#p6)"/>
+
+      <rect x="230" y="200" width="360" height="56" rx="6" fill="#0e1420" stroke="#5fd9a0"/>
+      <text x="410" y="224" text-anchor="middle" fill="#eef2f7" font-family="Space Grotesk" font-size="12.5" font-weight="600">Final report — 5 to 10 minutes</text>
+      <text x="410" y="242" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">vs. 1-2 days for a human researcher</text>
+    </svg>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>A deep research agent doesn't just answer faster — it parallelizes the research itself: fanning out across dozens of sources, reading each one, then converging on a single compiled report. That's what turns a 1-2 day human task into a 5-10 minute agent task.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Speed doesn't imply accuracy. Before this replaces a human research function, you need a citation/grounding check built into the pipeline — otherwise you've made bad information faster, not better.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Treat the 5-10 minute report as a first draft that still needs a human review pass for anything customer-facing or decision-critical — budget that review time into the workflow, don't assume it's zero.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 6 ============ -->
+<section class="block" id="t6">
+  <div class="kicker"><span class="num">06</span><span class="layer-tag">Risk</span></div>
+  <h2 class="title">Key Challenges in AI Development</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>A model shows 99% accuracy in testing but fails in production. Name two completely different root causes for that gap.</li>
+      <li>Is "model drift" a data problem, a model problem, or a world problem?</li>
+    </ol>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="n">01</div>
+      <h4>Data quality issues</h4>
+      <p>Missing values, biased data (garbage in → garbage out), insufficient quantity, poor labeling.</p>
+    </div>
+    <div class="card">
+      <div class="n">02</div>
+      <h4>Model bias &amp; fairness</h4>
+      <p>Models inherit biases from training data and can discriminate against groups — needs careful auditing and mitigation.</p>
+    </div>
+    <div class="card">
+      <div class="n">03</div>
+      <h4>Real-time deployment issues</h4>
+      <p>Latency requirements, scaling challenges, integration with existing systems.</p>
+    </div>
+    <div class="card">
+      <div class="n">04</div>
+      <h4>Monitoring &amp; maintenance</h4>
+      <p>Model drift as data distributions change, performance degradation, need for regular retraining.</p>
+    </div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Most AI failures aren't algorithm failures — they're data, bias, latency, or drift failures. A model that tests well can still fail in production because the production data distribution, latency budget, or user population differs from what it was validated against.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>Bias audits and drift monitoring are compliance and reputational risk, not just engineering nice-to-haves — in regulated domains (finance, healthcare) they're often a hard requirement, not optional hardening.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>Design for the 99%-in-test-fails-in-production gap explicitly: shadow deployments, canary rollout, and production-vs-training distribution monitoring should all be part of the architecture, not bolted on after the first incident.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 7 ============ -->
+<section class="block" id="t7">
+  <div class="kicker"><span class="num">07</span><span class="layer-tag">Horizon</span></div>
+  <h2 class="title">Narrow AI → AGI → ASI</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>What's the actual test for "general" intelligence — is it about task breadth, or something deeper?</li>
+      <li>If AGI can do any intellectual task a human can, what's left that's uniquely human?</li>
+    </ol>
+  </div>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 7.1 — THE INTELLIGENCE ESCALATOR</span><span>each level strictly broader than the last</span></div>
+    <svg viewBox="0 0 820 260" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="p7" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <rect x="60" y="10" width="700" height="60" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+      <text x="90" y="34" fill="#eef2f7" font-family="Space Grotesk" font-size="13.5" font-weight="700">Narrow AI (current)</text>
+      <text x="90" y="54" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">good at ONE task — chess, image recognition, translation</text>
+      <line x1="410" y1="70" x2="410" y2="92" stroke="#3fb6ff" marker-end="url(#p7)"/>
+
+      <rect x="60" y="94" width="700" height="70" rx="6" fill="#151b25" stroke="#ffb454"/>
+      <text x="90" y="118" fill="#eef2f7" font-family="Space Grotesk" font-size="13.5" font-weight="700">AGI — Artificial General Intelligence</text>
+      <text x="90" y="138" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">any intellectual task a human can do · learns any task</text>
+      <text x="90" y="154" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">the stated goal of many AI research labs</text>
+      <line x1="410" y1="164" x2="410" y2="186" stroke="#3fb6ff" marker-end="url(#p7)"/>
+
+      <rect x="60" y="188" width="700" height="66" rx="6" fill="#151b25" stroke="#ff6b6b"/>
+      <text x="90" y="212" fill="#eef2f7" font-family="Space Grotesk" font-size="13.5" font-weight="700">ASI — Artificial Super Intelligence</text>
+      <text x="90" y="232" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">surpasses the best human minds in every domain</text>
+      <text x="90" y="248" fill="#7c8898" font-family="JetBrains Mono" font-size="10.5">self-improving, exponential — "the singularity"</text>
+    </svg>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Narrow AI, AGI, and ASI aren't different technologies — they're points on a widening scale of generality. Narrow AI is bounded to one task domain; AGI matches human breadth; ASI would exceed the best humans across every domain and, per the theory, begin improving itself.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>None of today's roadmap decisions should be blocked on AGI arriving — plan around narrow-AI capability curves you can actually forecast, and treat AGI/ASI timelines as a watch-list, not a dependency.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 8 ============ -->
+<section class="block" id="t8">
+  <div class="kicker"><span class="num">08</span><span class="layer-tag">Applied Practice</span></div>
+  <h2 class="title">Applied Practice: Diabetes Risk Prediction</h2>
+
+  <div class="prime-box">
+    <div class="ptag">Prime yourself — answer before reading on</div>
+    <ol>
+      <li>For a diabetes-risk model, would you optimize harder for precision (avoid false alarms) or recall (avoid missed cases) — and why?</li>
+      <li>What compliance constraint is unique to healthcare deployment that wouldn't apply to, say, a movie recommender?</li>
+    </ol>
+  </div>
+
+  <p>Walking the 7-step lifecycle end-to-end against a single real scenario:</p>
+
+  <div class="timeline">
+    <div class="tl-row"><div class="tl-week">1 · Scoping</div><div class="tl-desc">Predict patient diabetes risk. Why: early detection enables early treatment. Stakeholders: patients, doctors, insurers.</div></div>
+    <div class="tl-row"><div class="tl-week">2 · Data</div><div class="tl-desc">Demographics (age, BMI), lab results (blood sugar, insulin), lifestyle data (diet, exercise, smoking). Sourced from hospital EMR and patient questionnaires.</div></div>
+    <div class="tl-row"><div class="tl-week">3 · Prep</div><div class="tl-desc">Handle missing values, normalize/scale features, engineer BMI from height/weight, 80/20 train/test split.</div></div>
+    <div class="tl-row"><div class="tl-week">4 · Modeling</div><div class="tl-desc">Candidates: Random Forest (interpretable), Neural Network (high performance), Logistic Regression (baseline), XGBoost.</div></div>
+    <div class="tl-row"><div class="tl-week">5 · Evaluation</div><div class="tl-desc">Accuracy, Precision (false positives matter), Recall (false negatives are dangerous in disease detection), F1-score.</div></div>
+    <div class="tl-row"><div class="tl-week">6 · Deployment</div><div class="tl-desc">Integrate with hospital EMR, secure API, doctor-facing UI, HIPAA compliance required.</div></div>
+    <div class="tl-row"><div class="tl-week">7 · Maintenance</div><div class="tl-desc">Monitor drift as population health changes, retrain regularly, audit for demographic bias, keep documentation current.</div></div>
+  </div>
+
+  <div class="recap">
+    <div class="rtag">What we just learned</div>
+    <p>Applied to a real scenario, the 7 abstract steps become concrete decisions — which features to engineer, which metric to optimize (recall over raw accuracy, given the cost of a missed diagnosis), and which regulatory constraint (HIPAA) shapes the deployment step specifically.</p>
+  </div>
+
+  <div class="persp-grid">
+    <div class="persp-card cto">
+      <div class="ptitle">🎯 CTO view</div>
+      <p>In healthcare, recall usually outweighs precision — a missed diabetes case is more costly than a false alarm that leads to a confirmatory test. Make that trade-off an explicit, documented decision, not an accident of the default threshold.</p>
+    </div>
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ Architect view</div>
+      <p>HIPAA-driven deployment means the API, logging, and data-at-rest design all need compliance review before step 6 starts — not a retrofit after the model works.</p>
+    </div>
+    <div class="persp-card pm">
+      <div class="ptitle">📋 PM view</div>
+      <p>Bias auditing across demographics (step 7) is its own workstream with its own timeline — don't fold it silently into "maintenance," it needs a named owner and a recurring cadence.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOPIC 9 : reference ============ -->
+<section class="block" id="t9">
+  <div class="kicker"><span class="layer-tag">Reference</span></div>
+  <h2 class="title">Course Map, Tooling &amp; Reference</h2>
+
+  <h3 class="subtitle">Course module outline</h3>
+  <table>
+    <tr><th>Module</th><th>Covers</th></tr>
+    <tr><td class="mono">1</td><td>AI Fundamentals &amp; Lifecycle Overview — AI/Gen AI/Agents, Data+Compute+Model, no-code model build, AGI &amp; ASI</td></tr>
+    <tr><td class="mono">2</td><td>AI Project Management — vision, scope, success metrics, stakeholders, Agile vs Waterfall, CRISP-DM, SAFe</td></tr>
+    <tr><td class="mono">3</td><td>Data Strategy &amp; Preparation — structured/unstructured, sourcing, quality, labeling cost, feature engineering, data lake vs warehouse</td></tr>
+    <tr><td class="mono">4</td><td>Model Development &amp; Validation — neural nets, metrics, GPU/TPU/CPU, cloud providers, experiment tracking, LLM leaderboards</td></tr>
+    <tr><td class="mono">5</td><td>Deployment &amp; Production — architecture, scalability, monitoring, MLOps, serving, API design</td></tr>
+    <tr><td class="mono">6</td><td>Governance &amp; Ethics — responsible AI, regulatory compliance, documentation, change management</td></tr>
+  </table>
+
+  <h3 class="subtitle">Local AI assistant setup — LM Studio</h3>
+  <div class="timeline">
+    <div class="tl-row"><div class="tl-week">1 · Download</div><div class="tl-desc">lmstudio.ai — available for Windows, Mac, Linux.</div></div>
+    <div class="tl-row"><div class="tl-week">2 · Install</div><div class="tl-desc">Run the executable, choose "only for me," keep defaults, install.</div></div>
+    <div class="tl-row"><div class="tl-week">3 · Select model</div><div class="tl-desc">New chat, pick a model (Qwen, Llama, etc.), click run, wait for download.</div></div>
+    <div class="tl-row"><div class="tl-week">4 · Use</div><div class="tl-desc">Free, runs offline, no data sharing, can write Python and explain concepts.</div></div>
+  </div>
+
+  <h3 class="subtitle">Practical demo — Teachable Machine results</h3>
+  <table>
+    <tr><th>Test image</th><th>Predicted</th><th>Confidence</th></tr>
+    <tr><td>Wildlife 1</td><td>Wildlife ✅</td><td class="mono">100%</td></tr>
+    <tr><td>Wildlife 2</td><td>Wildlife ✅</td><td class="mono">98% (dark image)</td></tr>
+    <tr><td>Turn Left 1</td><td>80km/h ❌</td><td class="mono">85% (misclassified)</td></tr>
+    <tr><td>Turn Left 2</td><td>Unknown ❌</td><td class="mono">low confidence</td></tr>
+  </table>
+  <p>Model: image classification, 5 classes, 100 images/class, 50 epochs. Performs well on trained classes, struggles on challenging angles/lighting — a direct, hands-on demonstration of why more data and hyperparameter tuning matter.</p>
+
+  <h3 class="subtitle">Success tips</h3>
+  <ul>
+    <li><strong>Learn by doing:</strong> use LM Studio or ChatGPT, brainstorm ideas, attempt every practice opportunity yourself.</li>
+    <li><strong>Use the tools:</strong> LM Studio locally, Google Teachable Machine for no-code modeling, AI-generated Python for practice.</li>
+    <li><strong>Optimize video pace:</strong> 1.25-1.5x if familiar with the material, 0.75x to catch up, 1080p available.</li>
+    <li><strong>Certification:</strong> complete all videos and practice opportunities to unlock the certificate.</li>
+  </ul>
+
+  <h3 class="subtitle">Key takeaways cheatsheet</h3>
+  <div class="card-grid">
+    <div class="card"><div class="n">01</div><p>AI is everywhere — from recommendations to self-driving cars.</p></div>
+    <div class="card"><div class="n">02</div><p>Gen AI creates new content; AI Agents perform complex, multi-step tasks.</p></div>
+    <div class="card"><div class="n">03</div><p>7-step lifecycle: Scope → Acquire → Explore → Model → Evaluate → Deploy → Maintain.</p></div>
+    <div class="card"><div class="n">04</div><p>Three ingredients for any AI model: Data + Model + Compute = AI system.</p></div>
+    <div class="card"><div class="n">05</div><p>Hyperparameters matter: epochs (iterations), batch size (samples at once), learning rate (adjustment speed).</p></div>
+    <div class="card"><div class="n">06</div><p>AI evolution: Narrow AI → AGI → ASI — many experts believe ASI is achievable in our lifetime.</p></div>
+    <div class="card"><div class="n">07</div><p>Core challenges: data quality, bias, deployment, monitoring.</p></div>
+    <div class="card"><div class="n">08</div><p>Always test on unseen data — avoid overfitting.</p></div>
+  </div>
+
+  <h3 class="subtitle">Glossary</h3>
+  <table>
+    <tr><th>Term</th><th>Definition</th></tr>
+    <tr><td class="mono">AI</td><td>Science of creating systems that mimic human intelligence</td></tr>
+    <tr><td class="mono">Gen AI</td><td>Subset of AI that creates new content (text, images, etc.)</td></tr>
+    <tr><td class="mono">AI Agents</td><td>Autonomous systems using tools to accomplish complex tasks</td></tr>
+    <tr><td class="mono">Epoch</td><td>One complete pass through the entire training dataset</td></tr>
+    <tr><td class="mono">Batch size</td><td>Number of samples processed per forward/backward pass</td></tr>
+    <tr><td class="mono">Learning rate</td><td>How aggressively the model adjusts during training</td></tr>
+    <tr><td class="mono">Overfitting</td><td>Model memorizes training data, fails to generalize</td></tr>
+    <tr><td class="mono">AGI</td><td>Artificial General Intelligence — human-level breadth</td></tr>
+    <tr><td class="mono">ASI</td><td>Artificial Super Intelligence — beyond human, every domain</td></tr>
+    <tr><td class="mono">MLOps</td><td>Machine Learning Operations — deployment and monitoring</td></tr>
+    <tr><td class="mono">Model drift</td><td>Performance degrades as data distribution changes</td></tr>
+    <tr><td class="mono">Hyperparameter</td><td>Configuration setting controlling the learning process</td></tr>
+  </table>
+
+  <h3 class="subtitle">Final architect's perspective</h3>
+  <div class="panel violet" style="background:var(--panel-2); border:1px solid var(--line); border-left:3px solid var(--violet); border-radius:var(--radius); padding:16px 18px; margin:16px 0;">
+    <div class="ptitle" style="font-family:var(--mono); font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-bright); margin-bottom:6px; font-weight:700;">As an AI architect, I always remind my teams</div>
+    <p style="margin:0; font-size:16px; color:var(--ink-bright); font-style:italic;">"The model is not the product — the solution is."</p>
+  </div>
+
+  <p><strong>Architecture is about:</strong></p>
+  <ul>
+    <li>End-to-end thinking — not just model accuracy</li>
+    <li>System reliability — not just research results</li>
+    <li>Business value — not just technical novelty</li>
+  </ul>
+
+  <div class="diagram-frame">
+    <div class="cap"><span>FIG 9.1 — THE ITERATIVE ARCHITECT'S LOOP</span><span>research to learning, and back again</span></div>
+    <svg viewBox="0 0 820 180" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="pf" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L7,4 L0,7 Z" fill="#3fb6ff"/></marker></defs>
+      <g font-family="Space Grotesk" font-size="12.5" font-weight="600" fill="#eef2f7">
+        <rect x="10" y="55" width="140" height="56" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+        <text x="80" y="88" text-anchor="middle">Research</text>
+        <line x1="150" y1="83" x2="178" y2="83" stroke="#3fb6ff" marker-end="url(#pf)"/>
+
+        <rect x="180" y="55" width="140" height="56" rx="6" fill="#151b25" stroke="#3fb6ff"/>
+        <text x="250" y="88" text-anchor="middle">Prototype</text>
+        <line x1="320" y1="83" x2="348" y2="83" stroke="#3fb6ff" marker-end="url(#pf)"/>
+
+        <rect x="350" y="55" width="140" height="56" rx="6" fill="#151b25" stroke="#ffb454"/>
+        <text x="420" y="88" text-anchor="middle">Deploy</text>
+        <line x1="490" y1="83" x2="518" y2="83" stroke="#3fb6ff" marker-end="url(#pf)"/>
+
+        <rect x="520" y="55" width="140" height="56" rx="6" fill="#151b25" stroke="#5fd9a0"/>
+        <text x="590" y="88" text-anchor="middle">Monitor</text>
+        <line x1="660" y1="83" x2="688" y2="83" stroke="#3fb6ff" marker-end="url(#pf)"/>
+
+        <rect x="690" y="55" width="120" height="56" rx="6" fill="#151b25" stroke="#c07bff"/>
+        <text x="750" y="88" text-anchor="middle">Learn</text>
+      </g>
+      <path d="M 750 111 C 750 160, 80 160, 80 111" fill="none" stroke="#c07bff" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#pf)"/>
+      <text x="415" y="150" text-anchor="middle" fill="#7c8898" font-family="JetBrains Mono" font-size="10">loops back — learning feeds the next research cycle</text>
+    </svg>
+  </div>
+
+  <p><strong>Always ask:</strong></p>
+  <ul>
+    <li>"What could go wrong?"</li>
+    <li>"How does this serve the user?"</li>
+    <li>"Can we measure success?"</li>
+    <li>"How do we handle edge cases?"</li>
+  </ul>
+
+  <div class="persp-grid">
+    <div class="persp-card arch">
+      <div class="ptitle">🏗️ The one line to remember</div>
+      <p>Building AI systems is roughly 80% data engineering, 20% modeling — and architecture is the discipline of never letting the 20% distract from the 80%.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ACTIVE RECALL ============ -->
+<section class="block" id="recall">
+  <div class="kicker"><span class="layer-tag">Active Recall</span></div>
+  <h2 class="title">Test yourself — deep thought questions</h2>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">If AI models learn from historical data, are they inherently conservative — reinforcing the past rather than being genuinely innovative?</div>
+    <div class="ra">Largely yes, by construction: a model's outputs are a function of the patterns present in its training data, so it tends to reproduce and interpolate within that distribution rather than originate something outside it. "Novelty" in generated output is usually recombination of existing patterns in a new configuration — impressive, but not the same as a human insight that breaks from precedent.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">In the 7-step lifecycle, is data acquisition always the step with the most downstream impact if done poorly?</div>
+    <div class="ra">It's the most common failure point, but not universally the most impactful one — a scoping failure (solving the wrong problem) can waste the entire cycle regardless of data quality, and a deployment failure can sink a technically sound model just as completely. Data quality dominates in practice because it's the easiest step to underinvest in, not because it's structurally guaranteed to matter most.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">Can we truly build unbiased AI systems, or are we just shifting human bias into the machine?</div>
+    <div class="ra">Mostly the latter — a model trained on human-generated or human-labeled data inherits the biases embedded in that data and in the labeling process. "Debiasing" techniques can reduce specific, measured disparities, but they don't remove bias as a category; they trade one set of trade-offs for another, which is why bias auditing has to be continuous rather than a one-time fix.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">If AI agents can act autonomously — making payments, sending emails — who is legally liable when something goes wrong?</div>
+    <div class="ra">This is genuinely unsettled and varies by jurisdiction, but current practice generally places liability on the deploying organization and/or developer rather than the agent itself, since the agent has no legal personhood. That's precisely why the tool-permission boundary (what an agent is allowed to touch, and what's logged) matters operationally — it's the evidence trail that liability arguments will hinge on.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">A model shows 99% accuracy on test data but fails in production — what's actually going on?</div>
+    <div class="ra">Usually one of: the production data distribution differs from the test set (distribution shift), the test set leaked information from training (data leakage inflating the reported number), the model overfit to quirks of the test set through repeated tuning, or production introduces edge cases the test set never covered. Accuracy on a static test set is a necessary check, not a guarantee of real-world generalization.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">How should we measure "success" for an AI system making high-stakes decisions differently than we'd measure a human decision-maker?</div>
+    <div class="ra">A human decision is usually judged case-by-case with room for context and appeal; an AI system is judged in aggregate — across thousands of decisions, for consistency, calibration, and disparate impact across groups, not just whether any single decision felt reasonable. That means success metrics need a fairness/consistency axis (does it treat similar cases similarly, across demographics) alongside raw accuracy, which isn't typically how we'd score an individual human's judgment.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">If we achieve AGI, should it have rights or moral consideration?</div>
+    <div class="ra">There's no consensus — the honest answer is that this depends entirely on unresolved questions about whether the system has anything like subjective experience, which we currently have no reliable way to test for. The more actionable near-term framing many ethicists use is precautionary: as systems become more capable and more autonomous, the cost of being wrong in either direction (over-attributing or under-attributing moral status) grows, which argues for taking the question seriously well before the technology forces the issue.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">The AI lifecycle is iterative — so how do you know when to stop iterating and ship?</div>
+    <div class="ra">In practice, you stop when the model clears a pre-agreed, business-defined threshold (not an ever-improving research metric) and the cost of another iteration exceeds its expected value — diminishing returns on accuracy, or a ticking business deadline, outweigh further gains. The mistake is letting "we could always keep improving it" delay shipping indefinitely; that's why step 1 (problem scoping) should define the success bar up front, so step 5 (evaluation) has a stopping condition instead of an open-ended target.</div>
+  </div>
+
+  <div class="recall" onclick="this.classList.toggle('open')">
+    <div class="rq">Should models be optimized for accuracy or interpretability in life-critical applications?</div>
+    <div class="ra">It's rarely a strict either/or — the real question is what interpretability buys you: in healthcare or lending, an explainable model lets a human reviewer catch a wrong-for-the-right-reasons or right-for-the-wrong-reasons prediction before it causes harm, which raw accuracy alone can't guarantee. Many teams resolve this by using a highly accurate model but pairing it with a separate interpretability layer (e.g. SHAP/LIME explanations) rather than sacrificing accuracy for a simpler but weaker model outright.</div>
+  </div>
+
+</section>
+
+<footer>ARCHITECTS LAB — Study Note 022 — AI Lifecycle Mastery — prime, learn, recap, and view it from every seat at the table<br><br>Source: <a href="https://www.udemy.com/course/ai-project-lifecycle-mastery-strategy-to-deployment/learn/lecture/50482271#overview" target="_blank" rel="noopener" style="color:var(--blueprint);">AI Project Lifecycle Mastery: Strategy to Deployment — Udemy</a></footer>
+
+</body>
+</html>
