@@ -1526,6 +1526,58 @@
     .project.gov .p-note-dot.filled { background: #0369a1; }
     [data-theme="light"] .project.gov .project-head { background: linear-gradient(135deg, rgba(3,105,161,0.05) 0%, rgba(67,56,202,0.02) 100%); }
     [data-theme="light"] .note-card.n13:hover { box-shadow: 0 10px 32px rgba(3,105,161,0.14); }
+    /* ── Category headers (grouping) ──────────────── */
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      margin: 2.75rem 0 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      animation: fade-up 0.5s ease both;
+      cursor: pointer;
+      user-select: none;
+    }
+    .category-header:first-of-type { margin-top: 0.5rem; }
+    .category-header:hover { border-bottom-color: var(--border-hover); }
+    .cat-chevron {
+      flex-shrink: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      transition: transform 0.25s ease, color 0.2s ease;
+    }
+    .category-header:hover .cat-chevron { color: var(--text-dim); }
+    .category-header.cat-open .cat-chevron { transform: rotate(180deg); }
+    .category-group {
+      display: block;
+      overflow: hidden;
+    }
+    .category-group.cat-collapsed { display: none; }
+    .cat-num {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--bg);
+      background: var(--cat-color, var(--primary));
+      border-radius: 7px;
+      padding: 0.28rem 0.55rem;
+      flex-shrink: 0;
+      box-shadow: 0 0 16px var(--cat-glow, var(--primary-glow));
+    }
+    .cat-text { flex: 1; min-width: 0; }
+    .cat-title {
+      font-family: var(--heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .cat-sub {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
   </style>
 </head>
 <body>
@@ -1679,6 +1731,17 @@
       <p>🔭</p>
       <p>No notes match your search.</p>
     </div>
+
+    <!-- ── Category 1: Core AI Development ──────── -->
+    <div class="category-header" data-cat-target="cat-group-1" style="--cat-color:var(--primary); --cat-glow:var(--primary-glow);">
+      <span class="cat-num">CAT 01</span>
+      <div class="cat-text">
+        <div class="cat-title">Core AI Development</div>
+        <div class="cat-sub">LLM Engineering &amp; RAG · Prompt Engineering · RAG · MCP</div>
+      </div>
+      <span class="cat-chevron">▾</span>
+    </div>
+    <div class="category-group cat-collapsed" id="cat-group-1">
 
     <!-- ── Project: LLM Engineering ─────────────── -->
     <article class="project" id="proj-llm">
@@ -2709,6 +2772,18 @@
       </div><!-- /project-body -->
     </article>
 
+    </div>
+    <!-- ── Category 2: AI Infrastructure & Deployment (MLOps) ── -->
+    <div class="category-header" data-cat-target="cat-group-2" style="--cat-color:var(--amber); --cat-glow:rgba(245,158,11,0.28);">
+      <span class="cat-num">CAT 02</span>
+      <div class="cat-text">
+        <div class="cat-title">AI Infrastructure &amp; Deployment (MLOps)</div>
+        <div class="cat-sub">Deploy AI to Cloud · Ultimate Docker for ML, GenAI &amp; Agentic AI · AWS Certified AI Practitioner (AIF-C01)</div>
+      </div>
+      <span class="cat-chevron">▾</span>
+    </div>
+    <div class="category-group cat-collapsed" id="cat-group-2">
+
     <!-- ── Project: Deploy AI to Cloud ──────────────── -->
     <article class="project deploy" id="proj-deploy">
 
@@ -3122,6 +3197,18 @@
       </div><!-- /project-body -->
     </article>
 
+    </div>
+    <!-- ── Category 3: AI Leadership & Strategy ────── -->
+    <div class="category-header" data-cat-target="cat-group-3" style="--cat-color:var(--rose); --cat-glow:rgba(244,63,94,0.28);">
+      <span class="cat-num">CAT 03</span>
+      <div class="cat-text">
+        <div class="cat-title">AI Leadership &amp; Strategy</div>
+        <div class="cat-sub">AI for Leaders and Program Managers · AI Leaders: Generative AI and Agentic AI</div>
+      </div>
+      <span class="cat-chevron">▾</span>
+    </div>
+    <div class="category-group cat-collapsed" id="cat-group-3">
+
     <!-- ── Project: AI for Leaders & Program Managers ─── -->
     <article class="project leaders-pm" id="proj-leaders-pm">
 
@@ -3419,6 +3506,18 @@
       </div><!-- /project-body -->
     </article>
 
+    </div>
+    <!-- ── Category 4: AI Governance & Responsible AI ── -->
+    <div class="category-header" data-cat-target="cat-group-4" style="--cat-color:#0ea5e9; --cat-glow:rgba(14,165,233,0.28);">
+      <span class="cat-num">CAT 04</span>
+      <div class="cat-text">
+        <div class="cat-title">AI Governance &amp; Responsible AI</div>
+        <div class="cat-sub">As organizations adopt AI, governance becomes critical · Fundamentals of AI Governance</div>
+      </div>
+      <span class="cat-chevron">▾</span>
+    </div>
+    <div class="category-group cat-collapsed" id="cat-group-4">
+
     <!-- ── Project: AI Governance ─────────────── -->
     <article class="project gov" id="proj-gov">
 
@@ -3640,6 +3739,8 @@
       </div><!-- /project-body -->
     </article>
 
+    </div>
+
   </div><!-- /wrap -->
 
   <!-- ── Footer ───────────────────────────────── -->
@@ -3821,6 +3922,8 @@
 
     document.getElementById('expand-all').addEventListener('click', () => {
       document.querySelectorAll('.project:not(.hidden)').forEach(p => p.classList.remove('collapsed'));
+      document.querySelectorAll('.category-group').forEach(g => g.classList.remove('cat-collapsed'));
+      document.querySelectorAll('.category-header').forEach(h => h.classList.add('cat-open'));
     });
 
     document.getElementById('collapse-all').addEventListener('click', () => {
@@ -3828,9 +3931,30 @@
     });
   })();
 
+  /* ─── 7b. Category group collapse (default collapsed) ─ */
+  (function () {
+    document.querySelectorAll('.category-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const target = document.getElementById(header.dataset.catTarget);
+        if (!target) return;
+        target.classList.toggle('cat-collapsed');
+        header.classList.toggle('cat-open', !target.classList.contains('cat-collapsed'));
+      });
+    });
+  })();
+
   /* ─── 9. Project filter tabs ───────────────────── */
   (function () {
     const btns = document.querySelectorAll('.f-btn');
+    const catHeaders = document.querySelectorAll('.category-header');
+    const openCategoryFor = (el) => {
+      const group = el.closest('.category-group');
+      if (!group) return;
+      group.classList.remove('cat-collapsed');
+      catHeaders.forEach(h => {
+        if (h.dataset.catTarget === group.id) h.classList.add('cat-open');
+      });
+    };
     const projects = {
       'proj-llm':    document.getElementById('proj-llm'),
       'proj-pe':     document.getElementById('proj-pe'),
@@ -3855,8 +3979,9 @@
           Object.entries(projects).forEach(([id, el]) => {
             el.classList.toggle('hidden', id !== f);
           });
-          /* auto-expand the selected project */
+          /* auto-expand the selected project and its category group */
           projects[f].classList.remove('collapsed');
+          openCategoryFor(projects[f]);
           projects[f].scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       });
