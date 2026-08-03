@@ -1526,6 +1526,27 @@
     .project.gov .p-note-dot.filled { background: #0369a1; }
     [data-theme="light"] .project.gov .project-head { background: linear-gradient(135deg, rgba(3,105,161,0.05) 0%, rgba(67,56,202,0.02) 100%); }
     [data-theme="light"] .note-card.n13:hover { box-shadow: 0 10px 32px rgba(3,105,161,0.14); }
+
+    /* ── AI Guardrails project accent ────────────────── */
+    .note-card.n14 { --card-glow: linear-gradient(135deg, rgba(225,29,72,0.07), rgba(124,58,237,0.03)); }
+    .note-card.n14:hover { box-shadow: 0 18px 50px rgba(225,29,72,0.18); }
+    .n-icon.n14 { background: linear-gradient(135deg,#e11d48,#7c3aed); box-shadow: 0 5px 18px rgba(225,29,72,0.35); }
+
+    .project.guardrails { animation-delay: 1.0s; }
+    .project.guardrails .project-head { background: linear-gradient(135deg, rgba(225,29,72,0.07) 0%, rgba(124,58,237,0.03) 100%); }
+    .project.guardrails .p-icon { background: linear-gradient(135deg,#e11d48,#7c3aed); box-shadow: 0 0 30px rgba(225,29,72,0.35); }
+    .project.guardrails .p-eyebrow { color: #fb7185; }
+    .project.guardrails .badge { background: rgba(225,29,72,0.08); border-color: rgba(225,29,72,0.18); color: #fda4af; }
+    .project.guardrails .sec-dot { background: radial-gradient(circle,#e11d48,rgba(225,29,72,0.3)); box-shadow: 0 0 8px rgba(225,29,72,0.28); }
+    .project.guardrails .sec-title { color: #fb7185; }
+    .project.guardrails .open-btn { background: rgba(225,29,72,0.08); border-color: rgba(225,29,72,0.18); color: #fda4af; }
+    .project.guardrails .note-card:hover .open-btn { background: rgba(225,29,72,0.18); border-color: rgba(225,29,72,0.45); box-shadow: 0 0 14px rgba(225,29,72,0.2); }
+    .f-btn[data-filter="proj-guardrails"].active { background: rgba(225,29,72,0.12); border-color: rgba(225,29,72,0.38); color: #fda4af; }
+    .project.guardrails .project-head:hover { background: linear-gradient(135deg, rgba(225,29,72,0.10) 0%, rgba(124,58,237,0.05) 100%); }
+    .project.guardrails .p-note-dot.filled { background: #e11d48; }
+    [data-theme="light"] .project.guardrails .project-head { background: linear-gradient(135deg, rgba(225,29,72,0.05) 0%, rgba(124,58,237,0.02) 100%); }
+    [data-theme="light"] .note-card.n14:hover { box-shadow: 0 10px 32px rgba(225,29,72,0.14); }
+
     /* ── Category headers (grouping) ──────────────── */
     .category-header {
       display: flex;
@@ -1648,25 +1669,6 @@
       <p class="hero-sub">Structured notes from AI engineering bootcamps, projects, and research — all in one place. Press <code style="font-family:var(--mono);background:rgba(99,102,241,0.12);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.85em">/</code> to search.</p>
     </section>
 
-    <!-- Stats -->
-    <div class="stats">
-      <div class="s-card">
-        <div class="s-emoji">🗂️</div>
-        <span class="s-num" data-target="10">0</span>
-        <div class="s-label">Modules</div>
-      </div>
-      <div class="s-card">
-        <div class="s-emoji">🧠</div>
-        <span class="s-num" data-target="14">0</span>
-        <div class="s-label">Bootcamp Days</div>
-      </div>
-      <div class="s-card">
-        <div class="s-emoji">📄</div>
-        <span class="s-num" data-target="48">0</span>
-        <div class="s-label">Notes</div>
-      </div>
-    </div>
-
     <!-- Upcoming Courses -->
     <div class="upcoming-section">
       <div class="upcoming-header">
@@ -1720,6 +1722,7 @@
       <button class="f-btn" data-filter="proj-leaders-pm">AI for Leaders</button>
       <button class="f-btn" data-filter="proj-ai-leader">GenAI &amp; Agentic AI</button>
       <button class="f-btn" data-filter="proj-gov">AI Governance</button>
+      <button class="f-btn" data-filter="proj-guardrails">AI Guardrails</button>
       <div class="expand-controls">
         <button class="xbtn" id="expand-all">↕ Expand All</button>
         <button class="xbtn" id="collapse-all">⊟ Collapse</button>
@@ -3512,7 +3515,7 @@
       <span class="cat-num">CAT 04</span>
       <div class="cat-text">
         <div class="cat-title">AI Governance &amp; Responsible AI</div>
-        <div class="cat-sub">As organizations adopt AI, governance becomes critical · Fundamentals of AI Governance</div>
+        <div class="cat-sub">As organizations adopt AI, governance becomes critical · Fundamentals of AI Governance · AI Guardrails &amp; Cybersecurity</div>
       </div>
       <span class="cat-chevron">▾</span>
     </div>
@@ -3739,13 +3742,144 @@
       </div><!-- /project-body -->
     </article>
 
+    <!-- ── Project: AI Guardrails ───────────────────── -->
+    <article class="project guardrails" id="proj-guardrails">
+
+      <div class="project-head">
+        <div class="p-icon">🛡️</div>
+        <div class="p-meta">
+          <div class="p-eyebrow">Project · 11</div>
+          <div class="p-name">AI Guardrails, Cybersecurity &amp; AI Agents</div>
+          <div class="tags">
+            <span class="tag t-i">AI Safety</span>
+            <span class="tag t-c">Prompt Injection</span>
+            <span class="tag t-v">Guardrails AI</span>
+            <span class="tag t-e">AWS Bedrock</span>
+          </div>
+          <p class="p-desc">Vulnerabilities and defenses around Foundation Models — prompt injection, hallucination detection, PII filtering with Microsoft Presidio, and managed safety layers via AWS Bedrock Guardrails and Meta Llama Guard.</p>
+        </div>
+        <div class="p-badges">
+          <span class="badge">3 notes</span>
+        </div>
+        <div class="p-chevron">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="project-body">
+
+      <div class="section">
+        <div class="sec-header">
+          <span class="sec-dot"></span>
+          <span class="sec-title">Guardrails, Safety &amp; Defenses</span>
+          <span class="sec-badge">3 notes</span>
+        </div>
+
+        <div class="notes-grid">
+
+          <div class="note-card n14"
+               data-title="AI Guardrails for Generative AI Applications Vulnerabilities Checkpoints Defenses Output Filtering Content Policy"
+               data-topics="Foundation Model Vulnerabilities Guardrail Checkpoints Output Filtering Content Policy Defensive Design"
+               data-file="ai_guardrails_cybersecurity_ai_agents/ai-guardrails-notes.html">
+            <span class="new-badge">New</span>
+            <div class="note-top">
+              <div class="n-icon n14">🛡️</div>
+              <div class="n-meta">
+                <div class="n-num">Note 01 · AI Guardrails</div>
+                <div class="n-title">AI Guardrails for Generative AI Applications</div>
+              </div>
+            </div>
+            <p class="n-desc">The vulnerabilities, checkpoints, and defenses that sit around a Foundation Model — how to architect safety layers and apply content-policy filtering to GenAI outputs.</p>
+            <div class="topics">
+              <span class="tp">Foundation Model Risks</span>
+              <span class="tp">Guardrail Checkpoints</span>
+              <span class="tp">Output Filtering</span>
+              <span class="tp">Content Policy</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:88%; --da:#e11d48; --db:#7c3aed;"></div>
+                </div>
+                <div class="depth-text">Thorough</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <div class="note-card n14"
+               data-title="AI Guardrails Mechanics Prompt Injection Defensive Models Meta Prompt Guard Llama Guard"
+               data-topics="Prompt Anatomy Injection Attacks Jailbreaks Meta Prompt Guard Llama Guard Defensive Models"
+               data-file="ai_guardrails_cybersecurity_ai_agents/ai-guardrails-notes-part2.html">
+            <span class="new-badge">New</span>
+            <div class="note-top">
+              <div class="n-icon n14">🔐</div>
+              <div class="n-meta">
+                <div class="n-num">Note 02 · AI Guardrails</div>
+                <div class="n-title">Mechanics, Prompt Injection &amp; Defensive Models</div>
+              </div>
+            </div>
+            <p class="n-desc">How guardrails work under the hood: prompt anatomy, injection attack vectors and jailbreaks, and the Meta Prompt Guard / Llama Guard model family as defensive classifiers.</p>
+            <div class="topics">
+              <span class="tp">Prompt Injection</span>
+              <span class="tp">Jailbreaks</span>
+              <span class="tp">Meta Prompt Guard</span>
+              <span class="tp">Llama Guard</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:86%; --da:#e11d48; --db:#7c3aed;"></div>
+                </div>
+                <div class="depth-text">Thorough</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+          <div class="note-card n14"
+               data-title="Hallucination Detection Microsoft Presidio PII Filtering AWS Bedrock Guardrails Safety Privacy Grounding"
+               data-topics="Hallucination Detection Presidio PII Filtering AWS Bedrock Managed Safety Privacy Grounding"
+               data-file="ai_guardrails_cybersecurity_ai_agents/ai-guardrails-notes-part3.html">
+            <span class="new-badge">New</span>
+            <div class="note-top">
+              <div class="n-icon n14">🔍</div>
+              <div class="n-meta">
+                <div class="n-num">Note 03 · AI Guardrails</div>
+                <div class="n-title">Hallucination Detection, Presidio &amp; AWS Bedrock Guardrails</div>
+              </div>
+            </div>
+            <p class="n-desc">Why models hallucinate and how to measure and catch it, how Microsoft Presidio strips PII before it reaches an LLM, and how AWS Bedrock ties safety, privacy, and grounding into one managed layer.</p>
+            <div class="topics">
+              <span class="tp">Hallucination Detection</span>
+              <span class="tp">Microsoft Presidio</span>
+              <span class="tp">PII Filtering</span>
+              <span class="tp">AWS Bedrock</span>
+            </div>
+            <div class="note-foot">
+              <div class="depth-wrap">
+                <div class="depth-bar">
+                  <div class="depth-fill" style="width:90%; --da:#e11d48; --db:#7c3aed;"></div>
+                </div>
+                <div class="depth-text">Thorough</div>
+              </div>
+              <div class="open-btn">Open →</div>
+            </div>
+          </div>
+
+        </div><!-- /notes-grid -->
+      </div><!-- /section -->
+
+      </div><!-- /project-body -->
+    </article>
+
     </div>
 
   </div><!-- /wrap -->
 
   <!-- ── Footer ───────────────────────────────── -->
   <footer class="z1">
-    <p>AI Knowledge Vault &mdash; <span class="hl">48 notes</span> across <span class="hl">10 modules</span> &mdash; Updated <span class="hl">August 2026</span></p>
+    <p>AI Knowledge Vault &mdash; <span class="hl">51 notes</span> across <span class="hl">11 modules</span> &mdash; Updated <span class="hl">August 2026</span></p>
     <p style="margin-top:0.35rem;font-size:0.6rem;opacity:0.5">Press <span style="color:var(--primary)">/</span> to search · Click any card to open note · Neural network reacts to your cursor</p>
   </footer>
 
@@ -3965,7 +4099,8 @@
       'proj-aws':        document.getElementById('proj-aws'),
       'proj-leaders-pm': document.getElementById('proj-leaders-pm'),
       'proj-ai-leader':  document.getElementById('proj-ai-leader'),
-      'proj-gov':        document.getElementById('proj-gov'),
+      'proj-gov':           document.getElementById('proj-gov'),
+      'proj-guardrails':    document.getElementById('proj-guardrails'),
     };
 
     btns.forEach(btn => {
