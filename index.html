@@ -298,41 +298,6 @@
       margin-top: 0.3rem;
     }
 
-    /* ── Filter bar ────────────────────────────── */
-    .filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-      animation: fade-up 0.5s 0.35s ease both;
-      align-items: center;
-    }
-
-    .f-btn {
-      padding: 0.38rem 1.1rem;
-      border-radius: 999px;
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .f-btn:hover { border-color: var(--border-hover); color: var(--text); }
-
-    .f-btn.active {
-      background: rgba(99,102,241,0.12);
-      border-color: rgba(99,102,241,0.38);
-      color: #a5b4fc;
-    }
-
-    .f-btn[data-filter="proj-pe"].active {
-      background: rgba(245,158,11,0.12);
-      border-color: rgba(245,158,11,0.38);
-      color: #fcd34d;
-    }
 
     /* ── Project card ──────────────────────────── */
     .project {
@@ -681,7 +646,6 @@
     .project.mcp .sec-title { color: var(--emerald); }
     .project.mcp .open-btn { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.18); color: #6ee7b7; }
     .project.mcp .note-card:hover .open-btn { background: rgba(16,185,129,0.18); border-color: rgba(16,185,129,0.45); box-shadow: 0 0 14px rgba(16,185,129,0.2); }
-    .f-btn[data-filter="proj-mcp"].active { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.38); color: #6ee7b7; }
 
     /* ── RAG project accent ────────────────────── */
     .note-card.n7 { --card-glow: linear-gradient(135deg, rgba(6,182,212,0.08), rgba(56,189,248,0.03)); }
@@ -697,7 +661,6 @@
     .project.rag .sec-title { color: var(--cyan); }
     .project.rag .open-btn { background: rgba(6,182,212,0.08); border-color: rgba(6,182,212,0.18); color: #67e8f9; }
     .project.rag .note-card:hover .open-btn { background: rgba(6,182,212,0.18); border-color: rgba(6,182,212,0.45); box-shadow: 0 0 14px rgba(6,182,212,0.2); }
-    .f-btn[data-filter="proj-rag"].active { background: rgba(6,182,212,0.12); border-color: rgba(6,182,212,0.38); color: #67e8f9; }
 
     .note-top {
       display: flex;
@@ -1102,7 +1065,7 @@
 
     /* ── Smooth theme transitions ────────────────── */
     body, header, .s-card, .project, .note-card, .focus-banner,
-    .f-btn, .xbtn, .badge, .tag, .tp, #search, .open-btn, .sec-badge {
+    .badge, .tag, .tp, #search, .open-btn, .sec-badge {
       transition:
         background-color 0.22s ease,
         border-color     0.22s ease,
@@ -1222,32 +1185,6 @@
       max-width: 560px;
     }
 
-    /* ── Expand / collapse all controls ──────────── */
-    .expand-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-left: auto;
-      flex-shrink: 0;
-    }
-
-    .xbtn {
-      padding: 0.32rem 0.85rem;
-      border-radius: 999px;
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .xbtn:hover {
-      border-color: var(--border-hover);
-      color: var(--text);
-      background: rgba(99,102,241,0.06);
-    }
 
     /* ── Collapsed project hint ───────────────────── */
     .project.collapsed .p-chevron {
@@ -1300,7 +1237,6 @@
     .project.deploy .sec-title { color: #fb923c; }
     .project.deploy .open-btn { background: rgba(249,115,22,0.08); border-color: rgba(249,115,22,0.18); color: #fdba74; }
     .project.deploy .note-card:hover .open-btn { background: rgba(249,115,22,0.18); border-color: rgba(249,115,22,0.45); box-shadow: 0 0 14px rgba(249,115,22,0.2); }
-    .f-btn[data-filter="proj-deploy"].active { background: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.38); color: #fdba74; }
 
     /* ── Focus banner ──────────────────────────────── */
     .focus-banner {
@@ -1467,7 +1403,6 @@
     .project.docker .sec-title { color: #60a5fa; }
     .project.docker .open-btn { background: rgba(37,99,235,0.08); border-color: rgba(37,99,235,0.18); color: #93c5fd; }
     .project.docker .note-card:hover .open-btn { background: rgba(37,99,235,0.18); border-color: rgba(37,99,235,0.45); box-shadow: 0 0 14px rgba(37,99,235,0.2); }
-    .f-btn[data-filter="proj-docker"].active { background: rgba(37,99,235,0.12); border-color: rgba(37,99,235,0.38); color: #93c5fd; }
     .project.docker .project-head:hover { background: linear-gradient(135deg, rgba(37,99,235,0.10) 0%, rgba(99,102,241,0.05) 100%); }
     .project.docker .p-note-dot.filled { background: #3b82f6; }
     [data-theme="light"] .project.docker .project-head { background: linear-gradient(135deg, rgba(37,99,235,0.05) 0%, rgba(99,102,241,0.02) 100%); }
@@ -1487,7 +1422,6 @@
     .project.aws .sec-title { color: #fbbf24; }
     .project.aws .open-btn { background: rgba(234,179,8,0.08); border-color: rgba(234,179,8,0.18); color: #fde68a; }
     .project.aws .note-card:hover .open-btn { background: rgba(234,179,8,0.18); border-color: rgba(234,179,8,0.45); box-shadow: 0 0 14px rgba(234,179,8,0.2); }
-    .f-btn[data-filter="proj-aws"].active { background: rgba(234,179,8,0.12); border-color: rgba(234,179,8,0.38); color: #fde68a; }
     .project.aws .project-head:hover { background: linear-gradient(135deg, rgba(234,179,8,0.10) 0%, rgba(245,158,11,0.05) 100%); }
     .project.aws .p-note-dot.filled { background: #d97706; }
     [data-theme="light"] .project.aws .project-head { background: linear-gradient(135deg, rgba(234,179,8,0.05) 0%, rgba(245,158,11,0.02) 100%); }
@@ -1507,7 +1441,6 @@
     .project.leaders-pm .sec-title { color: #2dd4bf; }
     .project.leaders-pm .open-btn { background: rgba(20,184,166,0.08); border-color: rgba(20,184,166,0.18); color: #99f6e4; }
     .project.leaders-pm .note-card:hover .open-btn { background: rgba(20,184,166,0.18); border-color: rgba(20,184,166,0.45); box-shadow: 0 0 14px rgba(20,184,166,0.2); }
-    .f-btn[data-filter="proj-leaders-pm"].active { background: rgba(20,184,166,0.12); border-color: rgba(20,184,166,0.38); color: #99f6e4; }
     .project.leaders-pm .project-head:hover { background: linear-gradient(135deg, rgba(20,184,166,0.10) 0%, rgba(8,145,178,0.05) 100%); }
     .project.leaders-pm .p-note-dot.filled { background: #14b8a6; }
     [data-theme="light"] .project.leaders-pm .project-head { background: linear-gradient(135deg, rgba(20,184,166,0.05) 0%, rgba(8,145,178,0.02) 100%); }
@@ -1527,7 +1460,6 @@
     .project.ai-leader .sec-title { color: #f472b6; }
     .project.ai-leader .open-btn { background: rgba(219,39,119,0.08); border-color: rgba(219,39,119,0.18); color: #fbcfe8; }
     .project.ai-leader .note-card:hover .open-btn { background: rgba(219,39,119,0.18); border-color: rgba(219,39,119,0.45); box-shadow: 0 0 14px rgba(219,39,119,0.2); }
-    .f-btn[data-filter="proj-ai-leader"].active { background: rgba(219,39,119,0.12); border-color: rgba(219,39,119,0.38); color: #fbcfe8; }
     .project.ai-leader .project-head:hover { background: linear-gradient(135deg, rgba(219,39,119,0.10) 0%, rgba(147,51,234,0.05) 100%); }
     .project.ai-leader .p-note-dot.filled { background: #db2777; }
     [data-theme="light"] .project.ai-leader .project-head { background: linear-gradient(135deg, rgba(219,39,119,0.05) 0%, rgba(147,51,234,0.02) 100%); }
@@ -1547,7 +1479,6 @@
     .project.gov .sec-title { color: #38bdf8; }
     .project.gov .open-btn { background: rgba(3,105,161,0.08); border-color: rgba(3,105,161,0.18); color: #7dd3fc; }
     .project.gov .note-card:hover .open-btn { background: rgba(3,105,161,0.18); border-color: rgba(3,105,161,0.45); box-shadow: 0 0 14px rgba(3,105,161,0.2); }
-    .f-btn[data-filter="proj-gov"].active { background: rgba(3,105,161,0.12); border-color: rgba(3,105,161,0.38); color: #7dd3fc; }
     .project.gov .project-head:hover { background: linear-gradient(135deg, rgba(3,105,161,0.10) 0%, rgba(67,56,202,0.05) 100%); }
     .project.gov .p-note-dot.filled { background: #0369a1; }
     [data-theme="light"] .project.gov .project-head { background: linear-gradient(135deg, rgba(3,105,161,0.05) 0%, rgba(67,56,202,0.02) 100%); }
@@ -1567,7 +1498,6 @@
     .project.guardrails .sec-title { color: #fb7185; }
     .project.guardrails .open-btn { background: rgba(225,29,72,0.08); border-color: rgba(225,29,72,0.18); color: #fda4af; }
     .project.guardrails .note-card:hover .open-btn { background: rgba(225,29,72,0.18); border-color: rgba(225,29,72,0.45); box-shadow: 0 0 14px rgba(225,29,72,0.2); }
-    .f-btn[data-filter="proj-guardrails"].active { background: rgba(225,29,72,0.12); border-color: rgba(225,29,72,0.38); color: #fda4af; }
     .project.guardrails .project-head:hover { background: linear-gradient(135deg, rgba(225,29,72,0.10) 0%, rgba(124,58,237,0.05) 100%); }
     .project.guardrails .p-note-dot.filled { background: #e11d48; }
     [data-theme="light"] .project.guardrails .project-head { background: linear-gradient(135deg, rgba(225,29,72,0.05) 0%, rgba(124,58,237,0.02) 100%); }
@@ -1696,25 +1626,6 @@
     </section>
 
     <!-- Upcoming Courses -->
-    <!-- Filter bar -->
-    <div class="filter-bar">
-      <button class="f-btn active" data-filter="all">All</button>
-      <button class="f-btn" data-filter="proj-llm">LLM Engineering</button>
-      <button class="f-btn" data-filter="proj-pe">Prompt Engineering</button>
-      <button class="f-btn" data-filter="proj-mcp">MCP</button>
-      <button class="f-btn" data-filter="proj-rag">RAG</button>
-      <button class="f-btn" data-filter="proj-deploy">Deploy AI</button>
-      <button class="f-btn" data-filter="proj-docker">Docker for AI</button>
-      <button class="f-btn" data-filter="proj-aws">AWS AI Practitioner</button>
-      <button class="f-btn" data-filter="proj-leaders-pm">AI for Leaders</button>
-      <button class="f-btn" data-filter="proj-ai-leader">GenAI &amp; Agentic AI</button>
-      <button class="f-btn" data-filter="proj-gov">AI Governance</button>
-      <button class="f-btn" data-filter="proj-guardrails">AI Guardrails</button>
-      <div class="expand-controls">
-        <button class="xbtn" id="expand-all">↕ Expand All</button>
-        <button class="xbtn" id="collapse-all">⊟ Collapse</button>
-      </div>
-    </div>
 
     <!-- Empty state -->
     <div class="empty" id="empty">
@@ -4082,15 +3993,6 @@
       });
     });
 
-    document.getElementById('expand-all').addEventListener('click', () => {
-      document.querySelectorAll('.project:not(.hidden)').forEach(p => p.classList.remove('collapsed'));
-      document.querySelectorAll('.category-group').forEach(g => g.classList.remove('cat-collapsed'));
-      document.querySelectorAll('.category-header').forEach(h => h.classList.add('cat-open'));
-    });
-
-    document.getElementById('collapse-all').addEventListener('click', () => {
-      document.querySelectorAll('.project:not(.hidden)').forEach(p => p.classList.add('collapsed'));
-    });
   })();
 
   /* ─── 7b. Category group collapse (default collapsed) ─ */
@@ -4105,51 +4007,6 @@
     });
   })();
 
-  /* ─── 9. Project filter tabs ───────────────────── */
-  (function () {
-    const btns = document.querySelectorAll('.f-btn');
-    const catHeaders = document.querySelectorAll('.category-header');
-    const openCategoryFor = (el) => {
-      const group = el.closest('.category-group');
-      if (!group) return;
-      group.classList.remove('cat-collapsed');
-      catHeaders.forEach(h => {
-        if (h.dataset.catTarget === group.id) h.classList.add('cat-open');
-      });
-    };
-    const projects = {
-      'proj-llm':    document.getElementById('proj-llm'),
-      'proj-pe':     document.getElementById('proj-pe'),
-      'proj-mcp':    document.getElementById('proj-mcp'),
-      'proj-rag':    document.getElementById('proj-rag'),
-      'proj-deploy': document.getElementById('proj-deploy'),
-      'proj-docker': document.getElementById('proj-docker'),
-      'proj-aws':        document.getElementById('proj-aws'),
-      'proj-leaders-pm': document.getElementById('proj-leaders-pm'),
-      'proj-ai-leader':  document.getElementById('proj-ai-leader'),
-      'proj-gov':           document.getElementById('proj-gov'),
-      'proj-guardrails':    document.getElementById('proj-guardrails'),
-    };
-
-    btns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        btns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const f = btn.dataset.filter;
-        if (f === 'all') {
-          Object.values(projects).forEach(p => p.classList.remove('hidden'));
-        } else {
-          Object.entries(projects).forEach(([id, el]) => {
-            el.classList.toggle('hidden', id !== f);
-          });
-          /* auto-expand the selected project and its category group */
-          projects[f].classList.remove('collapsed');
-          openCategoryFor(projects[f]);
-          projects[f].scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
-    });
-  })();
 
   /* ─── 10. Upcoming courses toggle ─────────────── */
   (function () {
