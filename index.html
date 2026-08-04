@@ -122,52 +122,6 @@
       100% { background-position:   0% 50%; }
     }
 
-    .search-box {
-      position: relative;
-      flex: 0 0 260px;
-    }
-
-    .search-icon {
-      position: absolute; left: 11px; top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted); pointer-events: none;
-    }
-
-    #search {
-      width: 100%;
-      padding: 0.5rem 2.4rem 0.5rem 2.2rem;
-      background: rgba(99,102,241,0.05);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 0.8rem;
-      outline: none;
-      transition: all 0.2s;
-    }
-
-    #search::placeholder { color: var(--text-muted); }
-
-    #search:focus {
-      border-color: var(--primary);
-      background: rgba(99,102,241,0.08);
-      box-shadow: 0 0 0 3px var(--primary-glow);
-    }
-
-    .kbd {
-      position: absolute; right: 9px; top: 50%;
-      transform: translateY(-50%);
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      color: var(--text-muted);
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.09);
-      padding: 1px 5px; border-radius: 4px;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
-
-    #search:focus ~ .kbd { opacity: 0; }
 
     .clock {
       font-family: var(--mono);
@@ -773,17 +727,6 @@
       box-shadow: 0 0 14px rgba(99,102,241,0.2);
     }
 
-    /* ── Empty state ────────────────────────────── */
-    .empty {
-      display: none;
-      text-align: center;
-      padding: 5rem 0;
-      font-family: var(--mono);
-      color: var(--text-muted);
-    }
-
-    .empty.show { display: block; }
-    .empty p:first-child { font-size: 2.5rem; margin-bottom: 0.6rem; }
 
     /* ── Footer ─────────────────────────────────── */
     footer {
@@ -810,15 +753,13 @@
       .project-head { flex-wrap: wrap; }
       .p-badges { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; }
       .notes-grid { grid-template-columns: 1fr; }
-      .search-box { flex: 0 0 180px; }
       .clock { display: none; }
       .hero-heading { font-size: 2.2rem; }
     }
 
     @media (max-width: 540px) {
       .header-row { flex-wrap: wrap; }
-      .search-box { order: 4; flex: 1 1 100%; }
-      .section { padding: 1.25rem 1.25rem; }
+.section { padding: 1.25rem 1.25rem; }
       .project-head { padding: 1.25rem; }
     }
 
@@ -1065,7 +1006,7 @@
 
     /* ── Smooth theme transitions ────────────────── */
     body, header, .s-card, .project, .note-card, .focus-banner,
-    .badge, .tag, .tp, #search, .open-btn, .sec-badge {
+    .badge, .tag, .tp, .open-btn, .sec-badge {
       transition:
         background-color 0.22s ease,
         border-color     0.22s ease,
@@ -1096,10 +1037,6 @@
 
     [data-theme="light"] #neural-bg { opacity: 0.10; }
 
-    [data-theme="light"] #search {
-      background: rgba(255,255,255,0.85);
-      color: var(--text);
-    }
 
     [data-theme="light"] .s-card {
       background: #ffffff;
@@ -1160,10 +1097,6 @@
       color: var(--text-muted);
     }
 
-    [data-theme="light"] .kbd {
-      background: rgba(0,0,0,0.05);
-      border-color: rgba(0,0,0,0.09);
-    }
 
     [data-theme="light"] #back-top {
       background: rgba(99,102,241,0.88);
@@ -1595,13 +1528,6 @@
         <h1>AI Knowledge Vault</h1>
         <p>// personal learning compendium</p>
       </div>
-      <div class="search-box">
-        <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <circle cx="11" cy="11" r="7.5"/><path d="M21 21l-4.5-4.5"/>
-        </svg>
-        <input type="text" id="search" placeholder="Search notes…" autocomplete="off" spellcheck="false">
-        <span class="kbd">/</span>
-      </div>
       <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark theme">
         <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="icon-sun"  width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
@@ -1622,16 +1548,11 @@
       <h2 class="hero-heading">
         Your <span class="grad">AI Learning</span><br>Universe
       </h2>
-      <p class="hero-sub">Structured notes from AI engineering bootcamps, projects, and research — all in one place. Press <code style="font-family:var(--mono);background:rgba(99,102,241,0.12);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.85em">/</code> to search.</p>
+      <p class="hero-sub">Structured notes from AI engineering bootcamps, projects, and research — all in one place.</p>
     </section>
 
     <!-- Upcoming Courses -->
 
-    <!-- Empty state -->
-    <div class="empty" id="empty">
-      <p>🔭</p>
-      <p>No notes match your search.</p>
-    </div>
 
     <!-- ── Category 1: Core AI Development ──────── -->
     <div class="category-header" data-cat-target="cat-group-1" style="--cat-color:var(--primary); --cat-glow:var(--primary-glow);">
@@ -3796,20 +3717,6 @@
             </div>
             <div class="cc-go">View Course →</div>
           </a>
-          <a class="course-card cc3"
-             href="https://www.udemy.com/course/ethical-secure-ai-guardrailsai-nvidia-nemo-guardrails/?src=sac&kw=ai+guard+r&couponCode=PMNVD2025"
-             target="_blank" rel="noopener">
-            <div class="cc-num">03 / 03</div>
-            <div class="cc-top">
-              <span class="cc-icon">🛡️</span>
-              <span class="cc-platform">Udemy</span>
-            </div>
-            <div class="cc-title">Ethical &amp; Secure AI: GuardRails AI, NVIDIA NeMo Guardrails</div>
-            <div class="cc-tags">
-              <span>AI Safety</span><span>GuardRails AI</span><span>NVIDIA NeMo</span><span>Ethical AI</span>
-            </div>
-            <div class="cc-go">View Course →</div>
-          </a>
         </div>
       </div>
     </div>
@@ -3819,7 +3726,7 @@
   <!-- ── Footer ───────────────────────────────── -->
   <footer class="z1">
     <p>AI Knowledge Vault &mdash; <span class="hl">51 notes</span> across <span class="hl">11 modules</span> &mdash; Updated <span class="hl">August 2026</span></p>
-    <p style="margin-top:0.35rem;font-size:0.6rem;opacity:0.5">Press <span style="color:var(--primary)">/</span> to search · Click any card to open note · Neural network reacts to your cursor</p>
+    <p style="margin-top:0.35rem;font-size:0.6rem;opacity:0.5">Click any card to open note · Neural network reacts to your cursor</p>
   </footer>
 
   <script>
@@ -3934,40 +3841,6 @@
     tick(); setInterval(tick, 1000);
   })();
 
-  /* ─── 4. Search / filter ────────────────────────── */
-  (function () {
-    const input  = document.getElementById('search');
-    const cards  = document.querySelectorAll('.note-card');
-    const empty  = document.getElementById('empty');
-
-    input.addEventListener('input', () => {
-      const q = input.value.trim().toLowerCase();
-      let visible = 0;
-      cards.forEach(c => {
-        const haystack = (c.dataset.title + ' ' + c.dataset.topics).toLowerCase();
-        const show = !q || haystack.includes(q);
-        c.classList.toggle('hidden', !show);
-        if (show) visible++;
-      });
-      empty.classList.toggle('show', visible === 0 && q.length > 0);
-    });
-  })();
-
-  /* ─── 5. Keyboard shortcuts ─────────────────────── */
-  (function () {
-    const input = document.getElementById('search');
-    document.addEventListener('keydown', e => {
-      if (e.key === '/' && document.activeElement !== input) {
-        e.preventDefault();
-        input.focus(); input.select();
-      }
-      if (e.key === 'Escape') {
-        input.value = '';
-        input.dispatchEvent(new Event('input'));
-        input.blur();
-      }
-    });
-  })();
 
   /* ─── 6. Card click → open note ────────────────── */
   (function () {
