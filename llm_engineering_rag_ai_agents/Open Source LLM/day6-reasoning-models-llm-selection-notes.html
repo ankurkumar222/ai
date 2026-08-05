@@ -91,6 +91,15 @@
   table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
   th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
   th{background:var(--panel2); color:var(--accent2);}
+  .sketch{
+    background:var(--code); border:1px dashed var(--muted);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .sketch h4{margin:0 0 8px; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted);}
+  .sketch pre{
+    background:transparent; border:none; padding:0; margin:0;
+    color:#9fb3c8; font-size:12px; line-height:1.4;
+  }
   .foot{color:var(--muted); text-align:center; padding:30px; font-size:12px;}
   .progress{font-size:11px; color:var(--muted);}
 </style>
@@ -101,11 +110,9 @@
 <header>
   <div class="eyebrow">Architects Lab · Reasoning Models Project</div>
   <h1>Reasoning Models &amp; A Framework for Choosing the Right LLM</h1>
-  <div class="sub">Notes from a hands-on project — using DeepSeek's reasoning model to classify financial
-  news with transparent chain-of-thought explanations, followed by a structured five-step framework for
-  picking the right model type, size, and sourcing option for a business use case, plus a tour of
-  Hugging Face's leaderboards. Structured for a Senior Engineering Manager who will likely use the
-  framework section directly in real vendor/model evaluation conversations.</div>
+  <div class="sub">A hands-on project: use DeepSeek's reasoning model to classify financial news, with
+  its thinking shown out loud. Then a simple 5-step framework for picking the right model for any job,
+  plus a tour of Hugging Face's leaderboards. Written to be used directly in real vendor/model calls.</div>
 </header>
 
 <div class="toolbar">
@@ -124,24 +131,49 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Project goal: classify financial news headlines as positive/negative/neutral <em>with visible
-      reasoning</em> — not just a label, but the model's actual chain-of-thought explaining why it reached
-      that conclusion, plus a topical tag. Model used: DeepSeek (open-weight, downloadable) — notable for
-      reportedly costing ~$5–6M to train vs. GPT-4's reported ~$100M, while showing strong reasoning and
-      instruction-following.</p>
-      <p>The differentiator versus a general-purpose chat model: a reasoning model exposes its internal
-      "thinking" as text before producing a final answer — described as being able to "open the brain and
-      see the train of thought," directly improving transparency and explainability.</p>
+      <p>Goal: read a financial news headline and decide if it's positive, negative, or neutral —
+      and <em>show the thinking</em> behind that decision, plus a topic tag. Model used: DeepSeek, an
+      open-weight model anyone can download.</p>
+      <p>Big difference from a normal chat model: a reasoning model writes out its thinking, step by step,
+      before giving the final answer. Like opening the brain and watching the thought process happen.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ CHAT MODEL                              REASONING MODEL (DeepSeek)
+ -----------                             ---------------------------
+ headline+desc                           headline+desc
+      |                                        |
+      v                                        v
+  [ LLM ]  (black box,                     [ LLM ]
+   no visible work)                             |
+      |                                         v
+      v                                  +-----------------+
+   answer                                | "thinking..."   |  <- you can
+   (take it or                           | step 1, 2, 3... |     SEE this
+    leave it)                            +-----------------+     part
+                                                 |
+                                                 v
+                                          final answer
+                                        (sentiment + tag)
+
+ COST TO TRAIN (reported):
+   GPT-4  ~$100,000,000
+   DeepSeek ~$5,000,000 - $6,000,000   (cheap, still reasons well)
+
+ WHY IT MATTERS: for risk flags, compliance, customer-facing
+ decisions -- "why did the model say this?" matters as much as
+ the answer itself. (Same transparency goal as RAG's citations,
+ different mechanism: RAG shows sources, this shows thinking.)
+        </pre>
+      </div>
 
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>Visible chain-of-thought is the single most production-relevant feature here — for any
-        classification decision that has downstream consequences (risk flags, compliance triage, customer
-        communications), being able to show <em>why</em> a model reached a conclusion is often as important
-        as the conclusion itself, especially in an audited, regulated environment. This is the same
-        transparency value proposition the RAG project delivered via citations — reasoning models deliver it
-        via exposed thought process instead. Worth treating both as complementary transparency mechanisms,
-        not competing ones.</p>
+        <p>Visible thinking is the most useful part of this whole project — in a regulated, audited
+        environment, being able to show <em>why</em> is often as important as the answer itself. Think of
+        this as a sibling to RAG's citations: RAG proves its answer with sources, reasoning models prove it
+        with visible thought. Use both where you can.</p>
       </div>
 
       <div class="recall" onclick="toggleRecall(this)">
@@ -158,13 +190,35 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Dataset: ~5,000 financial news rows (id, main_domain/source like CNBC, title, description,
-      created_at) — deliberately small (~1.6MB) so it runs comfortably on Colab's free-tier GPUs. Explored
-      first via Hugging Face's <strong>Data Studio</strong>, including a natural-language "AI query" feature
-      (e.g. "filter to CNBC news only") for quick exploratory filtering before writing any code.</p>
-      <p>Title and description are combined into one <code>full_text</code> field via a small mapping
-      function — this combined text is what actually gets fed to the model, since a headline alone is often
-      too thin a signal for reliable sentiment classification.</p>
+      <p>Dataset: ~5,000 rows of financial news (id, source like CNBC, title, description, date). Small on
+      purpose (~1.6MB) so it runs fine on Colab's free GPUs.</p>
+      <p>First explored using Hugging Face's <strong>Data Studio</strong> — it even lets you type plain
+      English like "filter to CNBC news only" instead of writing code.</p>
+      <p>Title alone is too thin a signal for sentiment. So title + description get merged into one
+      <code>full_text</code> field before going to the model.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ raw dataset row:
+   id | source (CNBC...) | title | description | created_at
+                                    ~5,000 rows, ~1.6MB
+                                    (small on purpose --
+                                     fits free Colab GPU)
+
+ title:       "Stock X jumps"          \
+                                         >-- mapping fn --> full_text
+ description: "...after strong Q2..."  /                        |
+                                                                  v
+                                                            [ fed to model ]
+
+ why merge?  title alone = weak signal
+             title + description = enough context to reason well
+
+ exploration tool: HF Data Studio -- type "filter to CNBC only"
+                    in plain English, no code needed
+        </pre>
+      </div>
 
       <div class="recall" onclick="toggleRecall(this)">
         <div class="q">Active Recall: Why combine title and description into a single "full_text" field instead of feeding the title alone? <span class="hint">tap to reveal</span></div>
@@ -192,9 +246,37 @@ model = AutoModelForCausalLM.from_pretrained(
 tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
 pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       </pre>
-      <p>Same quantization technique (4-bit) as the earlier LoRA fine-tuning project reappears here — this
-      time purely for inference, not training, but for the same reason: making a capable model runnable on
-      a free-tier GPU.</p>
+      <p>Same 4-bit trick used in the earlier fine-tuning project shows up again here — just for running
+      the model this time, not training it. Same reason both times: make a big model fit on a small
+      (free) GPU.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ DeepSeek 1.5B weights  (1.5 billion parameters, full size)
+        |
+        v
+ load_in_4bit=True  --- squeeze each weight into 4 bits -->  much
+        |                                                    smaller
+        |                                                    in memory
+        v
+ torch_dtype="auto"  -- picks best precision for your hardware
+ device_map="auto"   -- GPU if available, else CPU
+ trust_remote_code   -- allows model's own custom code to run
+        |
+        v
+ AutoModelForCausalLM  +  AutoTokenizer
+        |
+        v
+ pipeline("text-generation", model, tokenizer)
+        |
+        v
+   runs fine on a FREE-TIER Colab GPU
+
+ note: quantization saves memory whether you're TRAINING
+       (fine-tuning project) or just RUNNING (this project)
+        </pre>
+      </div>
 
       <div class="recall" onclick="toggleRecall(this)">
         <div class="q">Active Recall: Why is 4-bit quantization used here even though this project only does inference, not any training/fine-tuning? <span class="hint">tap to reveal</span></div>
@@ -216,24 +298,46 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
 &lt;IAM_START&gt;assistant
 &lt;think&gt;
       </pre>
-      <p>The trailing <code>&lt;think&gt;</code> tag is the key mechanism — it explicitly cues the model to
-      generate its internal reasoning before the final answer. This is the same "speak the model's native
-      chat-template language" pattern seen with Gemma/DeepSeek formatting in the fine-tuning project, applied
-      here specifically to unlock visible reasoning rather than just correct turn structure.</p>
-      <p>Generation parameters used: <code>max_new_tokens=4000</code> (reasoning traces can be long),
-      <code>do_sample=True</code> (adds controlled randomness instead of always picking the single
-      highest-probability next token), <code>temperature</code> (0 = deterministic/factual, up to 2 =
-      increasingly erratic), <code>top_p=0.9</code> (nucleus sampling — sample only from the smallest set of
-      tokens whose cumulative probability reaches 90%, keeping output on-topic while still allowing variety).</p>
+      <p>That last <code>&lt;think&gt;</code> tag is the trick — it tells the model "show your reasoning
+      before answering." Same idea as speaking a model's native chat format in the fine-tuning project,
+      just aimed at unlocking visible thinking instead of just correct turns.</p>
+      <p>A few settings shape how the answer gets generated — see the sketch below for what each one does.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ prompt string sent to model:
+
+ &lt;IAM_START&gt;user
+ [question] &lt;IAM_END&gt;
+ &lt;IAM_START&gt;assistant
+ &lt;think&gt;        <---- trigger token: "show your reasoning first"
+
+ settings that shape the answer:
+
+  max_new_tokens=4000
+     -> room for long reasoning (thinking can run on for a while)
+
+  do_sample=True
+     -> add some randomness, don't always pick the #1 likeliest word
+
+  temperature  (0 ---------------------------------------- 2)
+                deterministic,                         wild,
+                factual, safe                       unpredictable
+
+  top_p=0.9  (nucleus sampling)
+     -> only pick from the smallest group of words whose combined
+        chance adds up to 90% -- keeps it on-topic, still some variety
+     -> too low = repetitive   |   no limit = rambling/incoherent
+        </pre>
+      </div>
 
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>The explicit <code>&lt;think&gt;</code> token as a reasoning trigger is worth remembering as a
-        concrete prompt-engineering lever, not model-specific trivia — many reasoning-capable models expose
-        a similar mechanism (explicit or implicit) to separate deliberation from the final answer. If your
-        multi-LLM bootcamp work or Optimus prompt templates ever need a model to "show its work" before
-        answering, checking whether the target model has an equivalent trigger is the first thing to verify,
-        since it directly affects both output quality and how much you need to parse afterward.</p>
+        <p>Remember the <code>&lt;think&gt;</code> trigger as a general prompt-engineering tool, not
+        DeepSeek trivia — most reasoning models have something similar. If a future Optimus prompt needs a
+        model to "show its work," check for this trigger first. It changes both output quality and how much
+        parsing you'll need to do later.</p>
       </div>
 
       <div class="recall" onclick="toggleRecall(this)">
@@ -250,19 +354,42 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Raw model output interleaves the reasoning trace and the final answer inside special tokens —
-      not directly usable in a UI. A small parsing function locates the <code>&lt;think&gt;</code> /
-      end-of-think markers using string search (<code>output.find(...)</code>) and splits the text into two
-      pieces: the reasoning block and the final answer block, so each can be displayed separately.</p>
+      <p>The model's raw output is one messy blob — reasoning and final answer mixed together inside
+      special tokens. Not usable as-is. A small function finds the <code>&lt;think&gt;</code> markers with
+      simple string search and splits the text into two clean pieces.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ raw model output (one blob of text):
+ "...&lt;think&gt; step 1... step 2... &lt;/think&gt; Sentiment: Positive, Tag: Earnings"
+
+                        |
+                        |  output.find('&lt;think&gt;')
+                        |  output.find(end-of-think marker)
+                        v
+        split into two pieces:
+
+        +------------------+       +----------------------------+
+        |  reasoning block |       |   final answer block        |
+        |  (thinking text) |       |  (sentiment + tag, clean)   |
+        +------------------+       +----------------------------+
+              |                                  |
+              v                                  v
+          shown in UI                       shown in UI
+       (transparency)                     (the actual result)
+
+ method used: plain string search on hardcoded tokens
+ more robust option: structured output / JSON schema / function
+                      calling (less fragile if token format changes)
+        </pre>
+      </div>
 
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>This is a direct, hands-on illustration of why structured/parseable output matters for anything
-        beyond a demo — raw model text is not an API contract. Any production use of this pattern would want
-        a more robust extraction than string search on hardcoded tokens (e.g. explicit structured-output
-        formatting, or a schema the model is instructed to follow, similar to the Pydantic pattern from the
-        Vercel course's healthcare app) — fragile string parsing on model-specific special tokens is a
-        maintenance risk if the underlying model or its token format ever changes.</p>
+        <p>Good hands-on proof that raw model text is not an API contract. Fine for a demo, risky for
+        production — string search on hardcoded tokens breaks if the model or its token format changes.
+        A schema-based approach (like the Pydantic pattern from the Vercel healthcare app) holds up better.</p>
       </div>
 
       <div class="questions">
@@ -283,22 +410,43 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Two validation tests beyond news sentiment, deliberately chosen to probe genuine multi-step
-      reasoning rather than pattern-matching:</p>
+      <p>Two extra tests, outside news sentiment, to check the model is really reasoning — not just
+      pattern-matching:</p>
       <ul class="plain">
-        <li><strong>Simple arithmetic word problem</strong> ("5 apples, gave away 2+2, how many left?") — correctly reasoned through subtraction step-by-step and answered "1."</li>
-        <li><strong>CAPM finance problem</strong> (beta 1.2, expected return 10.5%, risk-free rate 3%, market return 9% — is the stock under/overvalued?) — the model correctly recalled the Capital Asset Pricing Model formula, substituted the given numbers, computed the CAPM-expected return (~10.2%), compared it to the actual expected return (10.5%), and correctly concluded the stock is <strong>undervalued</strong>.</li>
+        <li><strong>Simple math</strong>: "5 apples, gave away 2+2, how many left?" → correctly worked
+        through it and answered "1."</li>
+        <li><strong>CAPM finance problem</strong>: given beta, risk-free rate, and market return, decide if
+        a stock is under- or overvalued → model recalled the right formula, did the math, and got it
+        right: <strong>undervalued</strong>. Full chain shown in the sketch below.</li>
       </ul>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ CAPM validation chain (visible inside the reasoning trace):
+
+  beta 1.2, risk-free 3%, market return 9%
+             |
+             v
+  recall CAPM formula:  E(R) = Rf + beta * (Rm - Rf)
+             |
+             v
+  substitute:  3% + 1.2 * (9% - 3%) = 3% + 7.2% = 10.2%  (CAPM-expected)
+             |
+             v
+  compare to actual expected return: 10.5%
+             |
+             v
+  10.5% > 10.2%  ==>  stock is UNDERVALUED
+        </pre>
+      </div>
 
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>The CAPM test is the more interesting validation of the two — it required the model to recall a
-        specific domain formula unprompted, correctly substitute given variables, and interpret the numeric
-        comparison correctly, all visible in the reasoning trace. That's a genuinely useful capability check
-        for any finance-adjacent internal tool: not "can it sound confident," but "can you watch it show its
-        work and verify the formula and substitution were actually correct" — which is exactly the kind of
-        due diligence a domain expert (you, given your wealth/demat background) would want before trusting
-        such a model's output on a real financial calculation.</p>
+        <p>CAPM is the more interesting test — the model had to recall a real finance formula unprompted,
+        plug in the right numbers, and interpret the result. Not "does it sound confident," but "can you
+        watch its work and check the formula and math were actually right." That's the real due-diligence
+        question for any finance tool, and your wealth/demat background is exactly the lens for checking it.</p>
       </div>
 
       <div class="recall" onclick="toggleRecall(this)">
@@ -315,11 +463,29 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Explicit contrast drawn: a general-purpose chat model might answer a sentiment question
-      conversationally ("I think this sounds negative because...") but tends to struggle with consistently
-      following a strict, structured output format (separate reasoning / sentiment / tag fields) across many
-      requests. A reasoning model with strong instruction adherence reliably produces predictable, delimited
-      output — essential when the output needs to be parsed programmatically at scale, not just read by a human.</p>
+      <p>A regular chat model answers like a person talking ("I think this sounds negative because...") but
+      its format shifts from request to request. A reasoning model, followed carefully, keeps the same
+      delimited structure every time — which matters when code, not a human, is reading the output.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ General chat model:
+   "I think this sounds negative because..."
+   (free-form prose, format changes request to request)
+   result: X breaks automated parsing once you scale to
+           thousands of rows
+
+ Reasoning model (with a good prompt):
+   &lt;think&gt;...&lt;/think&gt; Sentiment: X | Tag: Y
+   (same structure, every single time)
+   result: OK parses reliably, request 1 or request 10,000
+
+ rule of thumb: one-off answer for a human to read -> either works
+                pipeline reading 1,000s of rows automatically -> need
+                the consistent, structured one
+        </pre>
+      </div>
 
       <div class="recall" onclick="toggleRecall(this)">
         <div class="q">Active Recall: Why does structured-output reliability matter more for a classification pipeline than for a one-off conversational answer? <span class="hint">tap to reveal</span></div>
@@ -371,14 +537,41 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
    - Operational capability: can you actually run and maintain this?
       </pre>
 
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ [1] DEFINE NEEDS
+      task, I/O, privacy, latency, time-to-market, cost
+             |
+             v
+ [2] CHOOSE MODEL TYPE  --- "do you even need an LLM?"
+      classification/NER/retrieval? --> maybe NO LLM needed
+      summarization/generation/translation/chat/reasoning? --> YES, LLM
+             |
+             v
+ [3] CHOOSE MODEL SIZE
+      small/medium (&lt;50B)  <--- boost via fine-tune or RAG
+      large/XL (&gt;50B)      <--- more knowledge/reasoning, higher cost
+             |
+             v
+ [4] CHOOSE SOURCING
+      build from scratch (rare, ~$100M)
+      open-source pretrained (low license cost, +50-100% deploy cost)
+      proprietary cloud API (fast, less transparency, usage fees)
+             |
+             v
+ [5] DECIDE HOW IT SCALES
+      data residency, volume vs. rate limits, skills needed,
+      end-to-end cost, can you actually operate it?
+        </pre>
+      </div>
+
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>This is the most directly reusable artifact in the whole project — a genuinely solid checklist
-        for evaluating any proposed AI tool inside Optimus, structured almost identically to how you'd
-        evaluate a build-vs-buy decision for any enterprise software component. Step 2 in particular ("do you
-        even need an LLM?") is worth institutionalizing as the very first question in any Optimus intake
-        process — it's the cheapest possible filter against over-engineering a classical classification or
-        retrieval problem with an unnecessarily expensive generative model.</p>
+        <p>The single most reusable thing in this whole project — a solid checklist for any proposed AI
+        tool inside Optimus, basically a build-vs-buy checklist adapted for AI. Step 2 ("do you even need
+        an LLM?") deserves to be the very first question in Optimus intake — the cheapest filter against
+        overbuilding a simple classification problem with an expensive generative model.</p>
       </div>
 
       <div class="questions">
@@ -417,6 +610,19 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
         <tr><td>Support</td><td>Community-based, irregular</td><td>Professional support/onboarding available</td></tr>
       </table>
 
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ OPEN-SOURCE (Hugging Face)              PROPRIETARY (OpenAI/AWS/etc.)
+ -----------------------------           -----------------------------
+ license cost:  low/free                 license cost:  usage fees
+ deploy cost:   +50-100% (expertise+GPU) deploy cost:   bundled in API price
+ time-to-mkt:   slow (build it yourself) time-to-mkt:   fast (pre-built)
+ data lineage:  often unclear            data lineage:  documented/compliant
+ support:       community, irregular     support:       professional
+        </pre>
+      </div>
+
       <div class="questions">
         <h4>Question worth sitting with</h4>
         <ul>
@@ -435,10 +641,8 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Notable finding: the "old" common benchmarks (DROP, HellaSwag, MMLU, ARC, TruthfulQA, WinoGrande,
-      HumanEval, MT-Bench) went from being considered genuinely hard to being scored above 80-85% across the
-      board by most models within about a year and a half — effectively saturated. This forced Hugging Face
-      to introduce much harder new benchmarks.</p>
+      <p>The old benchmarks got too easy. Within about 1.5 years, most models scored above 80–85% on all of
+      them — so they stopped telling models apart. Hugging Face had to bring in much harder ones.</p>
 
       <table>
         <tr><th>New Benchmark</th><th>Tests</th></tr>
@@ -452,13 +656,30 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
         <tr><td>CO2 cost</td><td>Environmental/energy footprint of running the model</td></tr>
       </table>
 
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ score
+  100%|                     .-----------------  OLD benchmarks
+      |                 .--'                    (MMLU, HellaSwag, ARC,
+   85%|- - - - - - - -.'- - - - - - - - - - -    DROP, TruthfulQA,
+      |            .-'                           WinoGrande, HumanEval,
+      |         .-'                               MT-Bench) -- saturated,
+      |      .-'                                   most models >80-85%
+      |   .-'
+      |.-'                                     NEW benchmarks
+   35%|-------------------------------------.   (Humanity's Last Exam,
+      |                                          GPQA, MuSR, BBH, IFEval,
+      |__________________________________.___   MATH, AgentBench/WebArena)
+        time -->        ~1.5 yrs              best models still ~35%
+        </pre>
+      </div>
+
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>The "benchmarks get saturated within 1-2 years" pattern is itself the most important takeaway,
-        more than any specific score — any model evaluation done today needs to be treated as a snapshot with
-        a short shelf life. For real vendor/model selection decisions (relevant to your AI/ML job search
-        conversations too), it's worth explicitly checking benchmark dates and re-verifying scores close to
-        decision time rather than relying on remembered leaderboard positions from even six months prior.</p>
+        <p>The real lesson isn't any one score — it's that benchmarks go stale within 1-2 years. Treat any
+        model evaluation as a snapshot with a short shelf life. For real vendor decisions (and your AI/ML
+        interviews), always check the benchmark date and re-verify scores close to decision time.</p>
       </div>
 
       <div class="recall" onclick="toggleRecall(this)">
@@ -475,22 +696,48 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>The leaderboard UI supports filtering by parameter count, precision (4-bit vs. float16/bfloat16),
-      and fine-tuned vs. pre-trained — letting you sort specifically on the benchmark relevant to your use
-      case (e.g. sort by MATH score if building a finance/quant tool, by GPQA if building a scientific
-      research assistant). A separate <strong>LLM Performance leaderboard</strong> plots accuracy against
-      latency directly — visually surfacing the accuracy-vs-speed trade-off (e.g. Phi-3 shown as a strong
-      accuracy/latency balance point; larger models like Qwen scoring higher but at higher latency and
-      compute cost). Domain-specific leaderboards exist too (coding, medical) for even more targeted comparison.</p>
+      <p>You can filter the leaderboard by size, precision, and fine-tuned vs. pre-trained — so you sort by
+      whatever score actually matters to you (MATH for a finance tool, GPQA for a research assistant). A
+      separate performance leaderboard plots accuracy against speed, so you can see the trade-off directly.
+      Domain leaderboards (coding, medical) exist too.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ accuracy
+    high |                                  * Qwen
+         |                                    (large model: higher
+         |                                     accuracy, but higher
+         |                     * Phi-3         latency + compute cost)
+         |                   (sweet spot --
+         |                    good accuracy,
+         |                    still fast)
+         |        *
+         |    *
+    low  |*
+         +---------------------------------------------- latency
+           fast                                     slow
+
+ filters you can apply:
+   - parameter count (model size)
+   - precision (4-bit vs float16/bfloat16)
+   - fine-tuned vs pre-trained
+   - domain leaderboard (coding, medical, ...)
+   - sort by the ONE score that matches your use case
+     e.g. MATH score --> finance/quant tool
+          GPQA score --> scientific research assistant
+
+ rule: no single "best" model -- best POINT on the
+       accuracy / latency / cost triangle for your job
+        </pre>
+      </div>
 
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>The accuracy-vs-latency scatter plot is worth internalizing as a mental model even without looking
-        at the live leaderboard: model selection is rarely "pick the highest score," it's "pick the best
-        point on the accuracy/latency/cost frontier for your specific constraint." That framing maps directly
-        onto latency-sensitive fintech APIs (a quick eligibility check needs different latency tolerance than
-        an overnight batch reconciliation job) — the same model-selection logic, just with your own SLAs
-        substituted for benchmark latency.</p>
+        <p>Worth internalizing even without the live leaderboard open: pick the best point on the
+        accuracy/latency/cost triangle for your constraint, not the highest score. Maps directly to fintech
+        APIs — a quick eligibility check tolerates less latency than an overnight batch job. Same logic,
+        your own SLAs instead of benchmark latency.</p>
       </div>
 
       <div class="questions">
@@ -531,6 +778,35 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
 10. Wrapped in a Gradio interface for interactive sentiment +
     reasoning + tag classification
       </pre>
+
+      <div class="sketch">
+        <h4>Rough Sketch — end-to-end project pipeline</h4>
+        <pre>
+ HF dataset (title+desc)
+        |
+        v
+ full_text  --------------------------> [ DeepSeek 1.5B, 4-bit quantized ]
+                                                    |
+                                       prompt ends in &lt;think&gt; trigger
+                                                    |
+                                                    v
+                                    raw output: reasoning + answer, mixed
+                                                    |
+                                          parse / split on markers
+                                                    |
+                        +---------------------------+--------------------+
+                        v                                                v
+                reasoning block                                 sentiment + tag
+                        |                                                |
+                        +----------------------> Gradio UI <-------------+
+                                        (interactive demo)
+
+ validated separately on: math word problem, CAPM finance problem
+
+ 5-STEP SELECTION FRAMEWORK (for choosing ANY LLM, not just this one):
+  needs -> type ("need an LLM at all?") -> size -> sourcing -> scaling
+        </pre>
+      </div>
 
       <div class="questions">
         <h4>Questions worth carrying forward</h4>
