@@ -66,9 +66,13 @@
   .questions li{margin:6px 0; color:#c8d6e2;}
   .archnote{
     background:var(--code); border-left:3px solid var(--accent2);
-    border-radius:6px; padding:12px 16px; margin:14px 0;
+    border-radius:6px; padding:12px 16px; margin:14px 0; cursor:pointer;
   }
   .archnote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent2);}
+  .archnote .think-q{color:var(--accent2); font-weight:600; font-size:13.5px;}
+  .archnote .think-a{display:none; margin-top:10px; border-top:1px solid var(--border); padding-top:8px;}
+  .archnote.show .think-a{display:block;}
+  .archnote .hint{font-size:11px; color:var(--muted); float:right; font-weight:400;}
   .risknote{
     background:var(--code); border-left:3px solid var(--danger);
     border-radius:6px; padding:12px 16px; margin:14px 0;
@@ -131,6 +135,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: RAG never touches the model's weights — it only changes the prompt. So does RAG make a model "smarter," or just "better informed"? Is a small model with great retrieval always better than a big model with none? <span class="hint">tap to reveal</span></div>
+        <div class="a">RAG improves what a model KNOWS, not how well it THINKS. Retrieval supplies facts; reasoning quality still comes entirely from the underlying LLM. A weak model with perfect retrieval can still reason badly over correct facts (miscalculate, misinterpret, contradict itself). A strong model with bad retrieval will reason brilliantly over the wrong facts. Neither fixes the other's job — that's exactly why the CAPM-style validation-of-reasoning work (studied separately) and RAG's retrieval-quality work are two different disciplines, not one.</div>
+      </div>
+
       <p>Ask an LLM directly, and it only knows what it learned in training — old, generic, or nothing
       about this one restaurant. RAG fixes that by feeding it the restaurant's own live data at question
       time. No retraining needed.</p>
@@ -161,11 +170,6 @@
             changes. Update the database, answers update too.
         </pre>
       </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: What does each letter in RAG stand for, mapped to what actually happens? <span class="hint">tap to reveal</span></div>
-        <div class="a">R = Retrieve: search an external knowledge source (vector database) for relevant information matching the query. A = Augment: add that retrieved content to the original prompt as extra context. G = Generate: send the augmented prompt to the LLM, which produces a response grounded in the retrieved data.</div>
-      </div>
     </div>
   </div>
 
@@ -176,6 +180,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: If you could bolt fine-tuning AND RAG onto the same production system, what job would each one actually be doing — and when would using both together be genuinely additive vs. just redundant? <span class="hint">tap to reveal</span></div>
+        <div class="a">RAG's job: supply current, citable FACTS at request time. Fine-tuning's job: change HOW the model behaves — tone, format discipline, domain reasoning style — baked in permanently. Combining is additive when you need both: e.g. an IDFC bot that must always answer in a compliance-safe tone and structure (fine-tune) while pulling live, correct policy numbers (RAG). Combining is redundant if the actual problem is just "the model doesn't know current facts" — fine-tuning alone won't fix staleness, since retraining every time a policy changes defeats RAG's entire cost advantage.</div>
+      </div>
+
       <table>
         <tr><th></th><th>Fine-Tuning</th><th>RAG</th></tr>
         <tr><td>What changes</td><td>Model weights themselves are updated</td><td>Nothing in the model changes — an external database is queried at request time</td></tr>
@@ -222,12 +231,12 @@
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Same lesson as the separate LoRA/fine-tuning project: fine-tuning is an expensive experiment with
-        real failure risk. RAG sidesteps that risk for anything that changes often — a menu, a policy doc, a
-        runbook. Keep fine-tuning for deep behavior/style change, not for facts. Use this table as a decision
-        checklist when scoping any Optimus AI tool.</p>
+        <div class="think-q">Think First: this table treats fine-tuning and RAG as opposite tools for opposite jobs. Is there a real Optimus scenario where reaching for RAG would actually be the WRONG call, even though the information genuinely changes often? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Yes — when "changes often" is really "phrases itself differently every time" rather than "facts change." If the underlying facts are stable but the FORMAT or TONE the answer must follow is strict and non-negotiable (e.g. a legally-reviewed disclaimer wording that must never drift), RAG alone won't guarantee that discipline — the LLM still has freedom in how it stitches retrieved text into prose. That's a case for fine-tuning the output behavior, sometimes on top of RAG rather than instead of it. Same lesson as the separate LoRA project: fine-tuning is an expensive experiment with real failure risk, so reserve it for cases where behavior/format control is the actual requirement — not as a reflex whenever "often" appears in a sentence.</p>
+        </div>
       </div>
 
       <div class="questions">
@@ -236,11 +245,6 @@
           <li>Your spirituality-site notes or Architects Lab archive — if you built an assistant over them,
           that's almost certainly a RAG job. Any case where fine-tuning would make more sense there?</li>
         </ul>
-      </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: Why is RAG generally easier to keep up to date than a fine-tuned model? <span class="hint">tap to reveal</span></div>
-        <div class="a">Because updating a RAG system just means adding, removing, or editing documents in the vector database — no retraining is needed. A fine-tuned model's knowledge is baked into its weights, so keeping it current requires re-running the fine-tuning process on updated data, which costs GPU time and money.</div>
       </div>
     </div>
   </div>
@@ -252,6 +256,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: LangChain hides a lot of manual wiring behind reusable chains. When a chain gives a bad answer in production, where does that convenience start working against you instead of for you? <span class="hint">tap to reveal</span></div>
+        <div class="a">The moment something breaks. A chain that "just works" hides which specific step failed — was it retrieval (wrong chunks found), the prompt assembly (context stuffed badly), or the LLM call itself (right context, bad generation)? The same abstraction that saves you from hand-wiring these steps also removes your visibility into them by default. The fix isn't avoiding frameworks — it's insisting on step-by-step tracing/logging (as section 7's isolated retrieval test does) so the black box stays debuggable, not just convenient.</div>
+      </div>
+
       <p>Plain LLM use is one prompt, one reply. LangChain lets you chain steps together and reuse common
       building blocks instead of hand-wiring everything yourself.</p>
 
@@ -269,11 +278,17 @@
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
+        <div class="think-q">Think First: an "opinionated framework" like LangChain bundles someone else's assumptions about how a RAG pipeline should be built. If your use case doesn't fit those assumptions, would you fight the framework to bend it — or drop back to raw API calls? Where's that line? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
         <p>LangChain plays the same role Next.js played for the Vercel course — an opinionated framework
-        on top of raw API calls, bundling common patterns so you don't build them by hand. Faster to start,
-        but know what's happening underneath before treating any chain as a black box in production.</p>
+        on top of raw API calls, bundling common patterns so you don't build them by hand. That's a genuine
+        speed win when your use case matches its assumptions (a standard retriever + chain + LLM shape, like
+        this project). The line to drop back to raw calls is when you find yourself fighting the framework's
+        defaults more than using them — configuring around a chain type instead of just writing the three
+        lines of logic yourself. Know what's underneath before deciding which side of that line you're on.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -285,6 +300,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: TextLoader reads the whole file as ONE document before anything is split. Why does that ORDER matter — could you embed the whole document first and split it into pieces later instead? <span class="hint">tap to reveal</span></div>
+        <div class="a">Order matters for a structural reason, not just convenience. An embedding compresses a chunk of text into ONE vector representing its overall meaning. Embed the entire document as one blob, and the menu, chef bio, and partnership info all get blended into a single averaged vector — which represents none of them well. Splitting BEFORE embedding is what lets each chunk's vector stay sharply about one topic, which is the entire reason retrieval can tell "menu questions" apart from "dress code questions" later. Embed-then-split isn't just unusual — it defeats the purpose.</div>
+      </div>
+
       <p>Data: one scraped text file of 11 Madison Park's website (menu, contact info, chef bio,
       partnerships). Loaded whole with LangChain's <code>TextLoader</code>.</p>
 
@@ -305,11 +325,6 @@
                or LangChain won't install/run correctly
         </pre>
       </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: At this stage, is the document already split into retrievable pieces? <span class="hint">tap to reveal</span></div>
-        <div class="a">No — TextLoader reads the entire file as one single large document object. Splitting into smaller, retrievable chunks is a separate, later step using a text splitter.</div>
-      </div>
     </div>
   </div>
 
@@ -320,6 +335,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: chunk_size and overlap were tuned for a casual restaurant website. If you applied this same 1000/150 setting to IDFC's compliance policy documents instead, would that be a safe default — or does legal/regulated text need a fundamentally different chunking approach? <span class="hint">tap to reveal</span></div>
+        <div class="a">Almost certainly not safe as-is. A restaurant's ideas are short and independent — cutting mid-sentence loses a little color, not much else. A compliance clause cut mid-condition ("...eligible for the exemption UNLESS [cut here] the transaction exceeds ₹X") can flip the legal meaning of the retrieved chunk, and the model may confidently answer from the incomplete half. Regulated text usually wants chunking aligned to structural boundaries (clause, section, sub-section) rather than a fixed character count, plus enough overlap to guarantee no single condition ever gets orphaned from its clause. This is exactly the kind of default a fintech deployment can't just copy from a demo project.</div>
+      </div>
+
       <p>A big document is hard to search well. Cut it into small chunks first — easier to store and find
       precisely. Uses LangChain's <code>RecursiveCharacterTextSplitter</code>.</p>
 
@@ -357,16 +377,18 @@
         exists to fix exactly that.</p>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Chunk size/overlap is a real trade-off, not a throwaway setting. Too big = wastes context, pulls
-        in noisy text. Too small = chops up ideas, hurts retrieval. Treat it like any tunable system
-        parameter — pick a sane default, then tune against real query results, not gut feel.</p>
-      </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: Why does each chunk carry metadata pointing back to the source document, and what does that enable later? <span class="hint">tap to reveal</span></div>
-        <div class="a">The metadata (source file name) links each chunk back to where it came from. This is what lets the final RAG chain report citations — telling the user which document an answer was grounded in, which improves transparency and lets users verify the answer's source.</div>
+        <div class="think-q">Think First: "pick a sane default, then tune against real results" sounds obvious. What would actually tell you your chunk_size is wrong, if the demo's answers already look fine? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>A demo "looking fine" is the trap — a handful of easy test questions can pass even with a badly
+        tuned chunk size, because the answer to "what menus are offered" doesn't need precise boundaries.
+        The real signal shows up on edge-case questions that straddle a chunk boundary, or questions needing
+        two related facts that got split into different chunks. Chunk size/overlap is a real trade-off, not
+        a throwaway setting: too big wastes context and pulls in noisy text, too small chops up ideas and
+        hurts retrieval. Treat it like any tunable system parameter — cache TTL, batch size — and tune it
+        against deliberately hard queries, not the easy ones that happen to work either way.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -378,6 +400,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: "king" sits near "queen" because they're close in MEANING. If your users type Hindi or Hinglish questions but every source document is in English, does semantic closeness still hold across languages — or does retrieval quietly fail? <span class="hint">tap to reveal</span></div>
+        <div class="a">It depends entirely on whether the embedding model was trained on multilingual data. Some embedding models do place semantically equivalent phrases from different languages reasonably close together — but "reasonably close" is weaker than same-language matching, and quality varies a lot by language pair and phrasing style (formal Hindi vs. casual Hinglish). This isn't something to assume — it's something to actually test with real Hinglish queries against your English docs before trusting it in an India-facing product. A silent, subtle retrieval failure (slightly-off chunks, not zero chunks) is far more dangerous than an obvious one, because the model will still answer fluently from whatever it got.</div>
+      </div>
+
       <p>An embedding turns text into a list of numbers that captures its <em>meaning</em>. Similar
       meaning → numbers land close together.</p>
 
@@ -419,16 +446,18 @@
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>This embedding-space idea is the whole engine retrieval runs on. When retrieval fails, it's
-        almost always one of two things: bad chunk boundaries, or the query's wording landing far from the
-        right chunks in vector space. Diagnosing which one starts right here.</p>
-      </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: What three things does ChromaDB store for each chunk, based on this project's setup? <span class="hint">tap to reveal</span></div>
-        <div class="a">The embedding vector (the numeric representation of the chunk's meaning), the original page content (human-readable text), and the metadata (including the source document it came from).</div>
+        <div class="think-q">Think First: retrieval just returned the wrong chunks for a real question. Given only "bad chunking" and "bad embedding match" as the two usual suspects, how would you actually tell which one it was, without guessing? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Look at what came back, not just that it was wrong. If the retrieved chunks are on a completely
+        different topic than the query, that usually points to an embedding/query-phrasing mismatch — the
+        question's wording landed far from the right chunks in vector space. If the retrieved chunks are on
+        the RIGHT topic but missing the specific detail asked about, that points to a chunking problem — the
+        right idea got split away from the fact that answers the question. This embedding-space idea is the
+        whole engine retrieval runs on, so diagnosing a failure always starts by asking which of these two
+        things actually happened, not by re-tuning both at once.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -440,6 +469,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: if similarity_search returns confident, plausible-looking chunks that are actually subtly off-topic — not obviously wrong, just slightly off — would a quick manual spot-check like the one in this section even catch that? <span class="hint">tap to reveal</span></div>
+        <div class="a">Probably not. Eyeballing 3-5 test questions catches obvious misses (wrong topic entirely) but not "confidently wrong" retrieval — chunks that are related enough to look right at a glance but aren't actually the best match. That needs something more rigorous: a labeled test set of queries with their expected correct chunks, and a real precision/recall@k metric computed against it — not just a human reading the output and nodding. Manual spot-checks are a fine first pass, exactly like this section's demo, but they're not a substitute for a measured retrieval-quality benchmark before anything goes to production — the same QA discipline your fintech background would demand of any other data pipeline.</div>
+      </div>
+
       <p>Before building the full chain, test retrieval alone first — "can we find the right info?" is a
       different question from "can we write a good answer from it?" Test one thing at a time.</p>
 
@@ -470,16 +504,17 @@
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Good debugging discipline — same as testing a database query alone before wiring it into an app
-        that also formats and displays results. This split tells you immediately whether a bad RAG answer is
-        a retrieval problem or a generation problem — two very different fixes.</p>
-      </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: Why test similarity_search in isolation before building the full RAG chain? <span class="hint">tap to reveal</span></div>
-        <div class="a">To isolate and verify the retrieval component works correctly (finds relevant chunks) before adding the generation component on top — this way, if the eventual RAG chain gives a bad answer, you already know whether retrieval or generation is the likely cause, rather than debugging both at once.</div>
+        <div class="think-q">Think First: testing retrieval alone, before generation, is good discipline here with 38 chunks and a handful of test questions. Does that same isolated-testing approach still scale once you have thousands of chunks and can't manually eyeball every result? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Manually checking "does the top-3 look right" works at 38 chunks and stops working almost
+        immediately after that — nobody eyeballs a thousand test queries. The isolated-testing PRINCIPLE
+        still holds (retrieval and generation are still two separate things that can each fail), but the
+        METHOD has to change: from "look at it and judge" to "score it automatically" — a labeled query set
+        with expected chunks, measured precision/recall@k, run on a schedule. Same discipline as testing a
+        database query alone before wiring it into an app, just industrialized instead of manual.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -491,6 +526,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: the "stuff" chain works today because 3 chunks fit the context window. The day your document set outgrows that, what would you actually SEE go wrong in production — a clean error, a crash, or something quieter and more dangerous? <span class="hint">tap to reveal</span></div>
+        <div class="a">Often something quieter. Depending on the client library and model, context overflow can raise a clear token-limit error — the "safe" failure — but it can also silently truncate the stuffed context, meaning the model answers fluently and confidently from an incomplete set of chunks, with no error at all. That silent case is the dangerous one: the answer looks exactly as trustworthy as a correct one. Worth deliberately testing at and beyond the context limit before trusting this pattern at any real scale, rather than assuming a clean failure mode.</div>
+      </div>
+
       <pre>
 retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 llm = OpenAI(temperature=0)
@@ -539,17 +579,18 @@ result = chain.invoke(query)
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Flag the "stuff" chain_type's context-window limit as a real scaling constraint. Fine for a
-        3-chunk restaurant knowledge base, but a large corpus (say, a full IDFC policy set) would blow past
-        context limits. Production RAG at that scale needs either a map-reduce/refine chain or much tighter
-        chunk/k tuning.</p>
-      </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: Why is temperature set to 0 here, and what does raising it to 1.3 actually change (and NOT change) about the RAG answer? <span class="hint">tap to reveal</span></div>
-        <div class="a">Temperature=0 minimizes randomness/creativity, aiming for consistent, factual answers. Raising it to 1.3 introduced noticeably different wording/phrasing in the response, but the answer remained grounded in the same retrieved source data — temperature affects HOW the answer is phrased, not WHETHER it's still grounded in the retrieved facts, since the retrieval step (which supplies the facts) is unaffected by the LLM's temperature setting.</div>
+        <div class="think-q">Think First: if this exact "stuff" pattern had to grow from a 38-chunk restaurant site to a 10,000-document IDFC policy library tomorrow, what's the FIRST thing that would need to change — the chain type, the chunk strategy, or something upstream of both? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>The chain type is the obvious answer but not necessarily the first bottleneck — before touching
+        "stuff" vs. map-reduce/refine, retrieval itself (k=3, plain similarity search) would likely need
+        upgrading first, since a 10,000-document corpus makes top-3-by-similarity far more likely to miss
+        the genuinely relevant chunk among near-duplicates. Fix retrieval precision first (better k tuning,
+        maybe re-ranking), THEN worry about whether "stuff" still fits the context window with the right
+        chunks found. Changing the chain type without fixing retrieval just stuffs more of the wrong context
+        into the prompt, faster.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -561,6 +602,11 @@ result = chain.invoke(query)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: a citation tells the user WHICH document an answer came from. It does not tell them whether that document is still accurate. What's missing from a "trustworthy" RAG answer if the cited source itself is stale? <span class="hint">tap to reveal</span></div>
+        <div class="a">Freshness. A citation creates a feeling of confidence ("it's grounded, it's sourced!") even when it's grounded in an outdated document. RAG only ever guarantees the answer matches what's IN the database — not that the database is current. A genuinely trustworthy setup would surface the source document's last-updated date alongside the citation, and have a real process for re-scraping/re-indexing when the underlying source changes — otherwise "cited" quietly gets mistaken for "correct," which is a dangerous gap for anything customer-facing or compliance-adjacent.</div>
+      </div>
+
       <p>Last layer: wrap the chain in a Gradio interface, so a normal person can use it, not just code.</p>
 
       <div class="sketch">
@@ -586,12 +632,18 @@ result = chain.invoke(query)
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Visible citations are what turn a RAG demo into something a business can actually trust. "Here's
-        the answer, here's exactly where it came from" is the gap between a plausible-sounding chatbot and
-        an auditable one. Treat this as non-negotiable for any Optimus tool answering from policies,
-        runbooks, or compliance docs.</p>
+        <div class="think-q">Think First: showing a citation is one thing. Would a regulator, auditor, or compliance reviewer actually accept "the UI displayed a source link" as proof of where an answer came from — or does auditable mean something stricter than visible? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Visible-in-the-UI and auditable are not the same bar. A citation shown to a user is a trust
+        signal for THEM in the moment — it doesn't by itself create a durable record. A real audit trail
+        needs the retrieved chunk, the exact prompt sent, the model's response, and the citation all logged
+        together with a timestamp, so a reviewer can reconstruct "why did the system say this" months later,
+        not just see a source name that flashed on screen. For any regulated or customer-facing Optimus
+        tool, visible citations are the right first step, but the non-negotiable requirement underneath them
+        is a logged, retrievable record — the UI citation is the tip of that iceberg, not the whole thing.</p>
+        </div>
       </div>
 
       <div class="questions">
@@ -611,6 +663,11 @@ result = chain.invoke(query)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: across the whole pipeline — load, split, embed, retrieve, generate, display — which single step, if it silently degrades, would be hardest to notice just by reading the final answer? And what would you actually monitor to catch it early? <span class="hint">tap to reveal</span></div>
+        <div class="a">Chunking and retrieval quality are the hardest to catch from the final answer alone — because the LLM will still generate a fluent, confident-sounding response even from mediocre or subtly-wrong chunks. It never says "I'm not sure these sources are relevant." A crash in loading or embedding is loud and obvious; a slow slide in retrieval relevance is silent and shows up only as answers that are "a bit off" in ways easy to write off as one-time flukes. Real production monitoring needs to check the middle of the pipeline directly — logging retrieved-chunk relevance scores, periodic spot-audits against a known-answer test set — rather than trusting that a fluent final answer means the pipeline is healthy.</div>
+      </div>
+
       <pre>
 1. RAG concept: Retrieve → Augment → Generate, no model weights touched
 2. RAG vs. fine-tuning: RAG wins for frequently-changing/niche factual
