@@ -91,6 +91,15 @@
   table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13px;}
   th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
   th{background:var(--panel2); color:var(--accent2);}
+  .sketch{
+    background:var(--code); border:1px dashed var(--muted);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .sketch h4{margin:0 0 8px; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted);}
+  .sketch pre{
+    background:transparent; border:none; padding:0; margin:0;
+    color:#9fb3c8; font-size:12px; line-height:1.4;
+  }
   .foot{color:var(--muted); text-align:center; padding:30px; font-size:12px;}
   .progress{font-size:11px; color:var(--muted);}
 </style>
@@ -101,10 +110,9 @@
 <header>
   <div class="eyebrow">Architects Lab · RAG &amp; LangChain Project</div>
   <h1>Retrieval-Augmented Generation with LangChain: "Ask 11 Madison Park"</h1>
-  <div class="sub">Notes from a hands-on RAG project — grounding an LLM's answers in a restaurant's own
-  scraped data, using LangChain, OpenAI embeddings, and ChromaDB, with a Gradio front end and citation
-  support. Structured for a Senior Engineering Manager comparing this against the fine-tuning project
-  studied separately, and against your own multi-LLM bootcamp and spirituality-site knowledge-base work.</div>
+  <div class="sub">A hands-on project: make an LLM answer questions using a restaurant's own website
+  data — not just what it learned in training. Built with LangChain, OpenAI embeddings, ChromaDB, and a
+  Gradio front end that shows its sources.</div>
 </header>
 
 <div class="toolbar">
@@ -123,23 +131,36 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <pre>
-User asks a question ("What kind of food does 11 Madison Park serve?")
-        ↓
-RETRIEVER searches a vector database of the restaurant's own data
-        ↓
-Relevant chunks are found and fetched
-        ↓
-AUGMENT: original question + retrieved context are combined into one prompt
-        ↓
-GENERATE: that combined prompt is sent to the LLM
-        ↓
-Answer is returned — grounded in the restaurant's actual data,
-not just whatever the LLM happened to learn during pre-training
-      </pre>
-      <p>The core motivation: asking a general-purpose LLM directly gives an answer based only on its
-      training data — which may be outdated, generic, or simply unaware of this specific restaurant. RAG
-      lets you ground responses in your own current data without touching the model's weights at all.</p>
+      <p>Ask an LLM directly, and it only knows what it learned in training — old, generic, or nothing
+      about this one restaurant. RAG fixes that by feeding it the restaurant's own live data at question
+      time. No retraining needed.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch — RAG in one picture</h4>
+        <pre>
+ User: "What kind of food does 11 Madison Park serve?"
+                    |
+                    v
+ R - RETRIEVE  ---------------------------------------------
+     search a vector database made of the restaurant's OWN
+     data --> pull out the chunks that match the question
+                    |
+                    v
+ A - AUGMENT  ----------------------------------------------
+     question  +  retrieved chunks  --->  ONE combined prompt
+                    |
+                    v
+ G - GENERATE  ---------------------------------------------
+     send that combined prompt to the LLM
+                    |
+                    v
+ Answer -- grounded in the RESTAURANT'S real data, not just
+           whatever the model happened to learn during training
+
+ KEY POINT: model weights are never touched. Only the prompt
+            changes. Update the database, answers update too.
+        </pre>
+      </div>
 
       <div class="recall" onclick="toggleRecall(this)">
         <div class="q">Active Recall: What does each letter in RAG stand for, mapped to what actually happens? <span class="hint">tap to reveal</span></div>
@@ -165,23 +186,55 @@ not just whatever the LLM happened to learn during pre-training
         <tr><td>Transparency</td><td>Knowledge is baked into weights — no easy citation trail</td><td>Can cite exactly which document/chunk an answer came from</td></tr>
       </table>
 
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+                    FINE-TUNING                      RAG
+                    -----------                       ---
+ what changes:      model weights                     nothing in the
+                     (retrain the model)               model -- an
+                                                        outside DB is
+                                                        checked live
+
+ best for:           deep, stable style/behavior       facts that change
+                      change on good quality data       often, or niche
+                                                          info
+
+ update knowledge:   retrain (GPU time, cost,           just edit the
+                      days/weeks)                       database (fast,
+                                                          cheap)
+
+ cost:                $$$ expensive, slow               $ cheap, quick
+
+ failure mode:        overfitting, narrow behavior      only as good as
+                                                          the retrieval
+                                                          (bad chunks ->
+                                                           bad answers)
+
+ citations:           X baked into weights,             OK can point to
+                       no citation trail                    the exact
+                                                             source doc
+
+ RULE OF THUMB: menu changes weekly? restaurant facts?
+                policy doc updates often?  --> RAG
+                need the model to WRITE or SPEAK in a
+                specific style/behavior?    --> fine-tune
+        </pre>
+      </div>
+
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>This maps directly onto the LoRA/PEFT fine-tuning project studied separately — that project's
-        big honest lesson was "fine-tuning is an expensive experiment with real failure modes (under-training,
-        overfitting)." RAG's core appeal here is sidestepping that entire risk category: for information that
-        changes often (a restaurant's menu, an internal policy doc, a squad's runbook), RAG is almost always
-        the more defensible default, with fine-tuning reserved for cases needing deep behavioral/stylistic
-        adaptation rather than factual grounding. Worth using this exact comparison table as a decision
-        framework the next time an internal AI tool's requirements are being scoped for Optimus.</p>
+        <p>Same lesson as the separate LoRA/fine-tuning project: fine-tuning is an expensive experiment with
+        real failure risk. RAG sidesteps that risk for anything that changes often — a menu, a policy doc, a
+        runbook. Keep fine-tuning for deep behavior/style change, not for facts. Use this table as a decision
+        checklist when scoping any Optimus AI tool.</p>
       </div>
 
       <div class="questions">
         <h4>Question worth sitting with</h4>
         <ul>
-          <li>For your own spirituality-site knowledge base or Architects Lab study notes — if you wanted
-          an AI assistant that answers questions grounded in your own accumulated notes, is that a RAG use
-          case (near-certainly yes) or could you see any argument for fine-tuning instead?</li>
+          <li>Your spirituality-site notes or Architects Lab archive — if you built an assistant over them,
+          that's almost certainly a RAG job. Any case where fine-tuning would make more sense there?</li>
         </ul>
       </div>
 
@@ -199,18 +252,28 @@ not just whatever the LLM happened to learn during pre-training
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>LangChain's value proposition: instead of a single prompt → single reply, it lets you chain
-      multiple steps together (search → summarize → translate, as one example given) and compose reusable
-      building blocks: prompts, memory, tools/plugins (calculators, code execution, search), agents (an
-      LLM deciding which tool to use and when), and — the focus of this project — retrieval/RAG.</p>
+      <p>Plain LLM use is one prompt, one reply. LangChain lets you chain steps together and reuse common
+      building blocks instead of hand-wiring everything yourself.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ WITHOUT a framework:            WITH LangChain:
+ one prompt --> one reply        search -> summarize -> translate
+ (build every piece yourself)    (chained steps, reusable pieces)
+
+ LangChain's building blocks:
+   [ prompts ]  [ memory ]  [ tools/plugins ]  [ agents ]  [ retrieval/RAG ]
+                                (calc, code,    (LLM picks    <- this
+                                 search)         which tool)     project
+        </pre>
+      </div>
 
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>LangChain here plays the same role Next.js played in the Vercel course notes — an opinionated
-        "application framework" layered on top of lower-level primitives (raw OpenAI API calls), bundling
-        common patterns (chains, retrievers, memory) so you're not hand-assembling them yourself. Same
-        build-vs-batteries-included trade-off as always: faster to start, but worth knowing what's happening
-        underneath before treating any chain as a black box in a production setting.</p>
+        <p>LangChain plays the same role Next.js played for the Vercel course — an opinionated framework
+        on top of raw API calls, bundling common patterns so you don't build them by hand. Faster to start,
+        but know what's happening underneath before treating any chain as a black box in production.</p>
       </div>
     </div>
   </div>
@@ -222,10 +285,26 @@ not just whatever the LLM happened to learn during pre-training
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Data source: a single scraped text file of 11 Madison Park's website content (menus, contact
-      info, chef bio, partnerships) — loaded with LangChain's <code>TextLoader</code> as one large
-      document object with UTF-8 encoding. A required system dependency is flagged: Microsoft Visual C++
-      14+ must be installed for LangChain to install/run correctly on Windows.</p>
+      <p>Data: one scraped text file of 11 Madison Park's website (menu, contact info, chef bio,
+      partnerships). Loaded whole with LangChain's <code>TextLoader</code>.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ 11madisonpark.com  --(scrape)-->  one .txt file
+                                          |
+                                          v
+                              TextLoader(file, encoding="utf-8")
+                                          |
+                                          v
+                          ONE big document object
+                          (menu + contact + chef bio + partnerships
+                           all still stuck together, not split yet)
+
+ Windows note: needs Microsoft Visual C++ 14+ installed,
+               or LangChain won't install/run correctly
+        </pre>
+      </div>
 
       <div class="recall" onclick="toggleRecall(this)">
         <div class="q">Active Recall: At this stage, is the document already split into retrievable pieces? <span class="hint">tap to reveal</span></div>
@@ -241,32 +320,48 @@ not just whatever the LLM happened to learn during pre-training
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Large documents are hard for retrieval to work with directly — smaller chunks are easier to
-      embed, store, and retrieve precisely. Uses LangChain's <code>RecursiveCharacterTextSplitter</code>
-      with two key parameters:</p>
-      <ul class="plain">
-        <li><strong>chunk_size</strong> (set to 1000 characters): max characters per chunk</li>
-        <li><strong>chunk_overlap</strong> (set to 150 characters): characters shared between consecutive chunks, to preserve context across a chunk boundary</li>
-      </ul>
-      <p>Result: 38 chunks from the source document. Each chunk carries <strong>metadata</strong> pointing
-      back to its source file — this is what later enables citations in the final answer.</p>
+      <p>A big document is hard to search well. Cut it into small chunks first — easier to store and find
+      precisely. Uses LangChain's <code>RecursiveCharacterTextSplitter</code>.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ ONE big document
+        |
+        v  RecursiveCharacterTextSplitter(
+        |     chunk_size=1000,    <- max characters per chunk
+        |     chunk_overlap=150)  <- shared chars between chunks,
+        v                            keeps context across the cut
+ [chunk1][chunk2][chunk3]...[chunk38]     --> 38 chunks total
+   each chunk also carries METADATA -> source file name
+                                        (this = later citations)
+
+ WHY OVERLAP?  zero overlap:
+   "...the chef trained    |   in Switzerland before..."
+                          CUT HERE -- sentence broken, meaning lost
+
+   150-char overlap: a bit of text repeats on both sides of the
+   cut, so no idea gets sliced clean in half
+
+ EXPERIMENT RESULTS:
+   chunk_size 1000 -> 38 chunks
+   chunk_size  500 -> 79 chunks   (roughly double)
+   overlap = 0     -> chunk count barely changes,
+                       but boundary context gets WORSE
+        </pre>
+      </div>
 
       <div class="risknote">
         <h4>Risk Flag — Chunk Boundaries Can Cut Sentences in Half</h4>
-        <p>With zero overlap, a sentence or idea that happens to fall exactly on a chunk boundary gets
-        split across two chunks, losing coherence for retrieval. The overlap parameter exists specifically
-        to mitigate this by duplicating a bit of context at each boundary. Practice-opportunity experiments
-        confirmed: smaller chunk_size (500) roughly doubled the chunk count (79 vs. 38); changing overlap to
-        zero had a much smaller effect on chunk count but degraded context preservation at boundaries.</p>
+        <p>Zero overlap means a sentence can get sliced right at the boundary, losing meaning. Overlap
+        exists to fix exactly that.</p>
       </div>
 
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>Chunk size/overlap tuning is a genuine engineering trade-off worth taking seriously, not a
-        throwaway parameter: too large and you waste context window / retrieve noisy irrelevant text; too
-        small and you fragment coherent ideas across chunk boundaries, hurting retrieval precision. Treat it
-        like any other tunable system parameter (cache TTL, batch size) — pick a sensible default, then tune
-        against actual retrieval quality on real queries, not gut feel.</p>
+        <p>Chunk size/overlap is a real trade-off, not a throwaway setting. Too big = wastes context, pulls
+        in noisy text. Too small = chops up ideas, hurts retrieval. Treat it like any tunable system
+        parameter — pick a sane default, then tune against real query results, not gut feel.</p>
       </div>
 
       <div class="recall" onclick="toggleRecall(this)">
@@ -283,30 +378,52 @@ not just whatever the LLM happened to learn during pre-training
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Embeddings represent the <em>meaning</em> of words/sentences/documents as dense numeric vectors —
-      illustrated with a semantic feature-space example (gender × age × "royalty" axes placing man/woman/
-      boy/girl/king/queen/prince/princess at intuitive relative positions). The real embeddings used are
-      far higher-dimensional (1,536 dimensions in this project, via OpenAI's embedding model) — far beyond
-      human visualization, but the same underlying idea: semantically similar text ends up numerically close.</p>
+      <p>An embedding turns text into a list of numbers that captures its <em>meaning</em>. Similar
+      meaning → numbers land close together.</p>
 
-      <p>Practical demo tool: the TensorFlow Embedding Projector, used to explore nearest-neighbor words to
-      "love" and "Italy" — visually confirming that semantically related words (France, Rome, Venice, Spain
-      for "Italy") cluster together in the embedding space, via a PCA-based 2D/3D projection of the
-      original high-dimensional space.</p>
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ EASY EXAMPLE (3 imaginary axes: gender, age, "royalty"):
 
-      <pre>
-Chroma.from_documents(documents=chunks, embedding=OpenAIEmbeddings(...))
-  → generates an embedding vector for each of the 38 chunks
-  → stores all vectors + original text + metadata in a ChromaDB vector store
-      </pre>
+              royalty
+                 |    king          queen
+                 |      *             *
+                 |         prince   princess
+                 |            *      *
+        ---------+------------------------- gender
+                 |   boy         girl
+                 |    *           *
+                 |  man          woman
+                 |   *             *
+                age
+
+    "king" is near "queen" and near "prince" -- because they
+    are close in MEANING, not because the letters match
+
+ REAL PROJECT: same idea, but 1,536 numbers per chunk (OpenAI
+ embeddings) instead of 3 -- too many to draw, same principle
+
+ DEMO TOOL: TensorFlow Embedding Projector
+    type "Italy"  --> nearby words: France, Rome, Venice, Spain
+    (2D/3D picture squashed down from 1,536 dimensions)
+
+ STORING IT:
+   Chroma.from_documents(chunks, OpenAIEmbeddings())
+        |
+        v
+   for each of the 38 chunks, ChromaDB stores THREE things:
+     1. the embedding vector (1,536 numbers -- the "meaning")
+     2. the original chunk text (human-readable)
+     3. the metadata (which source file it came from)
+        </pre>
+      </div>
 
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>The embedding-space intuition (semantically similar concepts cluster numerically close) is worth
-        having solid, because it's the entire mechanism retrieval relies on — a retrieval failure is almost
-        always either a chunking problem (bad boundaries) or an embedding-similarity mismatch (the query's
-        phrasing doesn't land near the right chunks in vector space), and diagnosing which one it is starts
-        from this mental model.</p>
+        <p>This embedding-space idea is the whole engine retrieval runs on. When retrieval fails, it's
+        almost always one of two things: bad chunk boundaries, or the query's wording landing far from the
+        right chunks in vector space. Diagnosing which one starts right here.</p>
       </div>
 
       <div class="recall" onclick="toggleRecall(this)">
@@ -323,22 +440,41 @@ Chroma.from_documents(documents=chunks, embedding=OpenAIEmbeddings(...))
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Before wiring retrieval into a full RAG chain, the retrieval step is tested in isolation using
-      <code>vector_store.similarity_search(query, k=N)</code> — asking "what different menus are offered?"
-      and confirming the top-k retrieved chunks actually contain menu-related content. This deliberately
-      separates "can we find the right information?" from "can we generate a good answer from it?" —
-      testing one variable at a time.</p>
-      <p>Follow-up tests with different questions ("Who is Daniel Humm?", "Is there a dress code?", "Tell
-      me about the partnership with Magic Farms") and different <code>k</code> values (1, 2, 5) confirmed
-      retrieval quality and showed <code>k</code> directly controls how many chunks come back.</p>
+      <p>Before building the full chain, test retrieval alone first — "can we find the right info?" is a
+      different question from "can we write a good answer from it?" Test one thing at a time.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ vector_store.similarity_search("what menus are offered?", k=3)
+                    |
+                    v
+       does the top-3 come back menu-related?  YES -- retrieval works
+
+ more test questions tried:
+   "Who is Daniel Humm?"
+   "Is there a dress code?"
+   "Tell me about the partnership with Magic Farms"
+
+ k = how many chunks come back:
+   k=1 -----> * (just the single best match)
+   k=2 -----> * *
+   k=5 -----> * * * * *   (more context, but more noise too)
+
+ WHY TEST THIS SEPARATELY?
+   bad final answer could mean:
+     (a) retrieval found the WRONG chunks    -> fix chunking/k/query
+     (b) retrieval found the RIGHT chunks,
+         but LLM wrote a bad answer          -> fix the prompt/LLM
+   testing retrieval alone tells you which one broke
+        </pre>
+      </div>
 
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>Testing retrieval in isolation before adding generation on top is good debugging discipline —
-        directly analogous to testing a database query independently before wiring it into application logic
-        that also has to format and present the result. If a RAG system gives a bad final answer, this
-        separation tells you immediately whether the fault is in retrieval (wrong/no chunks found) or
-        generation (right chunks, but the LLM answered poorly) — two very different fixes.</p>
+        <p>Good debugging discipline — same as testing a database query alone before wiring it into an app
+        that also formats and displays results. This split tells you immediately whether a bad RAG answer is
+        a retrieval problem or a generation problem — two very different fixes.</p>
       </div>
 
       <div class="recall" onclick="toggleRecall(this)">
@@ -357,39 +493,58 @@ Chroma.from_documents(documents=chunks, embedding=OpenAIEmbeddings(...))
     <div class="card-body">
       <pre>
 retriever = vector_store.as_retriever(search_kwargs={"k": 3})
-llm = OpenAI(temperature=0)          # 0 = factual, minimal creativity
+llm = OpenAI(temperature=0)
 
 chain = RetrievalQAWithSourcesChain.from_chain_type(
-    llm=llm,
-    chain_type="stuff",              # "stuff" all retrieved text
-                                      # directly into the prompt context
-    retriever=retriever,
-    return_source_documents=False,
-    verbose=False
+    llm=llm, chain_type="stuff", retriever=retriever
 )
 
 result = chain.invoke(query)
-  → result["answer"]      : the generated, grounded response
-  → result["sources"]     : cited source document(s)
-  → result["source_documents"]  (if enabled): actual retrieved chunk text
       </pre>
-      <p><strong>chain_type="stuff"</strong> means all retrieved chunks are inserted directly into the
-      prompt as-is — simplest strategy, but only works if retrieved content + question fits the model's
-      context window. (Other chain types exist for larger retrieval sets that don't fit directly — not
-      covered in depth here.)</p>
-      <p><strong>temperature=0</strong> is chosen deliberately for factual grounding — raising it to 1.3 in
-      a later experiment produced answers with the same grounded facts but noticeably different wording,
-      demonstrating temperature affects phrasing/creativity, not factual accuracy, when RAG is doing the
-      grounding.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ question
+    |
+    v
+ retriever (k=3) --> top 3 chunks
+    |
+    v
+ chain_type="stuff"
+    -----------------------------------------------
+    "STUFF" = shove all 3 chunks straight into the
+              prompt, as-is. Simplest strategy.
+    LIMIT: only works if chunks + question fit inside
+           the model's context window. Fine for 3
+           chunks; would break on a huge document set
+           (e.g. full IDFC policy library) -- would
+           need map-reduce/refine chain instead.
+    -----------------------------------------------
+    |
+    v
+ llm = OpenAI(temperature=0)   <- 0 = factual, no creativity
+    |
+    v
+ result["answer"]           <- the grounded answer
+ result["sources"]          <- which document(s) it came from
+ result["source_documents"] <- actual chunk text (if enabled)
+
+ TEMPERATURE EXPERIMENT:
+   temperature=0    -> same facts, plain/consistent wording
+   temperature=1.3  -> SAME facts, different wording/style
+   conclusion: temperature changes HOW it's said,
+               not WHETHER it's grounded (retrieval
+               supplies the facts either way)
+        </pre>
+      </div>
 
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>The "stuff" chain_type's context-window limitation is worth flagging explicitly as a scaling
-        constraint: this works fine for a 3-chunk, small-restaurant knowledge base, but would break down for
-        a much larger corpus (e.g. a full IDFC policy/compliance document set) where the top-k retrieved
-        chunks alone could exceed context limits. Production RAG at scale typically needs either a
-        map-reduce/refine chain strategy or much tighter chunk/k tuning — worth remembering as the natural
-        next question if this pattern were ever proposed for an Optimus knowledge-base tool at real scale.</p>
+        <p>Flag the "stuff" chain_type's context-window limit as a real scaling constraint. Fine for a
+        3-chunk restaurant knowledge base, but a large corpus (say, a full IDFC policy set) would blow past
+        context limits. Production RAG at that scale needs either a map-reduce/refine chain or much tighter
+        chunk/k tuning.</p>
       </div>
 
       <div class="recall" onclick="toggleRecall(this)">
@@ -406,26 +561,44 @@ result = chain.invoke(query)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Final layer: a Gradio interface wrapping the chain — a question box, example questions users can
-      click ("Is there a dress code?", "Do I need a reservation for the bar?", "Can I buy gift cards?"),
-      a styled submit button ("Ask 11 Madison Park 🍽️"), and — critically — the answer displayed alongside
-      its cited source, directly surfacing the transparency benefit RAG offers over a plain LLM call.</p>
+      <p>Last layer: wrap the chain in a Gradio interface, so a normal person can use it, not just code.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ +---------------------------------------------------+
+ |  Ask 11 Madison Park  🍽️                          |
+ |                                                     |
+ |  [ question box.......................... ]        |
+ |                                                     |
+ |  try:  "Is there a dress code?"                     |
+ |        "Do I need a reservation for the bar?"       |
+ |        "Can I buy gift cards?"                      |
+ |                                                     |
+ |  [ Ask 11 Madison Park 🍽️ ]  <- submit button       |
+ |                                                     |
+ |  Answer: "Yes, smart casual is required..."         |
+ |  Source: 11madisonpark.com/faq  <- CITED, visible   |
+ +---------------------------------------------------+
+
+ KEY: answer + citation shown together = transparency,
+      not just a plain LLM chat reply
+        </pre>
+      </div>
 
       <div class="archnote">
         <h4>Architect's Lens</h4>
-        <p>Citations-in-the-UI is the feature that turns a RAG demo into something a business could actually
-        trust enough to deploy — for any regulated or customer-facing context, "here's the answer, and here's
-        exactly which document it came from" is the difference between a plausible-sounding chatbot and an
-        auditable one. Worth treating as a non-negotiable feature, not a nice-to-have, for any internal
-        Optimus tool that answers questions from a document corpus (policies, runbooks, compliance docs).</p>
+        <p>Visible citations are what turn a RAG demo into something a business can actually trust. "Here's
+        the answer, here's exactly where it came from" is the gap between a plausible-sounding chatbot and
+        an auditable one. Treat this as non-negotiable for any Optimus tool answering from policies,
+        runbooks, or compliance docs.</p>
       </div>
 
       <div class="questions">
         <h4>Question worth sitting with</h4>
         <ul>
-          <li>If you built a RAG assistant over your own Architects Lab notes or Sankalp journal archive,
-          would citations back to the specific source note be equally valuable there — or is that mainly
-          a business-trust feature that matters less for a personal knowledge tool?</li>
+          <li>Build a RAG assistant over your Architects Lab notes or Sankalp archive — would citations
+          matter there too, or is that mainly a business-trust feature?</li>
         </ul>
       </div>
     </div>
@@ -453,6 +626,38 @@ result = chain.invoke(query)
    chain_type="stuff") → grounded, cited answers
 9. Wrap in a Gradio UI with example questions and visible citations
       </pre>
+
+      <div class="sketch">
+        <h4>Rough Sketch — full pipeline, start to finish</h4>
+        <pre>
+ website text file
+        |
+        v  TextLoader
+ ONE big document
+        |
+        v  RecursiveCharacterTextSplitter (size=1000, overlap=150)
+ 38 chunks (+ metadata: source file)
+        |
+        v  OpenAIEmbeddings (1,536-dim)
+ chunk --> vector, stored in ChromaDB
+        |
+        v  similarity_search()  <- tested ALONE first
+ confirmed: right chunks come back for real questions
+        |
+        v  RetrievalQAWithSourcesChain (k=3, chain_type="stuff")
+ question + top-3 chunks --> one prompt --> LLM (temp=0)
+        |
+        v
+ grounded answer + cited source
+        |
+        v  Gradio UI
+ question box + example questions + answer + citation, all visible
+
+ RAG vs fine-tuning, in one line:
+   changing facts often?  -> RAG (edit the database)
+   changing style/behavior deeply? -> fine-tune (retrain)
+        </pre>
+      </div>
 
       <div class="questions">
         <h4>Questions worth carrying forward</h4>
