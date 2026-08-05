@@ -18,6 +18,20 @@
   --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --maxw:1200px;
 }
+html[data-theme="light"]{
+  --ink:#f5f7fb; --panel:#ffffff; --panel-2:#f0f3f8; --panel-3:#e7ecf3;
+  --line:#d6dce6; --line-soft:#e2e7ef;
+  --text:#1c2532; --text-dim:#4c586a; --text-faint:#7c8798;
+  --beam:#2f5fd6; --amber:#a86311; --violet:#7a3fc9; --mint:#0f8f66; --rose:#c23458;
+}
+html[data-theme="light"] body{
+  background-image:
+    radial-gradient(1100px 520px at 12% -8%, rgba(47,95,214,.07), transparent 62%),
+    radial-gradient(900px 460px at 94% 3%, rgba(122,63,201,.05), transparent 60%);
+}
+html[data-theme="light"] .ascii{ background:#fbfcfe; }
+html[data-theme="light"] .ascii pre{ color:#3a4a60; }
+html[data-theme="light"] .topbar{ background:rgba(245,247,251,.92); }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth; scroll-padding-top:100px}
 body{
@@ -399,6 +413,7 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
     <div class="allctl">
       <button id="expandAll" title="Expand everything">Expand all</button>
       <button id="collapseAll" title="Collapse into an index">Collapse all</button>
+      <button id="themeToggle" title="Toggle light/dark theme" onclick="toggleTheme()">🌗 Theme</button>
     </div>
   </div>
   <div id="scrollbar"></div>
@@ -1590,6 +1605,21 @@ out = pipe(prompt, max_new_tokens=<span class="c-num">400</span>, temperature=<s
 </footer>
 
 <script>
+(function(){
+  if(localStorage.getItem('alTheme')==='light'){
+    document.documentElement.setAttribute('data-theme','light');
+  }
+})();
+function toggleTheme(){
+  var root = document.documentElement;
+  if(root.getAttribute('data-theme')==='light'){
+    root.removeAttribute('data-theme');
+    localStorage.setItem('alTheme','dark');
+  } else {
+    root.setAttribute('data-theme','light');
+    localStorage.setItem('alTheme','light');
+  }
+}
 /* ================= VRAM CALCULATOR ================= */
 const DEVICES = [
   {name:"Colab CPU RAM", gb:12.7},

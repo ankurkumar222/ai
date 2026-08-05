@@ -9,6 +9,17 @@
     --text:#dbe4ee; --muted:#7d92a8; --accent:#39d3ac; --accent2:#f2b84b;
     --danger:#ef6a6a; --code:#0d1319; --tag:#1c2a3a;
   }
+  html[data-theme="light"]{
+    --bg:#f4f6f9; --panel:#ffffff; --panel2:#eef1f6; --border:#d7dee6;
+    --text:#1c2530; --muted:#5c6b7c; --accent:#0f9b7e; --accent2:#b5790a;
+    --danger:#c23b3b; --code:#eef1f6; --tag:#e3e8f0;
+  }
+  html[data-theme="light"] pre{ color:#0f6b4f; }
+  html[data-theme="light"] .sketch pre{ color:#33495e; }
+  html[data-theme="light"] .recall{ background:#f7f9fb; }
+  html[data-theme="light"] body{ background:var(--bg); }
+  html[data-theme="light"] header{ background:linear-gradient(180deg,#eef1f6,#f4f6f9); }
+  html[data-theme="light"] .toolbar{ background:rgba(244,246,249,0.95); }
   *{box-sizing:border-box;}
   body{
     margin:0; background:var(--bg); color:var(--text);
@@ -66,9 +77,21 @@
   .questions li{margin:6px 0; color:#c8d6e2;}
   .archnote{
     background:var(--code); border-left:3px solid var(--accent2);
-    border-radius:6px; padding:12px 16px; margin:14px 0;
+    border-radius:6px; padding:12px 16px; margin:14px 0; cursor:pointer;
   }
   .archnote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent2);}
+  .archnote .think-q{color:var(--accent2); font-weight:600; font-size:13.5px;}
+  .archnote .think-a{display:none; margin-top:10px; border-top:1px solid var(--border); padding-top:8px;}
+  .archnote.show .think-a{display:block;}
+  .sketch{
+    background:var(--code); border:1px dashed var(--muted);
+    border-radius:6px; padding:12px 16px; margin:14px 0;
+  }
+  .sketch h4{margin:0 0 8px; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted);}
+  .sketch pre{
+    background:transparent; border:none; padding:0; margin:0;
+    color:#9fb3c8; font-size:12px; line-height:1.4;
+  }
   .risknote{
     background:var(--code); border-left:3px solid var(--danger);
     border-radius:6px; padding:12px 16px; margin:14px 0;
@@ -109,6 +132,7 @@
   <button class="ctrl" onclick="expandAll()">▾ Expand All</button>
   <button class="ctrl" onclick="collapseAll()">▸ Collapse All</button>
   <button class="ctrl" onclick="revealAllRecall()">💡 Reveal All Recall Answers</button>
+  <button class="ctrl" onclick="toggleTheme()">🌗 Toggle Theme</button>
   <span class="progress" id="progressLabel"></span>
 </div>
 
@@ -121,33 +145,59 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Pipeline: old resume + target job description → (1) gap analysis (what's missing, what matches,
-      what's an under-highlighted strength) → (2) a tailored, rewritten resume with tracked
-      additions/removals → (3) a matching, tone-appropriate cover letter.</p>
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: this tool can write "increased revenue by 30%" on your resume in one second. If you never told it that number, where did it come from — and what does that tell you about the ONE rule you must follow before using any of its output? <span class="hint">tap to reveal</span></div>
+        <div class="a">It made it up. LLMs generate plausible-sounding numbers to sound impressive — not because they know your actual achievements, but because confident, specific-sounding text is what they're good at producing. The one rule: never submit an AI-written metric unless YOU can personally verify it's true and you actually did it. Submitting a fabricated number is both unethical and a real risk if an interviewer asks you to walk through it. The tool's job is to suggest phrasing and flag gaps — verifying facts is entirely on you.</div>
+      </div>
+
+      <p>What it does, in three steps: old resume + target job → (1) find the gaps (what's missing, what
+      matches, what's a hidden strength) → (2) rewrite the resume with tracked changes → (3) write a
+      matching cover letter.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ old resume  +  job description
+         |
+         v
+ STEP 1: GAP ANALYSIS
+   what's missing?  what already matches?  what's a hidden strength?
+         |
+         v
+ STEP 2: REWRITE RESUME  (+ a visible diff of every change)
+         |
+         v
+ STEP 3: WRITE COVER LETTER  (tone-matched to the company)
+         |
+         v
+ output ready ... BUT every number in it is a DRAFT, not a fact
+
+ THE RULE, in one line:
+   AI writes the WORDS.  YOU verify every NUMBER.
+   never submit a metric you can't personally stand behind
+        </pre>
+      </div>
 
       <div class="risknote">
-        <h4>The Non-Negotiable Rule — Stated Explicitly and Repeated</h4>
-        <p>Every generated metric (percentages, growth numbers, "increased X by 30%") is fabricated by the
-        LLM to sound impressive — <strong>none of it is real unless you already did it</strong>. The
-        instructor repeats this warning multiple times: submitting an AI-embellished resume with numbers you
-        can't back up is both unethical and a real risk if questioned in an interview. The tool's correct use
-        is to surface phrasing and structure, and to flag genuine gaps — the human must verify every specific
-        claim before it goes anywhere near a real application.</p>
+        <h4>The Non-Negotiable Rule</h4>
+        <p>Every generated metric ("increased X by 30%") is invented to sound impressive —
+        <strong>none of it is real unless you already did it</strong>. Submitting a number you can't back
+        up is both unethical and risky if an interviewer asks about it. Use the tool to improve phrasing and
+        spot real gaps — you verify every specific claim before it goes anywhere near a real application.</p>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Given you're actively targeting AI/ML-focused roles, this is worth treating as more than a course
-        exercise — it's a real tool you could adapt for your own applications this week. But the fabricated-metrics
-        risk is exactly the kind of thing that would sink credibility fast in an interview at a company
-        that takes AI engineering seriously (Sarvam AI, PhonePe, Razorpay would all likely probe specifics) —
-        treat every AI-suggested number as a draft placeholder to replace with your own verified data, never
-        as a fact to keep.</p>
-      </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: What is the single most important guardrail when using this kind of resume tool? <span class="hint">tap to reveal</span></div>
-        <div class="a">Never submit AI-generated quantitative claims (percentages, growth numbers, specific achievements) unless you can personally verify they're true and you actually did them. The LLM fabricates plausible-sounding metrics to make the resume more impressive, but they are not grounded in fact unless the human confirms and edits them — this is a human-in-the-loop requirement, not optional polish.</div>
+        <div class="think-q">Think First: you're actively applying to Sarvam AI, PhonePe, Razorpay — companies that will absolutely probe any specific claim on your resume. Given that, is this tool actually SAFER or RISKIER to use than writing your resume by hand? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Neither, automatically — it depends entirely on discipline. Used carelessly it's riskier, because
+        it can generate a confident, specific-sounding number faster than you can fact-check it, and
+        confident fabrication is exactly what an experienced interviewer at an AI-focused company will probe
+        hardest. Used deliberately — as a phrasing and gap-finding tool, with every number replaced by your
+        own verified data — it's genuinely useful and arguably safer than hand-writing, since the gap
+        analysis surfaces things you might have under-sold. The tool doesn't change the risk; your discipline
+        applying it does.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -159,6 +209,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: before Pydantic, you'd just ask the LLM in plain English for "a JSON object with name, age, email." What could go wrong with that approach that a strict schema fixes? <span class="hint">tap to reveal</span></div>
+        <div class="a">Plain-English instructions are a request, not a guarantee — the model can still return age as the string "thirty" instead of 30, forget the email field, or wrap the JSON in extra prose. Your code then either crashes downstream or silently works with bad data. Pydantic turns "please return this shape" into "return this shape or get an explicit error right now" — catching the problem at the boundary instead of three steps later in your pipeline.</div>
+      </div>
+
       <pre>
 from pydantic import BaseModel
 
@@ -171,23 +226,46 @@ User(name="Mira Hero", age=30, email="mira@gmail.com")   # ✓ valid
 User(name="Mira", age="not a number", email="...")        # ✗ raises
                                                             #   a validation error
       </pre>
-      <p>Pydantic defines a data "blueprint" using Python type hints, then automatically validates that
-      any data assigned to it matches — raising a clear error instead of silently accepting malformed data,
-      and in many cases auto-converting compatible types. This replaces the earlier, weaker pattern of just
-      describing the desired output format in plain-English prompt text and hoping the LLM complies.</p>
 
-      <div class="archnote">
-        <h4>Architect's Lens</h4>
-        <p>This is the exact same principle as FastAPI's Pydantic request validation seen in the Vercel
-        production course (Day 4's healthcare app) — the same library, same discipline, applied to LLM
-        <em>output</em> here instead of API <em>input</em>. Worth recognizing as one unified pattern: wherever
-        untrusted or generated data crosses a boundary into your system (an API request, an LLM response),
-        Pydantic-style schema validation at that boundary is the fix, not manual parsing or hoping for the best.</p>
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ PLAIN DICTIONARY                      PYDANTIC MODEL
+ -----------------                     ---------------
+ dict = {"age": "banana"}              User(age="banana")
+       |                                     |
+       v                                     v
+ accepted silently                     ✗ VALIDATION ERROR, right away
+ (breaks later,                        (breaks HERE, loud and clear,
+  somewhere else,                       exactly where the bad data
+  hard to trace)                        entered the system)
+
+ the blueprint:
+   class User(BaseModel):
+       name: str     <- must be text
+       age: int      <- must be a whole number
+       email: str    <- must be text
+
+ wherever untrusted/generated data enters your system
+ (an API request, an LLM's reply) -- put a Pydantic
+ blueprint right at that boundary
+        </pre>
       </div>
 
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: What happens differently when you pass invalid data to a Pydantic model versus a plain Python dictionary? <span class="hint">tap to reveal</span></div>
-        <div class="a">A plain dictionary would silently accept whatever value you give it, regardless of type. A Pydantic model actively validates each field against its declared type hint and raises a clear validation error immediately if the data doesn't match (e.g. a string passed where an integer was expected) — catching the problem at the boundary instead of letting bad data flow silently into your application.</div>
+      <p>Pydantic defines a data "blueprint" from Python type hints, then checks any data assigned to it —
+      clear error instead of silently accepting bad data.</p>
+
+      <div class="archnote" onclick="toggleRecall(this)">
+        <h4>Architect's Lens</h4>
+        <div class="think-q">Think First: you already used Pydantic for FastAPI request validation in the Vercel course — checking data coming IN to an API. Here it's checking data coming OUT of an LLM. Is that really the same problem, or a different one wearing the same solution? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Genuinely the same problem: untrusted data crossing a boundary into your system. An API request
+        from an unknown caller and an LLM's generated reply are both "data you didn't fully control the
+        shape of," arriving at the edge of your code. The direction (in vs. out) doesn't change the fix —
+        schema validation at that boundary, not manual parsing or hoping for the best. Worth recognizing this
+        as one unified pattern rather than two separate skills, so the instinct to reach for Pydantic fires
+        the same way regardless of which direction the untrusted data is flowing.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -199,6 +277,11 @@ User(name="Mira", age="not a number", email="...")        # ✗ raises
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: section 2 showed Pydantic catching bad data AFTER it arrives. Here, the same Pydantic model gets handed straight to OpenAI's API call. What's the difference between "validate after" and "enforce during"? <span class="hint">tap to reveal</span></div>
+        <div class="a">"Validate after" means the model can still generate malformed JSON, and your code catches it once it lands. "Enforce during" — what response_format=Destination does — means the API itself constrains generation to match the schema, so you get guaranteed-structured output back, not "output you then have to hope parses correctly." Same schema, two very different guarantees: one catches problems, the other prevents them.</div>
+      </div>
+
       <pre>
 class Destination(BaseModel):
     city: str
@@ -212,15 +295,31 @@ response = client.beta.chat.completions.parse(
     response_format=Destination      # ← the Pydantic model itself
 )
       </pre>
-      <p>The <code>.beta.chat.completions.parse()</code> method takes a Pydantic model directly as
-      <code>response_format</code> — OpenAI returns output that's guaranteed to match that schema, instead of
-      generating free text that you then have to hope parses correctly. A list-type field
-      (<code>top_attractions: list[str]</code>) tells the model to return a collection, not a single value.</p>
 
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: What's the practical benefit of passing a Pydantic model as response_format, versus just describing the desired JSON structure in the prompt text? <span class="hint">tap to reveal</span></div>
-        <div class="a">The API enforces the schema at generation time and returns validated, guaranteed-structured output — eliminating the risk of the model returning malformed JSON, missing fields, or wrong types that you'd otherwise have to catch and handle after the fact when relying purely on prompt instructions.</div>
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ OLD WAY                              NEW WAY
+ --------                             -------
+ prompt: "please return JSON          response_format=Destination
+ with city, country,                        |
+ top_attractions"                           v
+        |                             OpenAI CONSTRAINS its own
+        v                             output generation to match
+ free text back                       that exact schema
+        |                                   |
+        v                                   v
+ you PARSE it yourself                guaranteed-structured reply
+ and HOPE it matches                  back, every time
+ (sometimes it won't)
+
+ list[str] field  -->  tells the model "return a LIST here,
+                        not a single string" (top_attractions)
+        </pre>
       </div>
+
+      <p>The <code>.beta.chat.completions.parse()</code> call takes a Pydantic model directly as
+      <code>response_format</code> — OpenAI's own generation is constrained to match that schema.</p>
     </div>
   </div>
 
@@ -231,6 +330,11 @@ response = client.beta.chat.completions.parse(
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: this one function can return either plain text OR a structured object, depending on one optional argument. Why not just write two separate functions — one for each — instead of branching inside one? <span class="hint">tap to reveal</span></div>
+        <div class="a">Two functions means two things to remember, document, and keep in sync whenever the underlying LLM call logic changes — near-duplicate code drifting apart over time. One function with an optional response_format parameter keeps a single, simple call surface: callers who don't need structure just omit the argument and get sensible defaults; callers who do need it pass a schema. Same underlying logic, one place to maintain it.</div>
+      </div>
+
       <pre>
 def openai_generate(
     prompt: str,
@@ -246,18 +350,46 @@ def openai_generate(
         # structured .beta.chat.completions.parse(...)
         ...
 </pre>
-      <p>One function handles both plain-text and Pydantic-structured generation, branching on whether
-      <code>response_format</code> was supplied. Default parameter values (model, temperature, max_tokens) mean
-      callers only need to specify what differs from the default — the same "sensible defaults, override what
-      you need" pattern seen across the FastAPI and LangChain projects.</p>
 
-      <div class="archnote">
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ openai_generate(prompt, ...)
+              |
+              v
+      response_format given?
+         /            \
+       NO              YES
+        |                |
+        v                v
+  plain text call   structured .parse() call
+  (chat.completions   (schema-enforced)
+   .create)
+        |                |
+        v                v
+   returns str      returns dict/object
+
+ defaults:  model="gpt-4o", temperature=0.7, max_tokens=1500
+ caller only overrides what's DIFFERENT from the default
+ (same "sensible defaults" pattern as FastAPI/LangChain)
+        </pre>
+      </div>
+
+      <p>One function, two behaviors, picked by whether <code>response_format</code> was passed —
+      defaults mean callers only specify what's different from the norm.</p>
+
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>This dual-mode function design (one function, two behaviors, selected by an optional parameter) is
-        a clean, reusable pattern worth lifting directly for any internal Optimus wrapper around an LLM call —
-        rather than maintaining two separate near-duplicate functions for "structured" and "unstructured"
-        generation, a single well-documented function with an optional schema parameter keeps the call surface
-        simple for callers while supporting both use cases.</p>
+        <div class="think-q">Think First: if you were wrapping this exact pattern for Optimus, where would "one function, two behaviors" stop being clean and start being a hidden trap for the next engineer who reads it? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>It stays clean as long as the branch is shallow and the two behaviors are close cousins — same
+        provider, same call shape, just structured vs. not. It becomes a trap the moment someone adds a
+        THIRD behavior via another optional flag, then a fourth — now the function silently does five
+        different things depending on which combination of arguments got passed, and nobody can read the
+        signature and know what they'll get back. The pattern is worth lifting directly for a wrapper like
+        this, but the discipline that keeps it clean is: one clear branch, well-documented, and a hard stop
+        before it becomes a maze of optional parameters.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -269,28 +401,48 @@ def openai_generate(
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Two near-identical generate functions (<code>openai_generate</code>, <code>gemini_generate</code>)
-      accept the same prompt and produce comparable output — a direct, hands-on multi-provider comparison.
-      Notable findings from the live tests:</p>
-      <ul class="plain">
-        <li>Both models correctly followed the "results-driven metrics" instruction, but generated different specific numbers (100 vs. 50 blog posts) for the same underlying vague resume bullet — a direct illustration that these numbers are fabricated, not recalled facts.</li>
-        <li>At the same prompt, Gemini consistently picked up an added instruction (mention AI/prompt-engineering skills) that OpenAI sometimes missed on one run and caught on another — non-deterministic instruction-following even at fixed settings.</li>
-        <li>Cranking OpenAI's temperature to 1.6 (near the 0-2 range's upper bound) visibly degraded output — the model started drifting into other languages and incoherent text, a live demonstration of the "high temperature = erratic" warning from earlier lessons.</li>
-      </ul>
-
-      <div class="archnote">
-        <h4>Architect's Lens</h4>
-        <p>This is a very concrete data point for your multi-LLM bootcamp work: even with the same prompt,
-        temperature, and task, provider behavior is not perfectly interchangeable or fully deterministic run
-        to run. For any production pipeline (Optimus or otherwise) relying on a specific model to reliably
-        follow an instruction, this argues for either explicit output validation (Pydantic, again) that
-        catches when an instruction was missed, or a retry/self-check step, rather than trusting a single
-        generation to consistently comply.</p>
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: same prompt, same instruction, sent to both OpenAI and Gemini. If the two came back with genuinely different numbers for "blog posts written," what does that alone prove about whether either number is real? <span class="hint">tap to reveal</span></div>
+        <div class="a">It proves neither number came from real data — if both models had access to your actual achievements, they'd converge on the same figure. Two different confident-sounding numbers (100 vs. 50) for the same vague bullet is a direct, visible demonstration that both are invented to sound plausible, not recalled facts. This is the fabrication problem from Section 1, caught red-handed by simply asking twice.</div>
       </div>
 
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: What happened to OpenAI's output when temperature was pushed to 1.6, and what does that confirm? <span class="hint">tap to reveal</span></div>
-        <div class="a">The output became visibly erratic — it started drifting into other languages and generating incoherent text. This confirms the general rule that pushing temperature toward the top of its range (near 2) sacrifices coherence for randomness/creativity, and for tasks like resume writing that need to stay factual and readable, a much lower temperature is appropriate.</div>
+      <p>Two near-identical functions (<code>openai_generate</code>, <code>gemini_generate</code>) — same
+      prompt, different providers. Live test findings:</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ SAME prompt, SAME resume bullet, sent to TWO providers:
+
+ OpenAI  --> "increased blog output by 100 posts"
+ Gemini  --> "increased blog output by 50 posts"
+             different numbers = BOTH invented, not real
+
+ extra instruction: "mention AI/prompt-engineering skills"
+   Gemini  -----> caught it, every time
+   OpenAI  -----> caught it once, missed it on a re-run
+             = NOT fully deterministic, even at fixed settings
+
+ temperature dial (OpenAI):
+   0 ----------------------------------------- 2
+   factual, safe                    1.6: drifting into other
+                                     languages, incoherent text
+                                     (high temp = erratic, confirmed
+                                      live, not just in theory)
+        </pre>
+      </div>
+
+      <div class="archnote" onclick="toggleRecall(this)">
+        <h4>Architect's Lens</h4>
+        <div class="think-q">Think First: OpenAI caught the extra instruction once, missed it on an identical re-run. If you were building an Optimus pipeline that MUST always follow a specific instruction, would picking "the more reliable model" actually solve this problem? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>No — because the problem isn't that one model is worse, it's that no single LLM call is fully
+        deterministic even at fixed settings. Picking Gemini over OpenAI here might reduce the miss rate, but
+        it doesn't eliminate it, and today's "more reliable" model can regress on a future update. The real
+        fix is structural, not a model choice: explicit output validation (Pydantic again — did the required
+        field actually appear?) or a retry/self-check step that catches a missed instruction and re-runs,
+        rather than trusting any single generation to comply every time.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -302,21 +454,36 @@ def openai_generate(
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Prompt structure asks the model to produce four distinct sections in one pass:</p>
-      <ol style="padding-left:18px; color:#c8d6e2;">
-        <li>Key requirements extracted from the job description</li>
-        <li>Relevant experience already present in the resume</li>
-        <li>Gaps/mismatches — requirements not evidenced in the resume</li>
-        <li>Potential strengths — resume content not explicitly requested, but valuable</li>
-      </ol>
-      <p>The same function supports either OpenAI or Gemini via a simple <code>if/elif</code> branch on a
-      <code>model</code> parameter — one interface, swappable backend, directly reusing the dual-provider
-      pattern from Section 5.</p>
-
       <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: Why does the gap analysis explicitly include a "potential strengths" section, not just "gaps"? <span class="hint">tap to reveal</span></div>
-        <div class="a">Because a resume may contain valuable, relevant experience that isn't literally listed as a job requirement but still strengthens the application — surfacing this helps the candidate deliberately highlight it, rather than only reacting defensively to what's missing.</div>
+        <div class="q">Think First: this prompt asks for four sections — requirements, matches, gaps, AND potential strengths. Why not just "gaps"? What does a resume tool miss if it only ever looks for what's missing? <span class="hint">tap to reveal</span></div>
+        <div class="a">A resume can contain real, relevant experience that isn't literally named in the job posting but still strengthens the application — a "gaps only" tool would never surface it, leaving the candidate to only react defensively to what's missing rather than proactively highlighting what's already there but under-sold. Section 4's "potential strengths" isn't padding — it's the difference between a defensive tool and one that actively finds your best material.</div>
       </div>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ resume  +  job description
+              |
+              v
+      ONE prompt, FOUR sections back:
+
+      1. requirements  -- what the job actually asks for
+      2. matches       -- what the resume ALREADY covers
+      3. gaps          -- required, but NOT evidenced in resume
+      4. hidden strengths -- resume has it, job didn't ask for
+                             it by name, but it's still valuable
+
+              |
+              v
+      same function, works with EITHER provider:
+        if model == "openai":  ...
+        elif model == "gemini": ...
+      (one interface, swappable backend -- same pattern as
+       section 5's provider comparison)
+        </pre>
+      </div>
+
+      <p>Same function, either provider, via a simple branch on a <code>model</code> parameter.</p>
     </div>
   </div>
 
@@ -327,21 +494,42 @@ def openai_generate(
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>A follow-up refinement adds an explicit instruction to the "potential strengths" section: highlight
-      any AI-adjacent skills (prompt engineering, ChatGPT familiarity) as valuable, even if not literally
-      requested in the job posting — reflecting how AI fluency is increasingly treated as a real hiring signal.</p>
-      <p>Result: Gemini consistently surfaced this addition; OpenAI was inconsistent — catching it on one run,
-      missing it on a re-run with the identical prompt and inputs, only reliably appearing after the
-      temperature was adjusted.</p>
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: adding "explicitly flag AI/prompt-engineering skills" to the prompt made Gemini catch it every time, but OpenAI still missed it on some runs. Before reading the result — do you expect a MORE specific instruction to always make an LLM MORE reliable, or can extra specificity sometimes get lost just as easily as a vague one? <span class="hint">tap to reveal</span></div>
+        <div class="a">Extra specificity helps on average but doesn't guarantee reliability — an instruction is still just one more thing competing for the model's attention inside a long prompt, and non-determinism means it can be followed on one run and dropped on the next with literally identical input. This is exactly what happened: Gemini reliably caught it, OpenAI didn't, on the same prompt. Specific instructions raise the odds; they don't eliminate the need to verify the output actually followed them.</div>
+      </div>
 
-      <div class="archnote">
+      <p>Refinement: explicitly instruct the model to flag AI-adjacent skills (prompt engineering, ChatGPT
+      familiarity) as a valuable strength, even if the job posting never asked for them by name.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ prompt BEFORE: "find potential strengths"
+ prompt AFTER:  "find potential strengths, AND specifically
+                  flag AI/prompt-engineering skills as valuable"
+
+ same resume + job, both providers, prompt AFTER:
+   Gemini -----> caught it, every single run
+   OpenAI -----> caught it once, missed it on a re-run,
+                 only reliable after adjusting temperature
+
+ takeaway: more specific instruction != guaranteed compliance
+           still needs verification, not just better wording
+        </pre>
+      </div>
+
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Directly relevant to your own resume/LinkedIn positioning: this project's own finding validates
-        explicitly calling out AI/prompt-engineering fluency as a distinct, valued skill category — not
-        assuming it's implied by "used ChatGPT for tasks." Given your idfc-coder and Optimus Project work,
-        that's a concrete, evidenced example (leading AI adoption for 80+ microservices, prompt template
-        design) that this tool's own logic would flag as a "potential strength" worth surfacing explicitly
-        rather than burying in a generic bullet point.</p>
+        <div class="think-q">Think First: this tool's own logic says "AI/prompt-engineering fluency is a real hiring signal, flag it explicitly." Looking at your own Optimus/idfc-coder work honestly — is that already called out as its own line on your resume, or is it currently buried inside a generic "engineering management" bullet? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Worth checking directly rather than assuming. Leading AI adoption across 80+ microservices and
+        designing prompt templates for idfc-coder is exactly the kind of evidenced, concrete AI-fluency
+        signal this tool's own gap analysis would flag as a "potential strength" if it weren't already
+        explicit — the same way OpenAI sometimes missed the AI-skills instruction here. If it's folded into
+        a generic bullet, it's at real risk of the same kind of miss a reader (human or model) makes when
+        the signal isn't called out by name.</p>
+        </div>
       </div>
 
       <div class="questions">
@@ -363,15 +551,37 @@ def openai_generate(
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
-      <p>Feeding the original resume + job description + gap analysis into a resume-rewriting prompt
-      produces two outputs: the updated resume text, and a separate <strong>markdown "diff"</strong> showing
-      what was added/changed/removed — letting the human clearly review and approve every modification
-      before using it, directly supporting the human-in-the-loop verification rule from Section 1.</p>
-
       <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: Why generate a separate "diff" markdown alongside the updated resume, rather than just handing over the final rewritten version? <span class="hint">tap to reveal</span></div>
-        <div class="a">To make every change explicitly visible and reviewable — since the tool can fabricate plausible-sounding metrics or additions, the diff lets the human quickly scan exactly what was added, changed, or removed and verify or correct each claim before using the resume for a real application, rather than having to compare two full documents line by line.</div>
+        <div class="q">Think First: the tool could just hand you the final rewritten resume. Instead it also generates a separate "diff" showing exactly what changed. Given Section 1's rule about verifying every number — why does that design choice matter more here than it would for, say, a grammar fix? <span class="hint">tap to reveal</span></div>
+        <div class="a">A grammar fix doesn't introduce new facts — a rewrite might. Without a diff, verifying the final resume means comparing two full documents line by line, hunting for what changed, which people skip when tired or in a hurry — exactly when a fabricated metric slips through unnoticed. A diff makes every addition/change/removal visible at a glance, turning "carefully re-read the whole thing" into "scan the changes and verify each one" — which is the difference between the human-in-the-loop rule being followed and being skipped.</div>
       </div>
+
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ original resume + job description + gap analysis
+              |
+              v
+      resume-rewriting prompt
+              |
+        +-----+-----+
+        v           v
+ updated resume   diff markdown
+ (final text)     (+ added, - removed, ~ changed, line by line)
+
+ WITHOUT the diff:                 WITH the diff:
+   compare two full docs             scan just the CHANGES
+   line by line, easy to               |
+   miss something                      v
+        |                          verify each one against
+        v                          what you actually did
+   fabricated number slips
+   through unnoticed
+        </pre>
+      </div>
+
+      <p>Two outputs: the rewritten resume, and a markdown diff of exactly what changed — so every
+      modification can be reviewed and approved before use.</p>
     </div>
   </div>
 
@@ -382,6 +592,11 @@ def openai_generate(
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: "tone" (professional vs. informal) is a fuzzy, judgment-heavy quality — not a hard fact like a name or date. Why turn something fuzzy like that into an explicit function parameter instead of just writing two separate prompts by hand each time? <span class="hint">tap to reveal</span></div>
+        <div class="a">Turning it into a parameter makes a subjective decision explicit and repeatable instead of buried inside a one-off prompt you'd have to rewrite from scratch each time. Same function, same underlying logic — just swap tone="professional" for tone="informal" — rather than maintaining two near-duplicate hand-written prompts that drift apart over time. It's the same "make the qualitative choice an input, not a hardcoded assumption" instinct as any other config value.</div>
+      </div>
+
       <pre>
 class CoverLetterOutput(BaseModel):
     cover_letter: str
@@ -394,18 +609,39 @@ def generate_cover_letter(
 ) -> dict:
     ...
 </pre>
-      <p>A <code>tone</code> parameter was added specifically so the same function could produce a formal,
-      corporate-appropriate letter or a more informal, startup-friendly one depending on the target company's
-      culture — tested explicitly by generating both a "professional" and a "slightly informal, enthusiastic,
-      startup-suited" version from the identical resume and job description.</p>
 
-      <div class="archnote">
+      <div class="sketch">
+        <h4>Rough Sketch</h4>
+        <pre>
+ generate_cover_letter(job_desc, resume, tone="professional")
+        --> formal, corporate-appropriate letter
+
+ generate_cover_letter(job_desc, resume, tone="informal")
+        --> enthusiastic, startup-suited letter
+
+ SAME resume, SAME job description, SAME function --
+ only the tone parameter changes -- two very
+ different-sounding letters come out
+
+ practical use: read the company's careers page / LinkedIn
+ voice FIRST, then set tone to match it
+        </pre>
+      </div>
+
+      <p>A <code>tone</code> parameter lets the same function write either a formal or an informal letter,
+      depending on the target company's culture.</p>
+
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Tone-as-parameter is a small but genuinely useful design choice — it turns a qualitative,
-        judgment-heavy decision (how formal should this sound?) into an explicit, controllable input rather
-        than something baked implicitly into a fixed prompt. Worth using directly: before applying to a
-        specific company, read their careers page or LinkedIn voice, and set the tone parameter to match —
-        this tool's own "read the company culture first" framing is good practical career advice on its own.</p>
+        <div class="think-q">Think First: this tool makes you actively choose a tone before it writes anything. What does that force you to do that a one-size-fits-all "write me a cover letter" prompt wouldn't? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>It forces you to actually go read the company's culture first — you can't set tone="informal"
+        vs. tone="professional" without deciding which one fits, and that decision requires looking at their
+        careers page or LinkedIn voice before you write anything. A generic prompt lets you skip that
+        research and default to whatever the model picks. Tone-as-parameter turns a step people often skip
+        into a step you can't avoid — arguably the tool's most practical career advice is baked into its
+        function signature, not its output.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -417,6 +653,11 @@ def generate_cover_letter(
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: this function chains gap-analysis → rewrite → cover letter with zero pauses for a human to look at the middle steps. Given everything this project just taught about fabricated metrics, is chaining all three steps automatically a convenience — or does it quietly remove the one checkpoint that mattered most? <span class="hint">tap to reveal</span></div>
+        <div class="a">As written, it removes the checkpoint — the function prints intermediate output but doesn't actually pause for review before feeding the gap analysis into the rewrite, or the rewrite into the cover letter. That's fine for a demo, but it means a fabricated metric introduced at step 2 flows straight into step 3 unexamined. The convenience of one function call and the human-in-the-loop rule from Section 1 are in direct tension — a production version would need an explicit pause (or at least a return-and-confirm step) between "rewrite" and "cover letter," not just a print statement.</div>
+      </div>
+
       <pre>
 def run_resume_rocket(resume: str, job_description: str):
     gaps = analyze_resume_against_job_description(resume, job_description, model="openai")
@@ -429,10 +670,33 @@ def run_resume_rocket(resume: str, job_description: str):
     cover_letter = generate_cover_letter(job_description, updated_resume, model="openai")
     return updated_resume, cover_letter
 </pre>
-      <p>All previously-built functions composed into a single call — feed in an old resume and a target job
-      description, get back a full gap analysis, tailored resume, tracked diff, and cover letter in one pass.
-      Explicitly framed by the instructor as a legitimate small-scale startup idea, and noted as a natural next
-      step toward wrapping this in an agentic system that could handle more of the job-application workflow autonomously.</p>
+
+      <div class="sketch">
+        <h4>Rough Sketch — everything from sections 1-9, chained</h4>
+        <pre>
+ resume + job description
+        |
+        v  analyze_resume_against_job_description()  [section 6]
+ gap analysis (requirements/matches/gaps/hidden strengths)
+        |
+        v  generate_updated_resume()  [section 8]
+ updated resume  +  diff markdown
+        |
+        v  generate_cover_letter(tone=...)  [section 9]
+ cover letter
+        |
+        v
+ return (updated_resume, cover_letter)
+
+ framed as a legit small-startup idea; natural next step
+ would be wrapping this in an agentic system for more of
+ the job-application workflow -- but see the Think First
+ above before automating away the review checkpoints
+        </pre>
+      </div>
+
+      <p>All earlier functions composed into one call — feed in a resume and job description, get a full
+      gap analysis, tailored resume with diff, and cover letter in one pass.</p>
 
       <div class="questions">
         <h4>Questions worth sitting with</h4>
@@ -455,6 +719,33 @@ def run_resume_rocket(resume: str, job_description: str):
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: across all 9 build sections, one warning kept resurfacing in different forms — fabricated metrics, non-deterministic instruction-following, missed AI-skills flags. What's the ONE underlying property of LLMs that all three of those symptoms trace back to? <span class="hint">tap to reveal</span></div>
+        <div class="a">LLMs generate plausible text, not verified truth — every symptom in this project is a variation of that one fact. Fabricated metrics: plausible-sounding numbers, not recalled ones. Inconsistent instruction-following: plausible compliance most of the time, not guaranteed every time. Missed AI-skills flags: plausible relevance judgment, not a reliable rule. The fixes (Pydantic validation, diffs, human review, tone-as-parameter) are all different ways of putting a human or a schema between "plausible" and "trusted" — which is really the single lesson under this whole project.</div>
+      </div>
+
+      <div class="sketch">
+        <h4>Rough Sketch — the whole pipeline, start to finish</h4>
+        <pre>
+ resume + job description
+        |
+        v  Pydantic schema (section 2-3) -- structure enforced,
+        |                                    not just requested
+        v  gap analysis (section 6) -- 4 parts: requirements,
+        |                               matches, gaps, hidden strengths
+        v  resume rewrite + diff (section 8) -- every change visible
+        |
+        v  cover letter, tone=company-matched (section 9)
+        |
+        v  run_resume_rocket() ties it all together (section 10)
+
+ THE RULE running through every step:
+   AI writes fluent, PLAUSIBLE text.
+   Only YOU can confirm it's TRUE.
+   Verify before it goes anywhere near a real application.
+        </pre>
+      </div>
+
       <pre>
 1. Pydantic: schema-defined, validated data structures using
    Python type hints — same discipline as FastAPI request models,
@@ -485,6 +776,21 @@ def run_resume_rocket(resume: str, job_description: str):
 <div class="foot">Architects Lab · Study Notes · Source: AI Resume &amp; Cover Letter Assistant Udemy Project (Pydantic + OpenAI/Gemini)</div>
 
 <script>
+  (function(){
+    if(localStorage.getItem('alTheme')==='light'){
+      document.documentElement.setAttribute('data-theme','light');
+    }
+  })();
+  function toggleTheme(){
+    var root = document.documentElement;
+    if(root.getAttribute('data-theme')==='light'){
+      root.removeAttribute('data-theme');
+      localStorage.setItem('alTheme','dark');
+    } else {
+      root.setAttribute('data-theme','light');
+      localStorage.setItem('alTheme','light');
+    }
+  }
   function toggleCard(headEl){
     const card = headEl.parentElement;
     card.classList.toggle('open');

@@ -9,6 +9,17 @@
     --text:#dbe4ee; --muted:#7d92a8; --accent:#39d3ac; --accent2:#f2b84b;
     --danger:#ef6a6a; --code:#0d1319; --tag:#1c2a3a;
   }
+  html[data-theme="light"]{
+    --bg:#f4f6f9; --panel:#ffffff; --panel2:#eef1f6; --border:#d7dee6;
+    --text:#1c2530; --muted:#5c6b7c; --accent:#0f9b7e; --accent2:#b5790a;
+    --danger:#c23b3b; --code:#eef1f6; --tag:#e3e8f0;
+  }
+  html[data-theme="light"] pre{ color:#0f6b4f; }
+  html[data-theme="light"] .sketch pre{ color:#33495e; }
+  html[data-theme="light"] .recall{ background:#f7f9fb; }
+  html[data-theme="light"] body{ background:var(--bg); }
+  html[data-theme="light"] header{ background:linear-gradient(180deg,#eef1f6,#f4f6f9); }
+  html[data-theme="light"] .toolbar{ background:rgba(244,246,249,0.95); }
   *{box-sizing:border-box;}
   body{
     margin:0; background:var(--bg); color:var(--text);
@@ -66,9 +77,12 @@
   .questions li{margin:6px 0; color:#c8d6e2;}
   .archnote{
     background:var(--code); border-left:3px solid var(--accent2);
-    border-radius:6px; padding:12px 16px; margin:14px 0;
+    border-radius:6px; padding:12px 16px; margin:14px 0; cursor:pointer;
   }
   .archnote h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent2);}
+  .archnote .think-q{color:var(--accent2); font-weight:600; font-size:13.5px;}
+  .archnote .think-a{display:none; margin-top:10px; border-top:1px solid var(--border); padding-top:8px;}
+  .archnote.show .think-a{display:block;}
   .risknote{
     background:var(--code); border-left:3px solid var(--danger);
     border-radius:6px; padding:12px 16px; margin:14px 0;
@@ -119,6 +133,7 @@
   <button class="ctrl" onclick="expandAll()">▾ Expand All</button>
   <button class="ctrl" onclick="collapseAll()">▸ Collapse All</button>
   <button class="ctrl" onclick="revealAllRecall()">💡 Reveal All Recall Answers</button>
+  <button class="ctrl" onclick="toggleTheme()">🌗 Toggle Theme</button>
   <span class="progress" id="progressLabel"></span>
 </div>
 
@@ -131,6 +146,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: a reasoning model writes out its thinking before answering. Does that visible "thinking" text prove the model actually reasoned correctly — or could it just be more plausible-sounding text, same as any other LLM output? <span class="hint">tap to reveal</span></div>
+        <div class="a">It doesn't prove correctness by itself — the thinking text is generated the same way as any other LLM output: token by token, optimized to look like reasoning, not verified to BE correct reasoning. What it does give you is something to check: a step-by-step trace you (or a downstream validator) can actually inspect and catch an error in, instead of a bare answer you'd have to trust blindly. Visible thinking upgrades "trust me" to "here's my work, verify it" — which is a real improvement, but the verifying part is still on you, exactly like Section 6's CAPM check will show.</div>
+      </div>
+
       <p>Goal: read a financial news headline and decide if it's positive, negative, or neutral —
       and <em>show the thinking</em> behind that decision, plus a topic tag. Model used: DeepSeek, an
       open-weight model anyone can download.</p>
@@ -168,17 +188,18 @@
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Visible thinking is the most useful part of this whole project — in a regulated, audited
-        environment, being able to show <em>why</em> is often as important as the answer itself. Think of
-        this as a sibling to RAG's citations: RAG proves its answer with sources, reasoning models prove it
-        with visible thought. Use both where you can.</p>
-      </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: What's the core structural difference between a reasoning model's output and a standard chat model's output for this task? <span class="hint">tap to reveal</span></div>
-        <div class="a">A reasoning model produces an explicit "thinking" section — its step-by-step internal reasoning as visible text — before generating the final structured answer (sentiment + tag). A standard general-purpose chat model tends to answer more conversationally and doesn't reliably separate or expose that reasoning process in a consistent, parseable format.</div>
+        <div class="think-q">Think First: RAG proves its answer with citations you can click and check against a source. A reasoning model proves its answer with a "thinking" trace. Are these two transparency mechanisms actually equally trustworthy, or is one fundamentally weaker? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>They're not equally strong. A citation points to an external, independently-checkable fact — you
+        can open the source and verify it yourself, no trust in the model required. A "thinking" trace is
+        still entirely the model's own generated text — plausible-sounding, but self-reported, with nothing
+        external to check it against. Visible thinking is genuinely useful (it gives you something to audit
+        instead of nothing), but it's a weaker transparency mechanism than citations, not an equivalent one.
+        The strongest systems would use both: retrieval for facts, visible reasoning for how those facts
+        were combined into a conclusion.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -190,6 +211,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: the dataset is deliberately kept small (~1.6MB, ~5,000 rows) so it fits a free GPU. Does keeping the DATASET small also mean the MODEL's understanding is limited to those 5,000 headlines — or is something else going on? <span class="hint">tap to reveal</span></div>
+        <div class="a">Something else entirely — this project isn't training the model on these 5,000 rows, it's running an already-trained model against them (inference, not fine-tuning). DeepSeek's actual knowledge comes from its massive original pretraining; these 5,000 rows are just the questions being asked of it, not lessons it's learning from. A small dataset here is small because it's a small TEST set, not because the model's understanding is limited to it.</div>
+      </div>
+
       <p>Dataset: ~5,000 rows of financial news (id, source like CNBC, title, description, date). Small on
       purpose (~1.6MB) so it runs fine on Colab's free GPUs.</p>
       <p>First explored using Hugging Face's <strong>Data Studio</strong> — it even lets you type plain
@@ -219,11 +245,6 @@
                     in plain English, no code needed
         </pre>
       </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: Why combine title and description into a single "full_text" field instead of feeding the title alone? <span class="hint">tap to reveal</span></div>
-        <div class="a">A headline alone often lacks enough context for reliable sentiment classification — combining it with the fuller description gives the model more signal to reason from, producing more accurate and better-justified sentiment judgments.</div>
-      </div>
     </div>
   </div>
 
@@ -234,6 +255,11 @@
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: this project never fine-tunes DeepSeek — it only loads and runs it. So why does the SAME 4-bit quantization trick from the fine-tuning project show up again here, if there's no training happening? <span class="hint">tap to reveal</span></div>
+        <div class="a">Because quantization solves a memory problem that exists whether you're training or just running a model — a 1.5B-parameter model's weights take real memory to hold regardless of whether you're computing gradients against them or just reading through them for inference. The reason (fit a big model on a small/free GPU) is identical in both projects; only the workload on top of those loaded weights differs (backprop and updates vs. a single forward pass).</div>
+      </div>
+
       <pre>
 model = AutoModelForCausalLM.from_pretrained(
     model_id,                 # DeepSeek 1.5B parameters
@@ -277,11 +303,6 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
        (fine-tuning project) or just RUNNING (this project)
         </pre>
       </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: Why is 4-bit quantization used here even though this project only does inference, not any training/fine-tuning? <span class="hint">tap to reveal</span></div>
-        <div class="a">To reduce the model's memory footprint so it fits and runs efficiently on limited hardware (a free-tier Colab GPU) — quantization saves memory regardless of whether you're doing inference or training, since it reduces how many bits are used to store each weight.</div>
-      </div>
     </div>
   </div>
 
@@ -292,6 +313,11 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: the prompt ends with an unfinished tag, "&lt;think&gt;", with nothing after it. Why would leaving the prompt deliberately incomplete — instead of asking "please explain your reasoning" in plain English — be the more reliable way to trigger step-by-step thinking? <span class="hint">tap to reveal</span></div>
+        <div class="a">A plain-English request is a suggestion the model can follow loosely or ignore under other pressures in the prompt. An unfinished special token isn't a request — it's a structural cue the model was specifically trained to continue in one particular way (with reasoning text), because that's literally where "assistant turn, thinking mode" tokens appeared during its training. It's less "please think" and more "here's the exact spot where thinking goes — continue from here." That's why it's more reliable than asking nicely.</div>
+      </div>
+
       <pre>
 &lt;IAM_START&gt;user
 [your question here]&lt;IAM_END&gt;
@@ -332,17 +358,18 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Remember the <code>&lt;think&gt;</code> trigger as a general prompt-engineering tool, not
-        DeepSeek trivia — most reasoning models have something similar. If a future Optimus prompt needs a
-        model to "show its work," check for this trigger first. It changes both output quality and how much
-        parsing you'll need to do later.</p>
-      </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: What does top_p=0.9 (nucleus sampling) actually restrict, and why does it help keep output "on topic"? <span class="hint">tap to reveal</span></div>
-        <div class="a">It restricts the model to sampling the next token only from the smallest set of candidate tokens whose combined probability reaches 90% — rather than considering every possible token or only the single most likely one. This keeps generation focused on plausible, contextually relevant words while still allowing some variety, avoiding both rigid repetition (top_p too low) and incoherent output (no restriction at all).</div>
+        <div class="think-q">Think First: this trigger works because it exploits a structural pattern DeepSeek was trained on. If you swapped in a completely different model that was never trained with a "&lt;think&gt;" token at all, what would you expect to happen if you used this exact same trick? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Nothing useful — the model would likely just treat "&lt;think&gt;" as ordinary text (maybe even
+        literally continuing "&lt;think&gt; about it..." as prose) rather than as a signal to enter a reasoning
+        mode, because it was never trained to associate that specific token with that specific behavior. This
+        is worth remembering as a general prompt-engineering principle, not DeepSeek trivia: a structural
+        trigger only works for the model it was trained into. If a future Optimus prompt needs a model to
+        "show its work," the first move is checking that specific model's documentation for its own trigger
+        — not assuming this one transfers.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -354,6 +381,11 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: the split relies on finding literal "&lt;think&gt;" and end-of-think text inside the model's output string. What happens the day the model's reply doesn't contain those exact markers — say, it forgets to close the think tag, or phrases something slightly differently? <span class="hint">tap to reveal</span></div>
+        <div class="a">The split silently breaks — output.find() either returns "not found," or worse, finds a spurious match somewhere unintended, and the reasoning/answer separation comes out wrong or empty with no error raised. That's the core fragility of parsing by string search: it works exactly as long as the format holds, and breaks quietly (not loudly) the moment it doesn't. This is the same lesson as day7/day8's Pydantic sections wearing different clothes — raw text is not a contract, and a schema or structured-output approach fails loudly instead of silently.</div>
+      </div>
+
       <p>The model's raw output is one messy blob — reasoning and final answer mixed together inside
       special tokens. Not usable as-is. A small function finds the <code>&lt;think&gt;</code> markers with
       simple string search and splits the text into two clean pieces.</p>
@@ -385,11 +417,18 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Good hands-on proof that raw model text is not an API contract. Fine for a demo, risky for
-        production — string search on hardcoded tokens breaks if the model or its token format changes.
-        A schema-based approach (like the Pydantic pattern from the Vercel healthcare app) holds up better.</p>
+        <div class="think-q">Think First: string-search parsing works fine in this demo. If you had to bet, would it survive a model VERSION UPGRADE unchanged — the same DeepSeek family, just a newer release? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Not a safe bet either way. Even within the same model family, a version upgrade can subtly change
+        tokenization, default formatting, or how consistently the model closes its own tags — none of which
+        show up as a documented breaking change, because the model provider isn't promising you a stable
+        text contract, only a stable API surface. Raw model text was never an API contract, version to
+        version any more than request to request. A schema-based approach (like the Pydantic pattern from
+        the Vercel healthcare app) holds up across version bumps in a way string search on hardcoded tokens
+        was never designed to.</p>
+        </div>
       </div>
 
       <div class="questions">
@@ -410,6 +449,11 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: the model gets the CAPM answer right — recalls the formula, does the substitution, reaches "undervalued." Does getting the right FINAL ANSWER prove the reasoning trace in between is actually correct, or could a wrong step and a right answer coexist? <span class="hint">tap to reveal</span></div>
+        <div class="a">They can absolutely coexist — a model could make two errors that cancel out, or get lucky on a comparison despite a wrong intermediate number, and still land on "undervalued." A correct final answer is necessary but not sufficient evidence that the reasoning was sound. The only way to actually know is to read the trace and check each step — the formula, the substitution, the arithmetic — independently of whether the conclusion happens to match. This is exactly why visible thinking matters: it gives you something to check beyond the bottom line.</div>
+      </div>
+
       <p>Two extra tests, outside news sentiment, to check the model is really reasoning — not just
       pattern-matching:</p>
       <ul class="plain">
@@ -438,20 +482,25 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
              |
              v
   10.5% > 10.2%  ==>  stock is UNDERVALUED
+
+  a wrong FORMULA + a wrong SUBSTITUTION could still, by luck,
+  cross the 10.5% line and land on "undervalued" -- the right
+  answer alone never proves the middle steps were sound
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>CAPM is the more interesting test — the model had to recall a real finance formula unprompted,
-        plug in the right numbers, and interpret the result. Not "does it sound confident," but "can you
-        watch its work and check the formula and math were actually right." That's the real due-diligence
-        question for any finance tool, and your wealth/demat background is exactly the lens for checking it.</p>
-      </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: In the CAPM test, what specific values did the model need to correctly reason through to reach the right conclusion? <span class="hint">tap to reveal</span></div>
-        <div class="a">It needed to recall the CAPM formula itself, correctly substitute the given beta (1.2), risk-free rate (3%), and market return (9%) into that formula to compute the CAPM-expected return (~10.2%), and then correctly compare that to the stock's actual expected return (10.5%) to conclude the stock is undervalued (actual return exceeds what CAPM predicts for its risk level).</div>
+        <div class="think-q">Think First: your wealth/demat background lets you personally check this CAPM trace by eye. What happens to this whole verification approach the moment the finance concept is one you DON'T already know well enough to check by hand? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>It breaks down — a visible reasoning trace is only as useful as your ability to actually verify
+        it. You could check CAPM here because you already know the formula and could catch an error in it.
+        For a formula or domain you don't know well, a fluent, confident-looking trace is just as
+        persuasive whether it's right or wrong — you'd have no independent way to catch a subtle mistake.
+        That's the real due-diligence question for any finance tool: not "does the reasoning trace exist,"
+        but "do you, or does some other check, actually have the domain knowledge to validate it" — because
+        without that, visible thinking gives a false sense of security rather than real verification.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -463,6 +512,11 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: "reasoning models keep the same structure every time" is stated here as a strength for pipelines. But is that reliability actually coming from the model being a REASONING model, or from something else entirely? <span class="hint">tap to reveal</span></div>
+        <div class="a">It's actually coming from something else — how the prompt was written and enforced, not from "reasoning" as a category. A reasoning model given a loose, unstructured prompt would drift in format just like a chat model would; a general chat model given a strict, well-designed prompt (or wrapped in structured output like day8's Pydantic pattern) can hold a consistent format too. Reasoning and structural consistency are two separate properties that happened to get demonstrated together in this project — worth not conflating "shows its thinking" with "always outputs a fixed format," since they don't automatically come as a package.</div>
+      </div>
+
       <p>A regular chat model answers like a person talking ("I think this sounds negative because...") but
       its format shifts from request to request. A reasoning model, followed carefully, keeps the same
       delimited structure every time — which matters when code, not a human, is reading the output.</p>
@@ -486,11 +540,6 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
                 the consistent, structured one
         </pre>
       </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: Why does structured-output reliability matter more for a classification pipeline than for a one-off conversational answer? <span class="hint">tap to reveal</span></div>
-        <div class="a">Because a classification pipeline needs to programmatically parse the output (extract sentiment, tag, reasoning) across potentially thousands of requests reliably and consistently — a model that answers conversationally and inconsistently formats its output breaks automated parsing, whereas a one-off human-read answer doesn't need that structural consistency.</div>
-      </div>
     </div>
   </div>
 
@@ -501,6 +550,11 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: step 2 asks "do you even need an LLM?" before any other model question. Think of a real Optimus request that arrived as "we need an AI/LLM solution for X" — is that framing itself already a warning sign, before you even get to step 3? <span class="hint">tap to reveal</span></div>
+        <div class="a">Often, yes — a request that names the SOLUTION ("we need an LLM") before establishing the actual NEED (classify these, retrieve that, summarize this) has usually skipped step 1 and step 2 entirely. It's the AI equivalent of a stakeholder saying "we need a bigger server" before anyone's confirmed the current one is actually the bottleneck. The framework's real value isn't steps 3-5 (model size, sourcing, scaling) — it's that steps 1-2 force the requester to justify needing an LLM at all before any model-selection conversation starts.</div>
+      </div>
+
       <pre>
 1. Define your needs
    - Core task: summarization? classification? search? generation?
@@ -566,12 +620,18 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>The single most reusable thing in this whole project — a solid checklist for any proposed AI
-        tool inside Optimus, basically a build-vs-buy checklist adapted for AI. Step 2 ("do you even need
-        an LLM?") deserves to be the very first question in Optimus intake — the cheapest filter against
-        overbuilding a simple classification problem with an expensive generative model.</p>
+        <div class="think-q">Think First: step 4 says open-source deployment can run 50-100% MORE expensive in practice once expertise and GPU time are counted, despite "free" licensing. Given your AWS Day 5 experience with IAM/Docker/App Runner setup friction — does that number feel too high, too low, or about right? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Worth checking against your own lived experience rather than taking the number at face value.
+        "Free and open source" only covers the license — every hour spent on IAM permissions, Docker
+        configuration, App Runner setup, GPU provisioning, and ongoing maintenance is real engineering cost
+        that a proprietary API call skips entirely. Whether that lands at 50%, 100%, or something else
+        depends heavily on how much of that infrastructure work your team already has reusable versus
+        building fresh each time — which is exactly the kind of number worth pressure-testing against your
+        own team's actual deployment friction before citing it in a real build-vs-buy conversation.</p>
+        </div>
       </div>
 
       <div class="questions">
@@ -586,11 +646,6 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
           sits underneath "it's free and open source"?</li>
         </ul>
       </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: According to the framework, what should be the very first question asked before choosing between LLM options at all? <span class="hint">tap to reveal</span></div>
-        <div class="a">Whether the problem actually requires a generative LLM in the first place — many tasks like classification, named entity recognition, or simple retrieval can often be solved effectively (and much more cheaply) with classical machine learning models or simpler retrieval-based systems, without needing an LLM at all.</div>
-      </div>
     </div>
   </div>
 
@@ -601,6 +656,11 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: "open-source" and "free" get used almost interchangeably, but this table shows open-source deployment can cost 50-100% MORE in practice. What is the word "free" actually referring to here, if not the total cost? <span class="hint">tap to reveal</span></div>
+        <div class="a">"Free" refers only to the LICENSE — you don't pay to download or use the model weights. It says nothing about deployment cost: the GPU time, the integration expertise, the ongoing maintenance, the infrastructure to serve it reliably at scale. A proprietary API bundles all of that into one usage fee; open-source unbundles it into "free license + everything else you now have to build and staff yourself." "Free" and "cheap" are not the same claim, and this table is really about that gap.</div>
+      </div>
+
       <table>
         <tr><th></th><th>Open-Source (Hugging Face)</th><th>Proprietary (OpenAI/AWS/etc.)</th></tr>
         <tr><td>License cost</td><td>Free/low</td><td>Subscription/usage fees</td></tr>
@@ -620,6 +680,10 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
  time-to-mkt:   slow (build it yourself) time-to-mkt:   fast (pre-built)
  data lineage:  often unclear            data lineage:  documented/compliant
  support:       community, irregular     support:       professional
+
+ "free" = the LICENSE is free
+ it says NOTHING about the deployment/staffing/GPU cost
+ sitting underneath it
         </pre>
       </div>
 
@@ -641,6 +705,11 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: if most frontier models now score above 80-85% on the OLD benchmarks, and a leaderboard still ranks models by those old scores, what would that ranking actually be measuring at this point — genuine ability, or something else? <span class="hint">tap to reveal</span></div>
+        <div class="a">At that point it's measuring noise, not ability — when everyone clusters near the ceiling, small score differences (83% vs 85%) stop reflecting real capability gaps and start reflecting benchmark quirks, evaluation methodology differences, or plain randomness. A saturated benchmark can't tell a genuinely better model from a slightly-differently-tuned one. That's exactly why Hugging Face had to retire the old set — not because the old benchmarks got "wrong," but because they stopped being able to discriminate at all once every model cleared the bar.</div>
+      </div>
+
       <p>The old benchmarks got too easy. Within about 1.5 years, most models scored above 80–85% on all of
       them — so they stopped telling models apart. Hugging Face had to bring in much harder ones.</p>
 
@@ -672,19 +741,25 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       |                                          GPQA, MuSR, BBH, IFEval,
       |__________________________________.___   MATH, AgentBench/WebArena)
         time -->        ~1.5 yrs              best models still ~35%
+
+ at the top of the curve, 83% vs 85% on an OLD benchmark
+ tells you almost nothing real -- everyone's clustered near
+ the ceiling. that's WHY new, harder benchmarks exist.
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>The real lesson isn't any one score — it's that benchmarks go stale within 1-2 years. Treat any
-        model evaluation as a snapshot with a short shelf life. For real vendor decisions (and your AI/ML
-        interviews), always check the benchmark date and re-verify scores close to decision time.</p>
-      </div>
-
-      <div class="recall" onclick="toggleRecall(this)">
-        <div class="q">Active Recall: Why did Hugging Face need to retire its original leaderboard benchmarks and introduce a new, harder set? <span class="hint">tap to reveal</span></div>
-        <div class="a">Because LLMs improved so quickly that most models were scoring above 80-85% on the original benchmarks within about a year and a half — the benchmarks became saturated and stopped meaningfully differentiating model quality, so a new set of substantially harder benchmarks (Humanity's Last Exam, GPQA, etc.) was introduced to restore meaningful comparison.</div>
+        <div class="think-q">Think First: today's "hard" benchmarks (Humanity's Last Exam, best models ~35%) will likely saturate too, on the same ~1.5 year timeline. If you were designing an internal Optimus model-evaluation process, would you build it around specific benchmark NAMES, or something else entirely? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Something else — build the process around a re-verification HABIT, not a fixed benchmark list.
+        Any benchmark named today has a documented shelf life of roughly 1-2 years before saturation makes
+        it stop discriminating between models. A process that hardcodes "we evaluate against GPQA and MATH"
+        will need updating on a schedule anyway, so the actual durable asset is the discipline: always check
+        the benchmark's publication date, always re-verify scores close to the decision (not from memory of
+        a leaderboard position from six months ago), and always expect today's "hard" test to be tomorrow's
+        saturated one. Worth remembering for both vendor decisions and AI/ML interviews.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -696,6 +771,11 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: the leaderboard lets you sort by MATH score for a finance tool, or GPQA for a research assistant — picking the benchmark that matches your use case. What's the risk of picking the model that TOPS your chosen benchmark, versus the model that scores well across several relevant ones? <span class="hint">tap to reveal</span></div>
+        <div class="a">Optimizing for a single benchmark risks picking a model that's been specifically tuned (deliberately or incidentally) to that one test's style of question, without broader competence you'll actually need in production — real user queries rarely look exactly like benchmark questions. A model that scores well across several related benchmarks (say, MATH AND general reasoning AND instruction-following) is a safer bet than the single highest MATH score, the same way you wouldn't hire based on one interview question alone.</div>
+      </div>
+
       <p>You can filter the leaderboard by size, precision, and fine-tuned vs. pre-trained — so you sort by
       whatever score actually matters to you (MATH for a finance tool, GPQA for a research assistant). A
       separate performance leaderboard plots accuracy against speed, so you can see the trade-off directly.
@@ -729,15 +809,26 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
 
  rule: no single "best" model -- best POINT on the
        accuracy / latency / cost triangle for your job
+
+ CAUTION: topping ONE benchmark != broad real-world competence
+          prefer a model that's solid across several relevant
+          tests over the single highest score on just one
         </pre>
       </div>
 
-      <div class="archnote">
+      <div class="archnote" onclick="toggleRecall(this)">
         <h4>Architect's Lens</h4>
-        <p>Worth internalizing even without the live leaderboard open: pick the best point on the
-        accuracy/latency/cost triangle for your constraint, not the highest score. Maps directly to fintech
-        APIs — a quick eligibility check tolerates less latency than an overnight batch job. Same logic,
-        your own SLAs instead of benchmark latency.</p>
+        <div class="think-q">Think First: "pick the best point on the accuracy/latency/cost triangle for your SLA" sounds clean in theory. In practice, who at IDFC would actually know the real latency tolerance for a given use case — is that even a question the engineering team can answer alone? <span class="hint">tap to reveal</span></div>
+        <div class="think-a">
+        <p>Usually not alone — a quick eligibility check's real latency tolerance is as much a product/business
+        decision as an engineering one (how long will a customer wait before abandoning the flow?), and an
+        overnight batch job's tolerance depends on operational scheduling constraints outside engineering.
+        The "best point on the triangle" framing is the right mental model, but applying it for real requires
+        pulling in whoever owns the actual SLA or user experience for that specific use case — not just
+        picking a number engineering finds comfortable. Worth treating model selection as a cross-functional
+        input, not a purely technical one, the same way "how fast does this need to be" already is for any
+        other fintech feature.</p>
+        </div>
       </div>
 
       <div class="questions">
@@ -758,6 +849,11 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
       <span class="chevron">▸</span>
     </div>
     <div class="card-body">
+      <div class="recall" onclick="toggleRecall(this)">
+        <div class="q">Think First: this project covers two very different things under one title — a hands-on DeepSeek reasoning demo, and a general 5-step framework for picking any LLM. If you could only remember ONE of the two a year from now, which would still be useful, and why? <span class="hint">tap to reveal</span></div>
+        <div class="a">The 5-step framework ages much better. The DeepSeek specifics — its exact special tokens, its reported training cost, its benchmark scores — will be stale within a year or two, the same way this project's own Section 10 shows benchmarks going stale on a ~1.5 year cycle. The framework (define needs → do you even need an LLM → size → sourcing → scaling) is a way of THINKING that doesn't expire just because the specific models it's applied to change. The demo teaches the mechanics of one moment in time; the framework teaches a durable decision process — worth weighting your review time accordingly.</div>
+      </div>
+
       <pre>
 1. Reasoning models (DeepSeek) expose visible chain-of-thought,
    unlike typical general-purpose chat models
@@ -805,6 +901,11 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
 
  5-STEP SELECTION FRAMEWORK (for choosing ANY LLM, not just this one):
   needs -> type ("need an LLM at all?") -> size -> sourcing -> scaling
+
+ WHAT AGES:                          WHAT DOESN'T:
+   DeepSeek's specific tokens          the 5-step decision framework
+   these exact benchmark scores        "measure before you trust" habit
+   "&lt;think&gt;" as THE trigger           "check if you need an LLM at all"
         </pre>
       </div>
 
@@ -828,6 +929,21 @@ pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, ...)
 <div class="foot">Architects Lab · Study Notes · Source: Reasoning Models &amp; LLM Selection Framework Udemy Project (DeepSeek Financial News Analysis)</div>
 
 <script>
+  (function(){
+    if(localStorage.getItem('alTheme')==='light'){
+      document.documentElement.setAttribute('data-theme','light');
+    }
+  })();
+  function toggleTheme(){
+    var root = document.documentElement;
+    if(root.getAttribute('data-theme')==='light'){
+      root.removeAttribute('data-theme');
+      localStorage.setItem('alTheme','dark');
+    } else {
+      root.setAttribute('data-theme','light');
+      localStorage.setItem('alTheme','light');
+    }
+  }
   function toggleCard(headEl){
     const card = headEl.parentElement;
     card.classList.toggle('open');
