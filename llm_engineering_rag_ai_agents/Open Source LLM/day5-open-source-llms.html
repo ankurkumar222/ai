@@ -16,7 +16,7 @@
   --display:"Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --body:"Newsreader", Georgia, serif;
   --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --maxw:1200px;
+  H0%;
 }
 html[data-theme="light"]{
   --ink:#f5f7fb; --panel:#ffffff; --panel-2:#f0f3f8; --panel-3:#e7ecf3;
@@ -323,6 +323,8 @@ footer .mono{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text
   html{scroll-behavior:auto}
   .reveal{opacity:1; transform:none}
 }
+  /* notes width expansion - matches learning plan box */
+  .wrap,.container,main,header.hero,header.masthead,nav.toc,section.block,footer{max-width:100%!important;padding-left:24px!important;padding-right:24px!important;}
 </style>
 </head>
 <body>
