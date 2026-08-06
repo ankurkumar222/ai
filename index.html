@@ -3209,7 +3209,7 @@
         if (!raw) return;
         /* encode each path segment individually */
         const encoded = raw.split('/').map(s => encodeURIComponent(s)).join('/');
-        window.open(encoded, '_blank');
+        window.location.href = encoded;
       });
     });
   })();
